@@ -9,7 +9,7 @@ Note that a common trend through all the API's is the requirement of a username 
 parameter then the API call will return a 401, except in the case of login. Login adds the user to the server for the
 game.
 
-A cards against humanity game is split into 
+A cards against humanity game is split into
 
 # Group Authentication
 Relating to calls about authentication.
@@ -20,7 +20,7 @@ The user making this call will need to submit a username, through the request he
 + Request (application/json)
     + Header
 
-        username: "acidic"
+        username: "user mrc26"
 
 + Response 200 (No Content)
 
@@ -31,7 +31,7 @@ The user making this call will need to pass in the username that they wish to re
 + Request (application/json)
     + Header
 
-        username: "acidic"
+        username: "user mrc26"
 
 + Response 200 (No Content)
 
@@ -45,7 +45,7 @@ at least once every 5 seconds, or the server may deem the player inactive.
 + Request (application/json)
     + Header
 
-            username: "acidic"
+            username: "user mrc26"
 
 + Response 200 (No Content)
 
@@ -57,7 +57,7 @@ the user has left in the round in seconds as a parameter in the body of the resp
 + Request (application/json)
     + Header
 
-            username: "acidic"
+            username: "user mrc26"
 
 + Response 200 (application/json)
     +Body
