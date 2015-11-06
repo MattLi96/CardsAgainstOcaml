@@ -37,13 +37,34 @@ The user making this call will need to pass in the username that they wish to re
 Relating to calls about timing that are frequently made to the server
 ## Heartbeat [/time/heartbeat]
 ### Send a heartbeat [POST]
+The user making this call will need to pass in the username of the given user. Every user should make this call
+at least once every 5 seconds, or the server may deem the player inactive.
 
-+ Request (No Content)
++ Request (application/json)
+    + Header
+
+            username: "acidic"
 
 + Response 200 (No Content)
 
 ## Timer [/time/timer]
 ### Get Round Timer [GET]
+The user making this call will need to pass in the username of the given user. The response should return the time that
+the user has left in the round in seconds as a parameter in the body of the response
+
++ Request (application/json)
+    + Header
+
+            username: "acidic"
+
++ Response 200 (application/json)
+    +Body
+
+        [
+            {
+                "time": 20,
+            }
+        ]
 
 # Group Model
 ##
