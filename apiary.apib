@@ -74,15 +74,65 @@ the user has left in the round in seconds as a parameter in the body of the resp
 # Group Game State
 Relating to calls to get the current world state.
 
-// all visible game state: current black card, current phase, submitted white cards if judging phase, '
-// players we are waiting on if playing phase, Scores, Card Czar (everything visible, same to every user)
+## State [/state/getState]
+### Get Current State [GET]
+The user making this call will need to pass in the username of the given user. The response will return a json
+object with the current game state (including current black card, current phase, submitted white cards if
+judging phase, players who have not submitted, scores, Card Czar)
+
++ Request (application/json)
+    + Header
+
+            username: "acidic"
+
++ Response 200 (application/json)
+    +Body
+
+        [
+            {
+                "black": "Current Issue _",
+                "phase": "Playing",
+                "submitted": ["pac man", "derp"],
+                "waitingPlayers": ["p3"],
+                "scores": [12, 14, 15, 19],
+                "czar": "acidic"
+            }
+        ]
 
 //Past winning cards list (black and white associated together)
+## Past Wins [/state/pastWins]
+### Get Previously Winning Pairs [GET]
 
-//Current hand of player
++Response 200 (application/json)
+    +Body
 
-//Start/Restart the game
+        [
+            {
+                "winning pairs": [("white1", "black2"),("white1", "black2")],
+            }
+        ]
 
+## Hand [/state/hand]
+### Get hand of current player [GET]
+
++ Request (application/json)
+    +Header
+
+            username: "acidic"
+
++ Response 200 (application/json)
+    +Body
+
+        [
+            {
+                "currentHand": ["white1", "white1","white1","white1","white1","white1","white1","white1","white1","white1"],
+            }
+        ]
+
+## Start [/state/start]
+### Trigger the start of a game or restart [POST]
+
++ Response 200 (No Content)
 
 # Group Playing
 Relating to calls that a non-card czar player would make during the play phase.
