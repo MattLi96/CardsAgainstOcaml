@@ -14,6 +14,10 @@ are meant to be logging in. Once all users are logged in players begin the game.
 presented with a black card and they must play a white card. During the judging phaes, the card czar picks the white card
 that he feels fits the black card best. The game is won when one player wins 10 black cards.
 
+As a brief note, this current API is insecure. It's possible to get other user's uID by calling login and there are no permissions
+preventing things like resetting the game. We did this because our implementations is basic and meant to be played in a group of close
+friends. In order to add more security, we could easily implement a password in login for each user as well as permission levels each user.
+
 # Group Authentication
 Relating to calls about authentication.
 ## Login [/user/login]
