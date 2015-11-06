@@ -16,10 +16,9 @@ Relating to calls about authentication.
 The user making this call will need to submit a username, through the request header, that they shall use for the game that they will join.
 
 + Request (application/json)
+    + Header
 
-        {
-            "username": "acidic-critter",
-        }
+        username: "acidic"
 
 + Response 200 (No Content)
 
@@ -28,10 +27,9 @@ The user making this call will need to submit a username, through the request he
 The user making this call will need to pass in the username that they wish to remove from the game.
 
 + Request (application/json)
+    + Header
 
-        {
-            "username": "acidic-critter",
-        }
+        username: "acidic"
 
 + Response 200 (No Content)
 
