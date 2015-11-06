@@ -11,30 +11,27 @@ game.
 
 # Group Authentication
 Relating to calls about authentication.
-## Login [/user/login{?username}]
+## Login [/user/login]
 ### Log in to the server [POST]
-The user making this call will need to submit a name that they shall use for the game that they will join.
+The user making this call will need to submit a username, through the request header, that they shall use for the game that they will join.
 
-+ Parameters
-    + username (string, required) - the username that the given user submitted
++ Request (application/json)
+
+        {
+            "username": "acidic-critter",
+        }
 
 + Response 200 (No Content)
 
-## Quit [/user/quit{?username}]
+## Quit [/user/quit]
 ### Quit out of the server [DELETE]
-The user making this call will need to pass in the username that they are currently called by.
+The user making this call will need to pass in the username that they wish to remove from the game.
 
-+ Parameters
-    + username (string, required) - the username that the given user submitted
++ Request (application/json)
 
-+ Response 200 (No Content)
-
-## Kick [/user/quit{?username}]
-### Kick a given user out of the server [DELETE]
-The user making this call will need to pass in the username of the user they wish to kick from the game.
-
-+ Parameters
-    + username (string, required) - the username that the given user submitted
+        {
+            "username": "acidic-critter",
+        }
 
 + Response 200 (No Content)
 
