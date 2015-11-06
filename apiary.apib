@@ -38,6 +38,12 @@ The user making this call will need to pass in the username that they wish to re
 
 + Response 200 (No Content)
 
+## Reset [/user/reset]
+### Reset all users [DELETE]
+This call resets all users and stops the current game
+
++ Reponse 200 (No Content)
+
 # Group Timing
 Relating to calls about timing that are frequently made to the server
 ## Heartbeat [/time/heartbeat]
@@ -59,7 +65,7 @@ at least once every 5 seconds, or the server may deem the player inactive.
 
 ### Get Round Timer [GET]
 The user making this call will need to pass in the username of the given user. The response should return the time that
-the user has left in the round in seconds as a parameter in the body of the response
+the user has left in the round in seconds as a parameter in the body of the response. This ignores the pause parameter
 
 + Request (application/json)
     + Header
@@ -75,7 +81,8 @@ the user has left in the round in seconds as a parameter in the body of the resp
         ]
 
 ### Pause/Play Game [POST]
-The user making this call can either pause or start the timer
+The user making this call can either pause or start the timer. If the parameter "pause" is true, then the timer should be paused,
+and if false, then the timer should start. If no arguement is provided, the parameter will be assumed to be false
 
 + Request (application/json)
     + Header
@@ -111,12 +118,16 @@ judging phase, players who have not submitted, scores, Card Czar)
             }
         ]
 
-//Past winning cards list (black and white associated together)
 ## Past Wins [/state/pastWins]
 ### Get Previously Winning Pairs [GET]
+This call returns a list of pairs, consisting of a single white card and a single black card, that have won previous rounds
 
-+Response 200 (application/json)
-    +Body
++ Request (application/json)
+    + Header
+
+            username: "acidic"
+
++ Response 200 (application/json)
 
         [
             {
@@ -126,6 +137,7 @@ judging phase, players who have not submitted, scores, Card Czar)
 
 ## Hand [/state/hand]
 ### Get hand of current player [GET]
+This call returns the hand of the given player
 
 + Request (application/json)
     + Header
@@ -142,6 +154,21 @@ judging phase, players who have not submitted, scores, Card Czar)
 
 ## Start [/state/start]
 ### Trigger the start of a game or restart [POST]
+This call either starts the game or restarts the game if it is already in progress
+
++ Request (application/json)
+    + Header
+
+            username: "acidic"
+            
+    + Body
+    
+            [
+                {
+                    "playTimer": 30,
+                    "judgeTimer": 20, 
+                }
+            ]
 
 + Response 200 (No Content)
 
@@ -149,17 +176,46 @@ judging phase, players who have not submitted, scores, Card Czar)
 Relating to calls that a non-card czar player would make during the play phase.
 
 ##  Play [/play]
-### Play a White Card [GET]
+### Play a White Card [POST]
 The user making this call needs to pass in his username. That user then plays the specified white card for
 the given round. This call is final, once it's made the user cannot play a different white card that round.
+
++ Request (application/json)
+    + Header
+
+            username: "acidic"
+
+    + Body
+            
+            [
+                {
+                    "choice": "hello",
+                }
+            ]
+
++ Response 200 (No Content)
 
 # Group Judging
 Relating to calls that the card czar would be making
 
 ##  Judge [/judge]
-### Pick White Card [GET]
+### Pick White Card [POST]
 The user making this call needs to pass in his username. This call will only be accepted if the username matches
 the username of the current card czar. Once a card is selected the decision is final.
 
++ Request (application/json)
+    + Header
+
+            username: "acidic"
+
+    + Body
+            
+            [
+                {
+                    "choice": "hello",
+                }
+            ]
+
++ Response 200 (No Content)
 
 
