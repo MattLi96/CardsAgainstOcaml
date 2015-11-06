@@ -18,15 +18,25 @@ The user making this call will need to submit a name that they shall use for the
 + Parameters
     + username (string, required) - the username that the given user submitted
 
-+ Response 200 (application/json)
++ Response 200 (No Content)
 
-        {
-            "session_id":123
-        }
-        
 ## Quit [/user/quit{?username}]
+### Quit out of the server [DELETE]
+The user making this call will need to pass in the username that they are currently called by.
+
++ Parameters
+    + username (string, required) - the username that the given user submitted
+
++ Response 200 (No Content)
 
 ## Kick [/user/quit{?username}]
+### Kick a given user out of the server [DELETE]
+The user making this call will need to pass in the username of the user they wish to kick from the game.
+
++ Parameters
+    + username (string, required) - the username that the given user submitted
+
++ Response 200 (No Content)
 
 # Group Critters
 Relating to calls to get information about critters in the world.
