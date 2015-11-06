@@ -19,13 +19,21 @@ Relating to calls about authentication.
 ## Login [/user/login]
 ### Log in to the server [POST]
 The user making this call will need to submit a username, through the request header, that they shall use for the game that they will join.
+When the call succeeds, the response will pass back the uID and new, which specifies if the user is a new user or not
 
 + Request (application/json)
     + Header
 
             username: "acidic"
 
-+ Response 200 (No Content)
++ Response 200 (application/json)  
+    
+        [
+            {
+                "uID": 42,
+                "new": true
+            }
+        ]
 
 ## Quit [/user/quit]
 ### Quit out of the server [DELETE]
@@ -34,7 +42,18 @@ The user making this call will need to pass in the username that they wish to re
 + Request (application/json)
     + Header
 
-            username: "acidic"
+            uID: 42
+
++ Response 200 (No Content)
+
+## Reset [/user/reset]
+### Reset all users [DELETE]
+This call resets all users and stops the current game
+
++ Request (application/json)
+    + Header
+
+            uID: 42
 
 + Response 200 (No Content)
 
@@ -48,8 +67,8 @@ at least once every 5 seconds, or the server may deem the player inactive.
 + Request (application/json)
     + Header
 
-            username: "acidic"
-
+            uID: 42
+            
 + Response 200 (No Content)
 
 ## Timer [/time/timer{?pause}]
@@ -59,13 +78,13 @@ at least once every 5 seconds, or the server may deem the player inactive.
 
 ### Get Round Timer [GET]
 The user making this call will need to pass in the username of the given user. The response should return the time that
-the user has left in the round in seconds as a parameter in the body of the response
+the user has left in the round in seconds as a parameter in the body of the response. This ignores the pause parameter
 
 + Request (application/json)
     + Header
 
-            username: "acidic"
-
+            uID: 42
+            
 + Response 200 (application/json)
     
         [
@@ -75,12 +94,13 @@ the user has left in the round in seconds as a parameter in the body of the resp
         ]
 
 ### Pause/Play Game [POST]
-The user making this call can either pause or start the timer
+The user making this call can either pause or start the timer. If the parameter "pause" is true, then the timer should be paused,
+and if false, then the timer should start. If no arguement is provided, the parameter will be assumed to be false
 
 + Request (application/json)
     + Header
 
-            username: "acidic"
+            uID: 42
             
 + Response 200 (application/json)
 
@@ -96,8 +116,8 @@ judging phase, players who have not submitted, scores, Card Czar)
 + Request (application/json)
     + Header
 
-            username: "acidic"
-
+            uID: 42
+            
 + Response 200 (application/json)
 
         [
@@ -122,12 +142,16 @@ judging phase, players who have not submitted, scores, Card Czar)
             }
         ]
 
-//Past winning cards list (black and white associated together)
 ## Past Wins [/state/pastWins]
 ### Get Previously Winning Pairs [GET]
+This call returns a list of pairs, consisting of a single white card and a single black card, that have won previous rounds
 
-+Response 200 (application/json)
-    +Body
++ Request (application/json)
+    + Header
+
+            uID: 42
+            
++ Response 200 (application/json)
 
         [
             {
@@ -137,12 +161,13 @@ judging phase, players who have not submitted, scores, Card Czar)
 
 ## Hand [/state/hand]
 ### Get hand of current player [GET]
+This call returns the hand of the given player
 
 + Request (application/json)
     + Header
 
-            username: "acidic"
-
+            uID: 42
+            
 + Response 200 (application/json)
 
         [
@@ -153,6 +178,21 @@ judging phase, players who have not submitted, scores, Card Czar)
 
 ## Start [/state/start]
 ### Trigger the start of a game or restart [POST]
+This call either starts the game or restarts the game if it is already in progress
+
++ Request (application/json)
+    + Header
+
+            uID: 42
+            
+    + Body
+    
+            [
+                {
+                    "playTimer": 30,
+                    "judgeTimer": 20, 
+                }
+            ]
 
 + Response 200 (No Content)
 
@@ -160,17 +200,46 @@ judging phase, players who have not submitted, scores, Card Czar)
 Relating to calls that a non-card czar player would make during the play phase.
 
 ##  Play [/play]
-### Play a White Card [GET]
+### Play a White Card [POST]
 The user making this call needs to pass in his username. That user then plays the specified white card for
 the given round. This call is final, once it's made the user cannot play a different white card that round.
+
++ Request (application/json)
+    + Header
+
+            uID: 42
+            
+    + Body
+            
+            [
+                {
+                    "choice": "hello",
+                }
+            ]
+
++ Response 200 (No Content)
 
 # Group Judging
 Relating to calls that the card czar would be making
 
 ##  Judge [/judge]
-### Pick White Card [GET]
+### Pick White Card [POST]
 The user making this call needs to pass in his username. This call will only be accepted if the username matches
 the username of the current card czar. Once a card is selected the decision is final.
 
++ Request (application/json)
+    + Header
+
+            uID: 42
+
+    + Body
+            
+            [
+                {
+                    "choice": "hello",
+                }
+            ]
+
++ Response 200 (No Content)
 
 
