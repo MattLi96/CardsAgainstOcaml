@@ -23,7 +23,7 @@ The user making this call will need to submit a username, through the request he
 + Request (application/json)
     + Header
 
-        username: "acidic"
+            username: "acidic"
 
 + Response 200 (No Content)
 
@@ -34,7 +34,7 @@ The user making this call will need to pass in the username that they wish to re
 + Request (application/json)
     + Header
 
-        username: "acidic"
+            username: "acidic"
 
 + Response 200 (No Content)
 
@@ -52,7 +52,11 @@ at least once every 5 seconds, or the server may deem the player inactive.
 
 + Response 200 (No Content)
 
-## Timer [/time/timer]
+## Timer [/time/timer{?pause}]
+
++ Parameters
+    + pause (boolean, optional) - parameter for telling if we are pausing or playing
+
 ### Get Round Timer [GET]
 The user making this call will need to pass in the username of the given user. The response should return the time that
 the user has left in the round in seconds as a parameter in the body of the response
@@ -63,17 +67,22 @@ the user has left in the round in seconds as a parameter in the body of the resp
             username: "acidic"
 
 + Response 200 (application/json)
-    +Body
-
+    
         [
             {
-                "time": 20,
+               "time": 20,
             }
         ]
 
 ### Pause/Play Game [POST]
 The user making this call can either pause or start the timer
 
++ Request (application/json)
+    + Header
+
+            username: "acidic"
+            
++ Response 200 (application/json)
 
 # Group Game State
 Relating to calls to get the current world state.
@@ -90,7 +99,6 @@ judging phase, players who have not submitted, scores, Card Czar)
             username: "acidic"
 
 + Response 200 (application/json)
-    +Body
 
         [
             {
@@ -120,12 +128,11 @@ judging phase, players who have not submitted, scores, Card Czar)
 ### Get hand of current player [GET]
 
 + Request (application/json)
-    +Header
+    + Header
 
             username: "acidic"
 
 + Response 200 (application/json)
-    +Body
 
         [
             {
