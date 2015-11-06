@@ -71,6 +71,10 @@ the user has left in the round in seconds as a parameter in the body of the resp
             }
         ]
 
+### Pause/Play Game [POST]
+The user making this call can either pause or start the timer
+
+
 # Group Game State
 Relating to calls to get the current world state.
 
@@ -87,13 +91,18 @@ Relating to calls to get the current world state.
 # Group Playing
 Relating to calls that a non-card czar player would make during the play phase.
 
-//Which card the player wants to phase
+##  Play [/play]
+### Play a White Card [GET]
+The user making this call needs to pass in his username. That user then plays the specified white card for
+the given round. This call is final, once it's made the user cannot play a different white card that round.
 
 # Group Judging
 Relating to calls that the card czar would be making
 
-//Which card judge chooses
-
+##  Judge [/judge]
+### Pick White Card [GET]
+The user making this call needs to pass in his username. This call will only be accepted if the username matches
+the username of the current card czar. Once a card is selected the decision is final.
 
 
 
