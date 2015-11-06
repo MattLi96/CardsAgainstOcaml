@@ -5,25 +5,28 @@ FORMAT: 1A
 This document specifies the APIs for Cards Against OCaml. The server for the game should implement these interfaces
 exactly. Click on each to get more information about what the JSON should look like
 
+Note that a common trend through all the API's is the requirement of a username parameter. If you fail to provide this
+parameter then the API call will return a 401, except in the case of login. Login adds the user to the server for the
+game.
 
-One common trend across this API is the concept of the <b>session_id</b>. Many of these calls take a <b>session_id</b> parameter which specifies the permissions of the caller. This is the same <b>session_id</b> returned by [Login](#Login).
-Any calls that would modify the state of the world require a <b>session_id</b> with write access. Some special calls (e.g. [New World](#New World)) require admin access.
-The other function of <b>session_id</b> is linked to critters - the ability to read the <b>program</b> and the <b>recently_executed_rule</b>, and ability to delete a critter are only granted to the user with the <b>session_id</b> that created the critter, or one of its ancestors (or an admin <b>session_id</b>).
-
-# User Authentication
+# Group Authentication
 Relating to calls about authentication.
-## Login [/user/login{?name}]
+## Login [/user/login{?username}]
 ### Log in to the server [POST]
 The user making this call will need to submit a name that they shall use for the game that they will join.
 
 + Parameters
-    + name (string, required) - the username that the given user submitted
+    + username (string, required) - the username that the given user submitted
 
 + Response 200 (application/json)
 
         {
             "session_id":123
         }
+        
+## Quit [/user/quit{?username}]
+
+## Kick [/user/quit{?username}]
 
 # Group Critters
 Relating to calls to get information about critters in the world.
