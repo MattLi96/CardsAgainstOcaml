@@ -9,7 +9,10 @@ Note that a common trend through all the API's is the requirement of a username 
 parameter then the API call will return a 401, except in the case of login. Login adds the user to the server for the
 game.
 
-A cards against humanity game is split into
+A cards against humanity game is split into three main phases: pregame, playing, and judging. During pregame, people
+are meant to be logging in. Once all users are logged in players begin the game. During the playing phase, players are
+presented with a black card and they must play a white card. During the judging phaes, the card czar picks the white card
+that he feels fits the black card best. The game is won when one player wins 10 black cards.
 
 # Group Authentication
 Relating to calls about authentication.
@@ -20,7 +23,7 @@ The user making this call will need to submit a username, through the request he
 + Request (application/json)
     + Header
 
-        username: "user mrc26"
+        username: "acidic"
 
 + Response 200 (No Content)
 
@@ -31,7 +34,7 @@ The user making this call will need to pass in the username that they wish to re
 + Request (application/json)
     + Header
 
-        username: "user mrc26"
+        username: "acidic"
 
 + Response 200 (No Content)
 
@@ -45,7 +48,7 @@ at least once every 5 seconds, or the server may deem the player inactive.
 + Request (application/json)
     + Header
 
-            username: "user mrc26"
+            username: "acidic"
 
 + Response 200 (No Content)
 
@@ -57,7 +60,7 @@ the user has left in the round in seconds as a parameter in the body of the resp
 + Request (application/json)
     + Header
 
-            username: "user mrc26"
+            username: "acidic"
 
 + Response 200 (application/json)
     +Body
@@ -68,18 +71,28 @@ the user has left in the round in seconds as a parameter in the body of the resp
             }
         ]
 
-# Group Model
+# Group Game State
 Relating to calls to get the current world state.
-##
 
+// all visible game state: current black card, current phase, submitted white cards if judging phase, '
+// players we are waiting on if playing phase, Scores, Card Czar (everything visible, same to every user)
+
+//Past winning cards list (black and white associated together)
+
+//Current hand of player
+
+//Start/Restart the game
 
 
 # Group Playing
 Relating to calls that a non-card czar player would make during the play phase.
 
+//Which card the player wants to phase
 
 # Group Judging
 Relating to calls that the card czar would be making
+
+//Which card judge chooses
 
 
 
