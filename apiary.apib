@@ -2,32 +2,22 @@ FORMAT: 1A
 
 # Cards Against Ocaml
 
-This document specifies the APIs for A7 of CS 2112 at Cornell for Fall 2015. CritterWorld servers should implement these interfaces exactly, and rely on nothing else, in order to comply with the course staff client code. Click on each to get more information about what the JSON should look like
+This document specifies the APIs for Cards Against OCaml. The server for the game should implement these interfaces
+exactly. Click on each to get more information about what the JSON should look like
 
 
 One common trend across this API is the concept of the <b>session_id</b>. Many of these calls take a <b>session_id</b> parameter which specifies the permissions of the caller. This is the same <b>session_id</b> returned by [Login](#Login).
 Any calls that would modify the state of the world require a <b>session_id</b> with write access. Some special calls (e.g. [New World](#New World)) require admin access.
 The other function of <b>session_id</b> is linked to critters - the ability to read the <b>program</b> and the <b>recently_executed_rule</b>, and ability to delete a critter are only granted to the user with the <b>session_id</b> that created the critter, or one of its ancestors (or an admin <b>session_id</b>).
 
-# Group Authentication
+# User Authentication
 Relating to calls about authentication.
-## Login [/CritterWorld/login{?level}]
+## Login [/user/login{?name}]
 ### Log in to the server [POST]
-The user making this call will need to submit a password (which are set via the web.xml file (or command line) when the server starts up).
+The user making this call will need to submit a name that they shall use for the game that they will join.
 
-If the password is not correct for the specified authentication level, the server should respond with the status code 401, meaning "Unauthorized".
 + Parameters
-    + level (string, required) - The level to request authentication for. Must be one of: 
-      * "read", for reading general world state (excluding critter programs)
-      * "write", for changing the world state and reading back programs of critters that this user created
-      * "admin", for creating new worlds and having control over all critters
-    
-
-+ Request (application/json)
-
-        {  
-            "password":"swordfish"
-        }
+    + name (string, required) - the username that the given user submitted
 
 + Response 200 (application/json)
 
@@ -46,17 +36,17 @@ A list of all the Critter objects with all their details (including <b>program</
 
         [
             { //example of a critter that the provided session_id can access
-                "id": 1, 
+                "id": 1,
                 "species_id": "basic-critter",
-                "program":"[the critter's entire program]", 
+                "program":"[the critter's entire program]",
                 "row":5,"col":7,"direction":1,
-                "mem":[1,2,3,4...], 
+                "mem":[1,2,3,4...],
                 "recently_executed_rule":3 // The index of the most recently executed rule in the critter's program
             }, { //example of a critter that the provided session_id cannot access
-                "id": 2, 
+                "id": 2,
                 "species_id": "acidic-critter",
                 "row":3,"col":3,"direction":2,
-                "mem":[1,2,3,4...], 
+                "mem":[1,2,3,4...],
             }, ...
         ]
 
@@ -71,10 +61,10 @@ If the session id does not have write or admin access, the server should respond
 
 + Request (application/json)
 
-        {  
+        {
             "species_id": "acidic-critter",
-            "program":"[the critter's entire program]", 
-            "mem":[1,2,3,4...], 
+            "program":"[the critter's entire program]",
+            "mem":[1,2,3,4...],
             "positions":[
                 {"row":2,"col":2},
                 {"row":3,"col":3},
@@ -83,19 +73,19 @@ If the session id does not have write or admin access, the server should respond
         }
         //or
 
-        {  
-            "program":"[the critter's entire program]", 
-            "mem":[1,2,3,4...], 
+        {
+            "program":"[the critter's entire program]",
+            "mem":[1,2,3,4...],
             "num":8
         }
 
 + Response 201 (application/json)
 
-        { 
+        {
             "species_id":"asdf",  //the species identifier of the newly created critter(s)
             "ids":[1,2,3,4...]
         }
-        
+
 ## Single Critter [/CritterWorld/critter/{id}?session_id=int]
 ### Retrieve a Critter [GET]
 A single Critter object with all its details (including <b>program</b> and <b>recently_executed_rule</b> if the critter was created by the user with <b>session_id</b>, or if <b>session_id</b> is an admin)
@@ -105,11 +95,11 @@ A single Critter object with all its details (including <b>program</b> and <b>re
 + Response 200 (application/json)
 
         {
-            "id": 2, 
+            "id": 2,
             "species_id": "acidic-critter",
-            "program":"[the critter's entire program]", 
+            "program":"[the critter's entire program]",
             "row":3,"col":3,"direction":2,
-            "mem":[1,2,3,4...], 
+            "mem":[1,2,3,4...],
             "recently_executed_rule":3
         }
 
@@ -132,13 +122,13 @@ You should assume that all critter files in the world definition can be found on
 
 If the session id does not have admin access, the server should respond with the status code 401, meaning "Unauthorized".
 + Parameters
-    + session_id (int, required) - The id of the current session. 
+    + session_id (int, required) - The id of the current session.
     Must be an admin for this call to have any effect.
-    
+
 
 + Request (application/json)
 
-        {  
+        {
             "description":"[the world definition, from the file]"
         }
 
@@ -150,9 +140,9 @@ If the session id does not have admin access, the server should respond with the
 ### Get the state of the world [GET]
 + Parameters
     + session_id (required, int) - The id of the current session
-    + update_since (optional, int) - An integer that specifies that the client 
-    is only interested in the tiles that have changed since the 
-<b>update_since</b> timestep. That is, if the current timestep is 10 and 
+    + update_since (optional, int) - An integer that specifies that the client
+    is only interested in the tiles that have changed since the
+<b>update_since</b> timestep. That is, if the current timestep is 10 and
 <b>update_since</b> is 7, then the server should return the content of all tiles whose content is different in timestep 10. This means that changes in timestep 8 or 9 that have been superseded by later changes need not be reported. Note that these changes may be reported. <b>update_since</b> may return updates from earlier than the desired update, so long as it returns the <b>update_since</b> parameter accurately. If <b>update_since</b> is not given, the entire state of the world at the current timestep is returned.
 + Response 200 (application/json)
 
@@ -174,17 +164,17 @@ If the session id does not have admin access, the server should respond with the
                 "value": 10
             }, {
                 "type":"critter",
-                "id": 1, 
+                "id": 1,
                 "species_id": "basic-critter",
                 "row":5,"col":7,"direction":1,
                 "mem":[1,2,3,4...]
             }, {
                 "type":"critter",
-                "id": 2, 
+                "id": 2,
                 "species_id": "acidic-critter",
-                "program":"[the critter's entire program]", 
+                "program":"[the critter's entire program]",
                 "row":3,"col":3,"direction":2,
-                "mem":[1,2,3,4...], 
+                "mem":[1,2,3,4...],
                 "recently_executed_rule":4
             }, {  // if some grid changed from having something to having nothing, then it has the type "nothing"
                 "type": "nothing",
@@ -197,7 +187,7 @@ If the session id does not have admin access, the server should respond with the
 ### Get a subsection of the world [GET]
 + Parameters
     + session_id (required, int) - The id of the current session
-    + update_since (optional, int) - Specifies that the client is only 
+    + update_since (optional, int) - Specifies that the client is only
     interested in tiles that have changed since <b>update_since</b>
     + from_row (int, required) - Row that the subsection starts from, inclusive
     + to_row (int, required) - Row that the subsection ends at, inclusive
@@ -223,24 +213,24 @@ If the session id does not have admin access, the server should respond with the
                 "value": 10
             }, {
                 "type":"critter",
-                "id": 1, 
+                "id": 1,
                 "species_id": "basic-critter",
                 "row":5,"col":7,"direction":1,
                 "mem":[1,2,3,4...]
             }, {
                 "type":"critter",
-                "id": 2, 
+                "id": 2,
                 "species_id": "acidic-critter",
-                "program":"[the critter's entire program]", 
+                "program":"[the critter's entire program]",
                 "row":3,"col":3,"direction":2,
-                "mem":[1,2,3,4...], 
+                "mem":[1,2,3,4...],
                 "recently_executed_rule":4
             }, {  // if some grid changed from having something to having nothing, then it has the type "nothing"
                 "type": "nothing",
                 "row": 6, "col": 3
             }, ...]
         }
-        
+
 ## Entity Creation [/CritterWorld/world/create_entity{?session_id,row,col,type,amount}]
 ### Create a food or rock object [POST]
 If the entity could not be created at the specified location, the server should respond with the status code 406, meaning "Not Acceptable".
@@ -257,7 +247,7 @@ If the session id does not have write or admin access, the server should respond
 
         Ok//return a single string "Ok"
 
-        
+
 # Group Control
 ## World Step [/CritterWorld/step?{count,session_id}]
 ### Advance the world by steps [POST]
@@ -265,7 +255,7 @@ When (and only when) the simulation rate is 0, a client may use the <b>step</b> 
 
 If the session id does not have write or admin access, the server should respond with the status code 401, meaning "Unauthorized".
 + Parameters
-    + session_id (int, required) - The id of the current session. 
+    + session_id (int, required) - The id of the current session.
     Must have write access to have any effect.
     + count (int, optional) - The number of steps to take
 
@@ -277,7 +267,7 @@ If the session id does not have write or admin access, the server should respond
 
 If the session id does not have write or admin access, the server should respond with the status code 401, meaning "Unauthorized".
 + Parameters
-    + session_id (int, required) - The id of the current session. 
+    + session_id (int, required) - The id of the current session.
     Must have write access to have any effect.
     + rate (float, optional) - The rate at which to run the simulation
 
