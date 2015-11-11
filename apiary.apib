@@ -3,29 +3,42 @@ FORMAT: 1A
 # Cards Against Ocaml
 
 This document specifies the APIs for Cards Against OCaml. The server for the game should implement these interfaces
-exactly. Click on each to get more information about what the JSON should look like
+exactly. Click on each to get more information about what the JSON should look like.
 
-Note that a common trend through all the API's is the requirement of a username parameter. If you fail to provide this
-parameter then the API call will return a 401, except in the case of login. Login adds the user to the server for the
-game.
+Note: All of the APIs require a username parameter. If this is not provided, then the API call will return a 401, 
+except in the case of login (Login adds the user to the server for the game.
 
-A cards against humanity game is split into three main phases: pregame, playing, and judging. During pregame, people
-are meant to be logging in. Once all users are logged in players begin the game. During the playing phase, players are
-presented with a black card and they must play a white card. During the judging phaes, the card czar picks the white card
-that he feels fits the black card best. The game is won when one player wins 10 black cards.
+A Cards Against Humanity game is split into three main phases: pregame, playing, and judging. During pregame, players enter
+the game by logging in.  Once all players are logged in, the game begins. During the playing phase, players are
+presented with a black card and asked to play a white card. During the judging phase, the Card Czar picks the white card
+that he feels is the most humorous response to the black card.  The player who played the selected black card
+receives the black card, and the black card is not played again for the duration of the game.
+The game is won when one player collects 10 black cards.
+
+As a brief note, this current API is insecure. It is currently possible to get other user's uID by calling login, and there are no permissions
+preventing things like resetting the game. We did this because our implementation is basic and meant to be played in a group of close
+friends. For added security, we could easily implement a password login for each user as well as permission levels for each user.
 
 # Group Authentication
-Relating to calls about authentication.
+The following calls relate to authentication.
 ## Login [/user/login]
 ### Log in to the server [POST]
 The user making this call will need to submit a username, through the request header, that they shall use for the game that they will join.
+When the call succeeds, the response will pass back the uID and new, which specifies if the user is a new user or not
 
 + Request (application/json)
     + Header
 
-        username: "acidic"
+            username: "temp mrc26"
 
-+ Response 200 (No Content)
++ Response 200 (application/json)  
+    
+        [
+            {
+                "uID": 42,
+                "new": true
+            }
+        ]
 
 ## Quit [/user/quit]
 ### Quit out of the server [DELETE]
@@ -34,12 +47,23 @@ The user making this call will need to pass in the username that they wish to re
 + Request (application/json)
     + Header
 
-        username: "acidic"
+            uID: 42
+
++ Response 200 (No Content)
+
+## Reset [/user/reset]
+### Reset all users [DELETE]
+This call resets all users and stops the current game.
+
++ Request (application/json)
+    + Header
+
+            uID: 42
 
 + Response 200 (No Content)
 
 # Group Timing
-Relating to calls about timing that are frequently made to the server
+The following calls relate to timing, and are frequently made to the server.
 ## Heartbeat [/time/heartbeat]
 ### Send a heartbeat [POST]
 The user making this call will need to pass in the username of the given user. Every user should make this call
@@ -48,93 +72,132 @@ at least once every 5 seconds, or the server may deem the player inactive.
 + Request (application/json)
     + Header
 
-            username: "acidic"
-
+            uID: 42
+            
 + Response 200 (No Content)
 
-## Timer [/time/timer]
+## Timer [/time/timer{?pause}]
+
++ Parameters
+    + pause (boolean, optional) - parameter for telling if we are pausing or playing
+
 ### Get Round Timer [GET]
 The user making this call will need to pass in the username of the given user. The response should return the time that
-the user has left in the round in seconds as a parameter in the body of the response
+the user has left in the round in seconds as a parameter in the body of the response. Note: This ignores the pause parameter.
 
 + Request (application/json)
     + Header
 
-            username: "acidic"
-
+            uID: 42
+            
 + Response 200 (application/json)
-    +Body
-
+    
         [
             {
-                "time": 20,
+               "time": 20,
             }
         ]
 
 ### Pause/Play Game [POST]
-The user making this call can either pause or start the timer
-
-
-# Group Game State
-Relating to calls to get the current world state.
-
-## State [/state/getState]
-### Get Current State [GET]
-The user making this call will need to pass in the username of the given user. The response will return a json
-object with the current game state (including current black card, current phase, submitted white cards if
-judging phase, players who have not submitted, scores, Card Czar)
+The user making this call can either pause or start the timer. If the parameter "pause" is true, then the timer should be paused,
+and if false, then the timer should start. If no argument is provided, the parameter will be assumed to be false.
 
 + Request (application/json)
     + Header
 
-            username: "acidic"
-
+            uID: 42
+            
 + Response 200 (application/json)
-    +Body
+
+# Group Game State
+The following calls get information about the current world state.
+
+## State [/state/getState]
+### Get Current State [GET]
+The user making this call will need to pass in the username of the given user. The response will return a json
+object with the current game state which includes the following: current black card, current phase, submitted white cards (if
+judging phase), players who have not submitted, scores, Card Czar.
+
++ Request (application/json)
+    + Header
+
+            uID: 42
+            
++ Response 200 (application/json)
 
         [
             {
-                "black": "Current Issue _",
                 "phase": "Playing",
+                "czar": "acidic",
+                "black": "Current Issue _",
                 "submitted": ["pac man", "derp"],
-                "waitingPlayers": ["p3"],
-                "scores": [12, 14, 15, 19],
-                "czar": "acidic"
+                "players": 
+                [
+                {
+                    "name":"rapper",
+                    "score":12,
+                    "played":true
+                },
+                {
+                    "name":"not_a_rapper",
+                    "score":13,
+                    "played":false
+                }
+                ]
             }
         ]
 
-//Past winning cards list (black and white associated together)
 ## Past Wins [/state/pastWins]
 ### Get Previously Winning Pairs [GET]
+This call returns a list of pairs, consisting of a single white card and a single black card, that have been won in previous rounds.
 
-+Response 200 (application/json)
-    +Body
++ Request (application/json)
+    + Header
+
+            uID: 42
+            
++ Response 200 (application/json)
 
         [
             {
-                "winning pairs": [("white1", "black2"),("white1", "black2")],
+                "winning pairs": [("white1", "black1"),("white2", "black2")],
             }
         ]
 
 ## Hand [/state/hand]
 ### Get hand of current player [GET]
+This call returns the hand of the given player.
 
 + Request (application/json)
-    +Header
+    + Header
 
-            username: "acidic"
-
+            uID: 42
+            
 + Response 200 (application/json)
-    +Body
 
         [
             {
-                "currentHand": ["white1", "white1","white1","white1","white1","white1","white1","white1","white1","white1"],
+                "currentHand": ["white1", "white2","white3","white4","white5","white6","white7","white8","whitez9","white10"],
             }
         ]
 
 ## Start [/state/start]
 ### Trigger the start of a game or restart [POST]
+This call either starts the game or restarts the game if it is already in progress.
+
++ Request (application/json)
+    + Header
+
+            uID: 42
+            
+    + Body
+    
+            [
+                {
+                    "playTimer": 30,
+                    "judgeTimer": 20, 
+                }
+            ]
 
 + Response 200 (No Content)
 
@@ -142,17 +205,46 @@ judging phase, players who have not submitted, scores, Card Czar)
 Relating to calls that a non-card czar player would make during the play phase.
 
 ##  Play [/play]
-### Play a White Card [GET]
+### Play a White Card [POST]
 The user making this call needs to pass in his username. That user then plays the specified white card for
-the given round. This call is final, once it's made the user cannot play a different white card that round.
+the given round. This call is final, and once it is made the user cannot play a different white card for that round.
+
++ Request (application/json)
+    + Header
+
+            uID: 42
+            
+    + Body
+            
+            [
+                {
+                    "choice": "hello",
+                }
+            ]
+
++ Response 200 (No Content)
 
 # Group Judging
-Relating to calls that the card czar would be making
+The following are calls that would be made by the Card Czar.
 
 ##  Judge [/judge]
-### Pick White Card [GET]
+### Pick White Card [POST]
 The user making this call needs to pass in his username. This call will only be accepted if the username matches
 the username of the current card czar. Once a card is selected the decision is final.
 
++ Request (application/json)
+    + Header
+
+            uID: 42
+
+    + Body
+            
+            [
+                {
+                    "choice": "hello",
+                }
+            ]
+
++ Response 200 (No Content)
 
 
