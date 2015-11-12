@@ -39,7 +39,7 @@ end
 module type UserState = sig
   (*Module which includes methods for individual users to access state info*)
   include State
-  
+
   (*Method for getting a user's hand*)
   val get_hand: state -> card list
 
@@ -49,7 +49,7 @@ module type ServerState = sig
   (*Module which can access all data in the game*)
   include State
 
-  type server_state of state
+  type server_state
 
   (*Method for getting any user's hand*)
   val get_user_hand: state -> uID -> card list
@@ -57,8 +57,13 @@ module type ServerState = sig
   (*Method for setting any user's hand*)
   val deal_single_card: state -> uID -> card list
 
-  (*Method for moving from state to state*)
-  val new_state: server_state -> state
+  (*Method for creating an initial server state*)
+  val new_state: () -> state
 
+  (*Method for moving from one state to the next*)
+  val next_state: server_state -> server_state
+
+  (*Method for retrieving a user's UserState*)
+  val get_user_state: uID -> state
 end
 
