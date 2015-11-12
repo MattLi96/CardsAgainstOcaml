@@ -14,7 +14,7 @@ that have won previous rounds*)
 val get_previous_wins: unit -> (card * card) list
 
 (*get_hands returns a list of cards in each person's hand*)
-val get_hands: (card list) list
+val get_hands: state -> (card list) list
 
 (*SET FUNCTIONS: functions that modify the state*)
 (*add_user takes in a username and adds it to the list of players in the state*)
@@ -37,3 +37,5 @@ val user_play_white: uID -> card -> state
 (*judge_select determines the winner of a round*)
 val judge_select: uID -> card -> state
 
+(*shuffle takes a state, shuffles the deck, and returns the deck*)
+val shuffle: state -> state
