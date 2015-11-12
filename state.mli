@@ -58,7 +58,7 @@ module type ServerState = sig
   val deal_single_card: state -> uID -> card list
 
   (*Method for creating an initial server state*)
-  val new_state: () -> state
+  val new_state: unit -> state
 
   (*Method for moving from one state to the next*)
   val next_state: server_state -> server_state
