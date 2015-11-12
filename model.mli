@@ -2,7 +2,7 @@
 
 (*A model that contains information about the entire game*)
 type state
-type card
+type card = Black of string | White of string
 type uID
 
 (*GET FUNCTIONS: functions that return information about the state*)
@@ -18,20 +18,22 @@ val get_hands: (card list) list
 
 (*SET FUNCTIONS: functions that modify the state*)
 (*add_user takes in a username and adds it to the list of players in the state*)
-val add_user: string -> unit
+val add_user: string -> state
 
-(*remove_user takes in the uID of a player and removes said player from the list of players in the state*)
-val remove_user: uID -> unit
+(*remove_user takes in the uID of a player and removes said player from the
+list of players in the state*)
+val remove_user: uID -> state
 
 (*reset_all removes all players from the state*)
-val reset_all: uID -> unit
+val reset_all: uID -> state
 
 (*game_start begins the game for all players in the list of players*)
-val game_start: unit -> unit
+val game_start: unit -> state
 
-(*user_play_white adds the card played by a player into the list of played cards in the state*)
-val user_play_white: uID -> card -> unit
+(*user_play_white adds the card played by a player into the list of played
+cards in the state*)
+val user_play_white: uID -> card -> state
 
 (*judge_select determines the winner of a round*)
-val judge_select: uID -> card -> unit
+val judge_select: uID -> card -> state
 
