@@ -10,3 +10,7 @@ val logout: uID -> unit
 
 (*reset*)
 val reset: uID -> unit
+
+(*heartbeat*)
+val heartbeat: uID -> unit
+val get_active: unit -> uID list
