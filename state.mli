@@ -4,10 +4,14 @@ module State = sig
   type play_state
   type judge_state
   type uID
-  type card
+  type card = Black of string | White of string
   type state = Play of play_state | Judge of judge_state
   type deck = card list
   type score
+
+  (*get_previous_wins returns all of the card pairs, one white and one black,
+    that have won previous rounds*)
+  val get_previous_wins: state -> (card * card) list
 
   (*Method to return the current black card in the state*)
   val curr_black_card: state -> card
@@ -59,9 +63,6 @@ module type ServerState = sig
 
   (*Method for creating an initial server state*)
   val new_state: unit -> state
-
-  (*Method for moving from one state to the next*)
-  val next_state: server_state -> server_state
 
   (*Method for retrieving a user's UserState*)
   val get_user_state: uID -> state

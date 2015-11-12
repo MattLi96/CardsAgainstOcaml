@@ -1,18 +1,15 @@
 (*Model*)
+open UserState
 
 (*A model that contains information about the entire game*)
-type state
-type card = Black of string | White of string
+type state = server_state
+type card
 type uID
 
 (*GET FUNCTIONS: functions that return information about the state*)
 
 (*get_current_state returns the current state of the game*)
 val get_current_state: unit -> state
-
-(*get_previous_wins returns all of the card pairs, one white and one black,
-that have won previous rounds*)
-val get_previous_wins: unit -> (card * card) list
 
 (*get_hands returns a list of cards in each person's hand*)
 val get_hands: state -> (card list) list
@@ -55,4 +52,9 @@ val game_start: unit -> state
 
 (*shuffle takes a state, shuffles the deck, and returns the deck*)
 val shuffle: state -> state
+
+(*goes to the next game phase*)
+val game_next_phase: state -> state
+
+
 
