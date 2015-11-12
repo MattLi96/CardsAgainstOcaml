@@ -46,9 +46,6 @@ module type UserState = sig
 
   type user_state
 
-  (*gets the internal state*)
-  val get_state: user_state -> state
-
   (*Method for getting a user's hand*)
   val get_hand: user_state -> card list
 
@@ -64,7 +61,7 @@ module type ServerState = sig
   val new_state: unit -> server_state
 
   (*Method for retrieving a user's UserState*)
-  val get_user_state: uID -> UserState.user_state
-  
+  val get_user_state: state -> uID -> UserState.user_state
+
 end
 

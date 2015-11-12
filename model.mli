@@ -1,5 +1,6 @@
 (*Model*)
 open UserState
+open Timer
 
 (*A model that contains information about the entire game*)
 type state = server_state
