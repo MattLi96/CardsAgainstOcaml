@@ -60,19 +60,11 @@ module type ServerState = sig
 
   type server_state
 
-  (*gets the internal state*) 
-  val get_state: server_state -> state
-
-  (*Method for getting any user's hand*)
-  val get_user_hand: sever_state -> uID -> card list
-
-  (*Method for setting any user's hand*)
-  val deal_single_card: server_state -> uID -> card list
-
   (*Method for creating an initial server state*)
   val new_state: unit -> server_state
 
   (*Method for retrieving a user's UserState*)
   val get_user_state: uID -> UserState.user_state
+  
 end
 
