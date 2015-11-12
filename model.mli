@@ -39,3 +39,6 @@ val judge_select: uID -> card -> state
 
 (*shuffle takes a state, shuffles the deck, and returns the deck*)
 val shuffle: state -> state
+
+(*create_user_state takes a server state and returns the state of the user*)
+val create_user_state: state -> state
