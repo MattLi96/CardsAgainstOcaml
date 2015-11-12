@@ -1,5 +1,5 @@
 (*Contains methods for getting various types of information in the game*)
-module State : sig
+module State = sig
 
   type play_state
   type judge_state
@@ -7,7 +7,7 @@ module State : sig
   type card
   type state = Play of play_state | Judge of judge_state
   type deck = card list
-
+  type score
 
   (*Method to return the current black card in the state*)
   val curr_black_card: state -> card
@@ -19,6 +19,10 @@ module State : sig
   val set_white_deck: state -> deck -> state
 
   val set_black_deck: state -> deck -> state
+
+  (*Method to return scores*)
+  val scores = score list
+
   (*----Play state methods----*)
 
   (*Method to return the list of users who have played in a given round*)
@@ -32,4 +36,29 @@ module State : sig
 
 end
 
+module type UserState = sig
+  (*Module which includes methods for individual users to access state info*)
+  include State
+  
+  (*Method for getting a user's hand*)
+  val get_hand: state -> card list
+
+end
+
+module type ServerState = sig
+  (*Module which can access all data in the game*)
+  include State
+
+  type server_state of state
+
+  (*Method for getting any user's hand*)
+  val get_user_hand: state -> uID -> card list
+
+  (*Method for setting any user's hand*)
+  val deal_single_card: state -> uID -> card list
+
+  (*Method for moving from state to state*)
+  val new_state: server_state -> state
+
+end
 
