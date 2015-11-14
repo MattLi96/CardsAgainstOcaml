@@ -2,28 +2,29 @@
 module State = sig
 
   type uID = int
-  type card = Black of string | White of string
-  type deck = card list
+  type white_card = string
+  type black_card = string
+  type deck = BDeck of black_card list | WDeck of white_card list
   type scores = (int * int) list (*uID to score*)
   
   type play_state = {played : uID list}
-  type judge_state = {played : card list} (*played white cards*)
+  type judge_state = {played : black_card list} (*played white cards*)
   type phase_state = Play of play_state | Judge of judge_state
   
   type state = {
     phase : phase_state;
     score : scores;
-    winners : (card * card * uID);
+    winners : (black_card * white_card * uID);
     b_card : card;
   }
 
 
   (*get_previous_wins returns all of the card pairs, one white and one black,
     that have won previous rounds*)
-  val get_previous_wins: state -> (card * card) list
+  val get_previous_wins: state -> (black_card * white_card) list
 
   (*Method to return the current black card in the state*)
-  val curr_black_card: state -> card
+  val curr_black_card: state -> black_card
 
   (*Method to return scores*)
   val scores = score list
@@ -37,7 +38,7 @@ module State = sig
   (*----Judge state methods----*)
 
   (*Method to return a list of white cards played*)
-  val played_white_cards: judge_state -> card list
+  val played_white_cards: judge_state -> white_card list
 
 end
 
@@ -47,11 +48,11 @@ module type UserState = sig
 
   type user_state = {
     state : State.state;
-    hand : State.card list;
+    hand : State.white_card list;
   }
 
   (*Method for getting a user's hand*)
-  val get_hand: user_state -> card list
+  val get_hand: user_state -> white_card list
 
 end
 
@@ -64,20 +65,20 @@ module type ServerState = sig
     b_deck : State.deck;
     w_deck : State.deck;
 
-    (*Pairs of played white cards to players*)
-    card_to_player : (State.card * State.uID) list; 
-    hands : State.uID * (State.card list)
+    (*List of (card, player) pairs matching cards played to users who played them*)
+    card_to_player : (State.white_card * State.uID) list; 
+    hands : State.uID * (State.white_card list)
   }
 
   (*Method for creating an initial server state*)
   val new_state: unit -> server_state
 
   (*Method for retrieving a user's UserState*)
-  val get_user_state: state -> uID -> UserState.user_state
+  val get_user_state: server_state -> uID -> UserState.user_state
 
   (*Method to return the entire deck*)
-  val get_white_deck: state -> deck
-  val get_black_deck: state -> deck
+  val get_white_deck: state -> white_deck
+  val get_black_deck: state -> black_deck
 
 end
 
