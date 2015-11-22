@@ -28,7 +28,7 @@
   (* val curr_black_card: state -> black_card *)
 
   let curr_black_card current_state =
-    failwith "to implement"
+    current_state.b_card
 
   (*Method to return scores*)
   (* val scores: state -> scores *)
