@@ -34,20 +34,20 @@
   (* val scores: state -> scores *)
 
   let scores current_state =
-    failwith "to implement"
+    current_state.score
 
   (*----Play state methods----*)
 
   (*Method to return the list of users who have played in a given round*)
   (* val users_played: play_state -> uID list *)
 
-  let users_played current_play_state =
-    failwith "to implement"
+  let users_played (current_play_state: play_state): uID list =
+    current_play_state.played
 
   (*----Judge state methods----*)
 
   (*Method to return a list of white cards played*)
   (* val played_white_cards: judge_state -> white_card list *)
 
-  let played_white_cards current_judge_state =
-    failwith "to implement"
+  let played_white_cards (current_judge_state:judge_state): white_card list =
+    current_judge_state.played
