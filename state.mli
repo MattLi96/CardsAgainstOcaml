@@ -1,23 +1,15 @@
 (*Contains methods for getting various types of information in the game*)
-module State = sig
+(* module State = sig *)
+  type uID
+  type white_card
+  type black_card
+  type deck
+  type scores
+  type play_state
+  type judge_state
+  type phase_state
 
-  type uID = int
-  type white_card = string
-  type black_card = string
-  type deck = BDeck of black_card list | WDeck of white_card list
-  type scores = (int * int) list (*uID to score*)
-  
-  type play_state = {played : uID list}
-  type judge_state = {played : black_card list} (*played white cards*)
-  type phase_state = Play of play_state | Judge of judge_state
-  
-  type state = {
-    phase : phase_state;
-    score : scores;
-    winners : (black_card * white_card * uID);
-    b_card : card;
-  }
-
+  type state
 
   (*get_previous_wins returns all of the card pairs, one white and one black,
     that have won previous rounds*)
@@ -27,7 +19,7 @@ module State = sig
   val curr_black_card: state -> black_card
 
   (*Method to return scores*)
-  val scores = score list
+  val scores: state -> scores
 
   (*----Play state methods----*)
 
@@ -40,8 +32,9 @@ module State = sig
   (*Method to return a list of white cards played*)
   val played_white_cards: judge_state -> white_card list
 
-end
+(* end *)
 
+(*
 module type UserState = sig
   (*Module which includes methods for individual users to access state info*)
   include State
@@ -66,7 +59,7 @@ module type ServerState = sig
     w_deck : State.deck;
 
     (*List of (card, player) pairs matching cards played to users who played them*)
-    card_to_player : (State.white_card * State.uID) list; 
+    card_to_player : (State.white_card * State.uID) list;
     hands : State.uID * (State.white_card list)
   }
 
@@ -81,4 +74,4 @@ module type ServerState = sig
   val get_black_deck: state -> black_deck
 
 end
-
+*)
