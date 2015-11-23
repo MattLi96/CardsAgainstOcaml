@@ -1,3 +1,6 @@
+
+
+(*Module written as a dummy for running the GUI separately*)
 module PullCards = struct 
 
   type cardsfile = Yojson.Basic.json
@@ -56,17 +59,11 @@ end
 
 
 let locale() = GtkMain.Main.init()
-
 let destroy () = GMain.Main.quit()
-let button_callback () = (print_endline "BUTTONCALLBACK")
-
-let button2c() = button_callback(); flush stdout
-let button3c() = (print_endline "Button 3 pressed"); flush stdout
-let button4c() = (print_endline "Button 4 pressed"); flush stdout
-let button5c() = (print_endline "Button 5 pressed"); flush stdout
-
 
 let expansion_enabled = ref false
+
+let czar_mode = ref false
 
 let new_black_card() = 
   let blackdeck = PullCards.get_deck "black.json" in
@@ -75,10 +72,11 @@ let new_black_card() =
 let new_white_card() =
   let whitedeck = PullCards.get_deck "white.json" in
   PullCards.get_random_break whitedeck 20
+    
 
-
+(*Options window, currently only contains one option*)
 let options_window () =
-  let option_window = GWindow.window ~title:"Options" ~border_width:5 () in
+  let option_window = GWindow.window ~title:"Options" ~resizable:false ~border_width:5 () in
   let myclose _ = option_window#destroy() in
   ignore(option_window#connect#destroy ~callback:(myclose));
   let vbox = GPack.vbox ~spacing:5 ~packing:option_window#add () in
@@ -95,8 +93,10 @@ let options_window () =
   ignore(confirm#connect#clicked(myclose));
   option_window#show()
 
+
+(*About screen - includes image, about text*)
 let about_screen () =
-  let about = GWindow.window ~title:"About" ~border_width:5 () in
+  let about = GWindow.window ~title:"About" ~resizable:false ~border_width:5 () in
   let myclose _ = about#destroy() in
   ignore(about#connect#destroy(myclose));
   let vbox = GPack.vbox ~spacing:5 ~packing:about#add() in
@@ -106,7 +106,9 @@ let about_screen () =
   let aboutlabel = GMisc.label ~line_wrap:true ~packing:vbox#add ~justify:`CENTER() in
   aboutlabel#set_text("v0.0.05a112215\n\nCharley Chen\nMatthew Li\nAustin Liu \nJared Wong\n
 Some code borrowed from the open-source lablgtk2 libraries.\n\n 2015. All rights reserved.");
-
+  let okbutton = GButton.button ~packing:vbox#add () in
+  okbutton#set_label("Close");
+  ignore(okbutton#connect#clicked(myclose));
 about#show()
 
 (*Draft of style for cards - bw, not sure how to set yet*)
@@ -120,10 +122,9 @@ about#show()
 
 let main () =
   ignore(locale());
-  let curr_val = ref 30 in
   let icon = GdkPixbuf.from_file "icon.png" in
   let window = GWindow.window 
-      ~border_width:0 ~title:"Cards Against OCaml"() in
+      ~resizable:false ~border_width:0 ~title:"Cards Against OCaml"() in
   window#set_icon(Some icon);
   let menubox = GPack.vbox ~packing:window#add() in
   let menubar = GMenu.menu_bar ~packing:menubox#pack() in
@@ -145,7 +146,6 @@ let main () =
   let menu_about = GMenu.menu_item ~label:"About" ~packing:menubar#append() in
   menu_about#set_submenu(about_menu);
 
-  (*let title = GMisc.label ~packing:(windowbox#pack ~padding:10)() in*)
   let bcbox = GPack.hbox ~packing:(windowbox#pack ~padding:10)() in
   let mhbox = GPack.vbox ~packing:(windowbox#pack ~padding:5)() in
   let timerframe = GBin.frame ~packing:(bcbox#pack ~padding:5) ~label: "Timer:" ~width: 70 ~height:70 () in
@@ -200,55 +200,88 @@ let main () =
   let button10 = GButton.button ~label:btext ~packing:(card10box#pack ~padding:0)() in
 
 
-  timer#set_label((string_of_int(!curr_val)));
-  score#set_label("score");
+  (*Code for initialization, can be modified to take data from the server
+   *when this is fully implemented.*)
+
+
+  let curr_time = ref 30 in
+  let curr_score = ref 0 in
+  timer#set_label((string_of_int(!curr_time)));
+  score#set_label((string_of_int(!curr_score)));
   let set_new_cards() = 
     card1#set_label(new_white_card());
     card2#set_label(new_white_card());
     card3#set_label(new_white_card());
     card4#set_label(new_white_card());
     card5#set_label(new_white_card());
-    bcard#set_label(new_black_card()) in
-  card6#set_label(new_white_card());
-  card7#set_label(new_white_card());
-  card8#set_label(new_white_card());
-  card9#set_label(new_white_card());
-  card10#set_label(new_white_card());
-
+    bcard#set_label(new_black_card());
+    card6#set_label(new_white_card());
+    card7#set_label(new_white_card());
+    card8#set_label(new_white_card());
+    card9#set_label(new_white_card());
+    card10#set_label(new_white_card()) in
   set_new_cards();
+
+
+  (*Universal Callbacks: Methods for updating score, updating timer - 
+   *bound to every button currently, primarily for debug.  Can be modified*)
+  let update_score() = score#set_label((string_of_int(!curr_score))) in
+  let update_timer() = timer#set_label((string_of_int(!curr_time))) in
+
+
+  (*Debug Callbacks: Used for testing GUI in offline*)
+  let increment_score() = curr_score:=(!curr_score +1) in
+  (*let increment_timer() = curr_time:=(!curr_time +1) in*)
+
   let cb1 ()= card1#set_label(new_white_card());
-    bcard#set_label(new_black_card()); in
+    bcard#set_label(new_black_card());increment_score() in
   let cb2 ()= card2#set_label(new_white_card());
-    bcard#set_label(new_black_card()); in
+    bcard#set_label(new_black_card());increment_score() in
   let cb3 ()= card3#set_label(new_white_card());
-    bcard#set_label(new_black_card()); in
+    bcard#set_label(new_black_card());increment_score() in
   let cb4 ()= card4#set_label(new_white_card());
-    bcard#set_label(new_black_card()); in
+    bcard#set_label(new_black_card());increment_score() in
   let cb5 ()= card5#set_label(new_white_card());
-    bcard#set_label(new_black_card()); in
+    bcard#set_label(new_black_card());increment_score() in
   let cb6 ()= card6#set_label(new_white_card());
-    bcard#set_label(new_black_card()); in
+    bcard#set_label(new_black_card());increment_score() in
   let cb7 ()= card7#set_label(new_white_card());
-    bcard#set_label(new_black_card()); in
+    bcard#set_label(new_black_card());increment_score() in
   let cb8 ()= card8#set_label(new_white_card());
-    bcard#set_label(new_black_card()); in
+    bcard#set_label(new_black_card());increment_score() in
   let cb9 ()= card9#set_label(new_white_card());
-    bcard#set_label(new_black_card()); in
+    bcard#set_label(new_black_card());increment_score() in
   let cb10 ()= card10#set_label(new_white_card());
-    bcard#set_label(new_black_card()); in
+    bcard#set_label(new_black_card());increment_score() in
 
 
-  ignore(window#connect#destroy ~callback:(destroy));
-  ignore(button1#connect#clicked ~callback:(fun () -> cb1()));
-  ignore(button2#connect#clicked ~callback:(fun () -> cb2()));
-  ignore(button3#connect#clicked ~callback:(fun () -> cb3()));
-  ignore(button4#connect#clicked ~callback:(fun () -> cb4()));
-  ignore(button5#connect#clicked ~callback:(fun () -> cb5()));
-  ignore(button6#connect#clicked ~callback:(fun () -> cb6()));
-  ignore(button7#connect#clicked ~callback:(fun () -> cb7()));
-  ignore(button8#connect#clicked ~callback:(fun () -> cb8()));
-  ignore(button9#connect#clicked ~callback:(fun () -> cb9()));
-  ignore(button10#connect#clicked ~callback:(fun () -> cb10()));
+  (*Callbacks: Here is where the callbacks are assigned for each
+   *of the 10 buttons in the main interface of the GUI.  When connecting
+   *to the server, each of the 10 buttons' callbacks can be used to call
+   *functions which deal with card data from the server.*)
+
+  let callback1 () = cb1();update_score();update_timer() in
+  let callback2 () = cb2();update_score();update_timer() in
+  let callback3 () = cb3();update_score();update_timer() in
+  let callback4 () = cb4();update_score();update_timer() in
+  let callback5 () = cb5();update_score();update_timer() in
+  let callback6 () = cb6();update_score();update_timer() in
+  let callback7 () = cb7();update_score();update_timer() in
+  let callback8 () = cb8();update_score();update_timer() in
+  let callback9 () = cb9();update_score();update_timer() in
+  let callback10 () = cb10();update_score();update_timer() in
+
+  ignore(window#connect#destroy ~callback:destroy);
+  ignore(button1#connect#clicked ~callback:callback1);
+  ignore(button2#connect#clicked ~callback:callback2);
+  ignore(button3#connect#clicked ~callback:callback3);
+  ignore(button4#connect#clicked ~callback:callback4);
+  ignore(button5#connect#clicked ~callback:callback5);
+  ignore(button6#connect#clicked ~callback:callback6);
+  ignore(button7#connect#clicked ~callback:callback7);
+  ignore(button8#connect#clicked ~callback:callback8);
+  ignore(button9#connect#clicked ~callback:callback9);
+  ignore(button10#connect#clicked ~callback:callback10);
   window#show();
   GMain.Main.main()
 
