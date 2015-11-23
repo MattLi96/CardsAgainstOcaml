@@ -76,24 +76,6 @@ let new_white_card() =
   let whitedeck = PullCards.get_deck "white.json" in
   PullCards.get_random_break whitedeck 20
 
-(*Demo code from testgtk.ml*)
-(*let create_menu depth tearoff =
-  let rec aux depth tearoff =
-    let menu = GMenu.menu () and group = ref None in
-    if tearoff then ignore (GMenu.tearoff_item ~packing: menu#append ());
-    for i = 0 to 4 do
-      let menuitem = GMenu.radio_menu_item ?group:!group
-          ~label:("item " ^ string_of_int depth ^ " - " ^ string_of_int (i+1))
-          ~packing:menu#append ~show_toggle:(depth mod 2 <> 0)
-          () in
-      group := Some (menuitem #group);
-      if i = 3 then menuitem #misc#set_sensitive false;
-      if depth > 1 then
-        menuitem #set_submenu (aux (depth-1) true)
-    done;
-
-    menu
-  in aux depth tearoff*)
 
 let options_window () =
   let option_window = GWindow.window ~title:"Options" ~border_width:5 () in
@@ -118,14 +100,21 @@ let about_screen () =
   let myclose _ = about#destroy() in
   ignore(about#connect#destroy(myclose));
   let vbox = GPack.vbox ~spacing:5 ~packing:about#add() in
-  let logo = GdkPixbuf.from_file "cards.jpg" in
+  let logo = GdkPixbuf.from_file "cards.png" in
   let logo_widget = GMisc.image ~pixbuf:logo ~packing:vbox#add () in
   logo_widget#set_pixbuf logo;
   let aboutlabel = GMisc.label ~line_wrap:true ~packing:vbox#add ~justify:`CENTER() in
-  aboutlabel#set_text("Cards Against Ocaml\nv0.0.05a112215\n\nCharley Chen\nMatthew Li\nAustin Liu \nJared Wong\n
+  aboutlabel#set_text("v0.0.05a112215\n\nCharley Chen\nMatthew Li\nAustin Liu \nJared Wong\n
 Some code borrowed from the open-source lablgtk2 libraries.\n\n 2015. All rights reserved.");
 
 about#show()
+
+(*Draft of style for cards - bw, not sure how to set yet*)
+(*let card_style = 
+  let s = GtkData.Style.create() in
+  let colormap = Gdk.Color.get_system_colormap() in
+  let bcol = Gdk.Color.alloc colormap `BLACK in
+  GtkData.Style.set_bg s `NORMAL bcol; s*)
 
 
 
@@ -136,9 +125,11 @@ let main () =
   let window = GWindow.window 
       ~border_width:0 ~title:"Cards Against OCaml"() in
   window#set_icon(Some icon);
-  let windowbox = GPack.vbox ~packing:window#add() in
-  let menubar = GMenu.menu_bar ~packing:windowbox#pack() in
-  let logo = GdkPixbuf.from_file "logo.jpg" in
+  let menubox = GPack.vbox ~packing:window#add() in
+  let menubar = GMenu.menu_bar ~packing:menubox#pack() in
+  let hbox = GPack.hbox ~packing:(menubox#pack ~padding:50)() in
+  let windowbox = GPack.vbox ~packing:(hbox#pack ~padding:50)() in
+  let logo = GdkPixbuf.from_file "logo.png" in
   let logo_widget = GMisc.image ~pixbuf:logo ~packing:windowbox#add () in
   logo_widget#set_pixbuf logo; 
   let opt_menu = GMenu.menu() in
@@ -209,14 +200,6 @@ let main () =
   let button10 = GButton.button ~label:btext ~packing:(card10box#pack ~padding:0)() in
 
 
-  (*title#set_label("Cards Against OCaml");*)
-  (*logo#set_image("cah.jpg");*)
-  (*bcard#set_label("Black Card");
-    card1#set_label("Card 1 is a very very very long card");
-    card2#set_label("Card 2");
-    card3#set_label("Card 3");
-    card4#set_label("Card 4");
-    card5#set_label("Card 5");*)
   timer#set_label((string_of_int(!curr_val)));
   score#set_label("score");
   let set_new_cards() = 
@@ -254,9 +237,6 @@ let main () =
   let cb10 ()= card10#set_label(new_white_card());
     bcard#set_label(new_black_card()); in
 
-  (*let time = ref 30 in
-    let rec timertest () = Async.upon (Async.after Core.Std.sec 1.0) (fun () -> time:= (!time-1);
-                                                        timer#set_label(string_of_int(!time))); timertest() in timertest;*)
 
   ignore(window#connect#destroy ~callback:(destroy));
   ignore(button1#connect#clicked ~callback:(fun () -> cb1()));
