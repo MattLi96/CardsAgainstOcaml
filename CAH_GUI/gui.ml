@@ -1,5 +1,3 @@
-
-
 (*Module written as a dummy for running the GUI separately*)
 module PullCards = struct 
 
@@ -76,14 +74,16 @@ let new_white_card() =
 
 (*Options window, currently only contains one option*)
 let options_window () =
-  let option_window = GWindow.window ~title:"Options" ~resizable:false ~border_width:5 () in
+  let option_window = GWindow.window ~title:"Options" ~resizable:false 
+      ~border_width:5 () in
   let myclose _ = option_window#destroy() in
   ignore(option_window#connect#destroy ~callback:(myclose));
   let vbox = GPack.vbox ~spacing:5 ~packing:option_window#add () in
   let info = GMisc.label ~line_wrap:true 
       (*~text:"Enable/disable expansion pack.  Warning: This will reset your
       current game and all data will be lost."*) ~packing:vbox#add () in 
-  let checkbox = GButton.check_button ~active:(!expansion_enabled) ~packing:vbox#add () in
+  let checkbox = GButton.check_button ~active:(!expansion_enabled) 
+      ~packing:vbox#add () in
   let confirm = GButton.button ~packing:vbox#add ~label:"Confirm!"() in
   info#set_text("Enable/disable expansion packs. Warning: This will reset your
                  current game and all data will be lost.");
@@ -96,16 +96,20 @@ let options_window () =
 
 (*About screen - includes image, about text*)
 let about_screen () =
-  let about = GWindow.window ~title:"About" ~resizable:false ~border_width:5 () in
+  let about = GWindow.window ~title:"About" ~resizable:false 
+      ~border_width:5 () in
   let myclose _ = about#destroy() in
   ignore(about#connect#destroy(myclose));
   let vbox = GPack.vbox ~spacing:5 ~packing:about#add() in
   let logo = GdkPixbuf.from_file "cards.png" in
   let logo_widget = GMisc.image ~pixbuf:logo ~packing:vbox#add () in
   logo_widget#set_pixbuf logo;
-  let aboutlabel = GMisc.label ~line_wrap:true ~packing:vbox#add ~justify:`CENTER() in
-  aboutlabel#set_text("v0.0.05a112215\n\nCharley Chen\nMatthew Li\nAustin Liu \nJared Wong\n
-Some code borrowed from the open-source lablgtk2 libraries.\n\n 2015. All rights reserved.");
+  let aboutlabel = GMisc.label ~line_wrap:true ~packing:vbox#add 
+      ~justify:`CENTER() in
+  aboutlabel#set_text("v0.0.05a112215\n\nCharley Chen\nMatthew Li\nAustin Liu 
+Jared Wong\n
+Some code borrowed from the open-source lablgtk2 libraries.\n
+ 2015. All rights reserved.");
   let okbutton = GButton.button ~packing:vbox#add () in
   okbutton#set_label("Close");
   ignore(okbutton#connect#clicked(myclose));
@@ -134,24 +138,30 @@ let main () =
   let logo_widget = GMisc.image ~pixbuf:logo ~packing:windowbox#add () in
   logo_widget#set_pixbuf logo; 
   let opt_menu = GMenu.menu() in
-  let opt_button = GMenu.menu_item ~label:("More settings") ~packing:opt_menu#append() in
+  let opt_button = GMenu.menu_item ~label:("More settings") 
+      ~packing:opt_menu#append() in
   ignore(opt_button#connect#activate(options_window));
   let menu_opts = GMenu.menu_item ~label:"Options" ~packing:menubar#append() in
   menu_opts#set_submenu (opt_menu);
   let about_menu = GMenu.menu() in
-  let about_button = GMenu.menu_item ~label:("About") ~packing:about_menu#append() in
+  let about_button = GMenu.menu_item ~label:("About") 
+      ~packing:about_menu#append() in
   ignore(about_button#connect#activate ~callback:about_screen);
-  let exit_button = GMenu.menu_item ~label:("Exit") ~packing:about_menu #append() in
+  let exit_button = GMenu.menu_item ~label:("Exit") 
+      ~packing:about_menu #append() in
   ignore(exit_button#connect#activate ~callback:destroy);
   let menu_about = GMenu.menu_item ~label:"About" ~packing:menubar#append() in
   menu_about#set_submenu(about_menu);
 
   let bcbox = GPack.hbox ~packing:(windowbox#pack ~padding:10)() in
   let mhbox = GPack.vbox ~packing:(windowbox#pack ~padding:5)() in
-  let timerframe = GBin.frame ~packing:(bcbox#pack ~padding:5) ~label: "Timer:" ~width: 70 ~height:70 () in
+  let timerframe = GBin.frame ~packing:(bcbox#pack ~padding:5) 
+      ~label: "Timer:" ~width: 70 ~height:70 () in
   let timer = GMisc.label ~packing:(timerframe#add)() in
-  let bcframe = GBin.frame ~packing:(bcbox#pack ~padding:50) ~label:"Current Black Card" ~width:540 ~height:70 ()in
-  let scoreframe = GBin.frame ~packing:(bcbox#pack ~padding:5) ~label: "Score:" ~width:70 ~height:70() in
+  let bcframe = GBin.frame ~packing:(bcbox#pack ~padding:50) 
+      ~label:"Current Black Card" ~width:540 ~height:70 ()in
+  let scoreframe = GBin.frame ~packing:(bcbox#pack ~padding:5) 
+      ~label: "Score:" ~width:70 ~height:70() in
   let score = GMisc.label ~packing:(scoreframe#add)() in
   let cbox1 = GPack.hbox ~packing:(mhbox#pack ~padding:5)() in
   let cbox2 = GPack.hbox ~packing:(mhbox#pack ~padding:5)() in
@@ -165,39 +175,59 @@ let main () =
   let card8box = GPack.vbox ~packing:(cbox2#pack ~padding:0)() in
   let card9box = GPack.vbox ~packing:(cbox2#pack ~padding:0)() in
   let card10box = GPack.vbox ~packing:(cbox2#pack ~padding:0)() in
-  let card1frame = GBin.frame ~packing:(card1box#pack ~padding:15) ~width:160 ~height:160() in
-  let card2frame = GBin.frame ~packing:(card2box#pack ~padding:15) ~width:160 ~height:160() in
-  let card3frame = GBin.frame ~packing:(card3box#pack ~padding:15) ~width:160 ~height:160() in
-  let card4frame = GBin.frame ~packing:(card4box#pack ~padding:15) ~width:160 ~height:160() in
-  let card5frame = GBin.frame ~packing:(card5box#pack ~padding:15) ~width:160 ~height:160() in
-  let card6frame = GBin.frame ~packing:(card6box#pack ~padding:15) ~width:160 ~height:160() in
-  let card7frame = GBin.frame ~packing:(card7box#pack ~padding:15) ~width:160 ~height:160() in
-  let card8frame = GBin.frame ~packing:(card8box#pack ~padding:15) ~width:160 ~height:160() in
-  let card9frame = GBin.frame ~packing:(card9box#pack ~padding:15) ~width:160 ~height:160() in
-  let card10frame = GBin.frame ~packing:(card10box#pack ~padding:15) ~width:160 ~height:160() in
+  let card1frame = GBin.frame ~packing:(card1box#pack ~padding:15) 
+      ~width:160 ~height:160() in
+  let card2frame = GBin.frame ~packing:(card2box#pack ~padding:15) 
+      ~width:160 ~height:160() in
+  let card3frame = GBin.frame ~packing:(card3box#pack ~padding:15) 
+      ~width:160 ~height:160() in
+  let card4frame = GBin.frame ~packing:(card4box#pack ~padding:15) 
+      ~width:160 ~height:160() in
+  let card5frame = GBin.frame ~packing:(card5box#pack ~padding:15) 
+      ~width:160 ~height:160() in
+  let card6frame = GBin.frame ~packing:(card6box#pack ~padding:15) 
+      ~width:160 ~height:160() in
+  let card7frame = GBin.frame ~packing:(card7box#pack ~padding:15) 
+      ~width:160 ~height:160() in
+  let card8frame = GBin.frame ~packing:(card8box#pack ~padding:15) 
+      ~width:160 ~height:160() in
+  let card9frame = GBin.frame ~packing:(card9box#pack ~padding:15) 
+      ~width:160 ~height:160() in
+  let card10frame = GBin.frame ~packing:(card10box#pack ~padding:15) 
+      ~width:160 ~height:160() in
 
   let btext = "Select!" in
   let bcard = GMisc.label ~packing:bcframe#add ~line_wrap:true() in
   let card1 = GMisc.label  ~packing:card1frame#add ~line_wrap:true() in
-  let button1 = GButton.button ~label:btext ~packing:(card1box#pack ~padding:0)() in
+  let button1 = GButton.button ~label:btext 
+      ~packing:(card1box#pack ~padding:0)() in
   let card2 = GMisc.label ~packing:card2frame#add ~line_wrap:true () in
-  let button2 = GButton.button ~label:btext ~packing:(card2box#pack ~padding:0)() in
+  let button2 = GButton.button ~label:btext 
+      ~packing:(card2box#pack ~padding:0)() in
   let card3 = GMisc.label ~packing:card3frame#add ~line_wrap:true () in
-  let button3 = GButton.button ~label:btext ~packing:(card3box#pack ~padding:0)() in
+  let button3 = GButton.button ~label:btext 
+      ~packing:(card3box#pack ~padding:0)() in
   let card4 = GMisc.label ~packing:card4frame#add ~line_wrap:true () in
-  let button4 = GButton.button ~label:btext ~packing:(card4box#pack ~padding:0)() in
+  let button4 = GButton.button ~label:btext 
+      ~packing:(card4box#pack ~padding:0)() in
   let card5 = GMisc.label ~packing:card5frame#add ~line_wrap:true () in
-  let button5 = GButton.button ~label:btext ~packing:(card5box#pack ~padding:0)() in
+  let button5 = GButton.button ~label:btext 
+      ~packing:(card5box#pack ~padding:0)() in
   let card6 = GMisc.label ~packing:card6frame#add ~line_wrap:true () in
-  let button6 = GButton.button ~label:btext ~packing:(card6box#pack ~padding:0)() in
+  let button6 = GButton.button ~label:btext 
+      ~packing:(card6box#pack ~padding:0)() in
   let card7 = GMisc.label ~packing:card7frame#add ~line_wrap:true () in
-  let button7 = GButton.button ~label:btext ~packing:(card7box#pack ~padding:0)() in
+  let button7 = GButton.button ~label:btext 
+      ~packing:(card7box#pack ~padding:0)() in
   let card8 = GMisc.label ~packing:card8frame#add ~line_wrap:true () in
-  let button8 = GButton.button ~label:btext ~packing:(card8box#pack ~padding:0)() in
+  let button8 = GButton.button ~label:btext 
+      ~packing:(card8box#pack ~padding:0)() in
   let card9 = GMisc.label ~packing:card9frame#add ~line_wrap:true () in
-  let button9 = GButton.button ~label:btext ~packing:(card9box#pack ~padding:0)() in
+  let button9 = GButton.button ~label:btext 
+      ~packing:(card9box#pack ~padding:0)() in
   let card10 = GMisc.label ~packing:card10frame#add ~line_wrap:true () in
-  let button10 = GButton.button ~label:btext ~packing:(card10box#pack ~padding:0)() in
+  let button10 = GButton.button ~label:btext 
+      ~packing:(card10box#pack ~padding:0)() in
 
 
   (*Code for initialization, can be modified to take data from the server
