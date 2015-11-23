@@ -65,10 +65,8 @@ let button3c() = (print_endline "Button 3 pressed"); flush stdout
 let button4c() = (print_endline "Button 4 pressed"); flush stdout
 let button5c() = (print_endline "Button 5 pressed"); flush stdout
 
-let flip_bool (a: bool ref) = 
-  match !a with
-  |true -> a:=false
-  |false -> a:=true
+
+let expansion_enabled = ref false
 
 let new_black_card() = 
   let blackdeck = PullCards.get_deck "black.json" in
@@ -97,33 +95,66 @@ let new_white_card() =
     menu
   in aux depth tearoff*)
 
+let options_window () =
+  let option_window = GWindow.window ~title:"Options" ~border_width:5 () in
+  let myclose _ = option_window#destroy() in
+  ignore(option_window#connect#destroy ~callback:(myclose));
+  let vbox = GPack.vbox ~spacing:5 ~packing:option_window#add () in
+  let info = GMisc.label ~line_wrap:true 
+      (*~text:"Enable/disable expansion pack.  Warning: This will reset your
+      current game and all data will be lost."*) ~packing:vbox#add () in 
+  let checkbox = GButton.check_button ~active:(!expansion_enabled) ~packing:vbox#add () in
+  let confirm = GButton.button ~packing:vbox#add ~label:"Confirm!"() in
+  info#set_text("Enable/disable expansion packs. Warning: This will reset your
+                 current game and all data will be lost.");
+  checkbox#set_label("Use expansion packs!");
+  let update_expansion() = expansion_enabled:= (checkbox#active) in
+  ignore(confirm#connect#clicked(update_expansion));
+  ignore(confirm#connect#clicked(myclose));
+  option_window#show()
+
+let about_screen () =
+  let about = GWindow.window ~title:"About" ~border_width:5 () in
+  let myclose _ = about#destroy() in
+  ignore(about#connect#destroy(myclose));
+  let vbox = GPack.vbox ~spacing:5 ~packing:about#add() in
+  let logo = GdkPixbuf.from_file "cards.jpg" in
+  let logo_widget = GMisc.image ~pixbuf:logo ~packing:vbox#add () in
+  logo_widget#set_pixbuf logo;
+  let aboutlabel = GMisc.label ~line_wrap:true ~packing:vbox#add ~justify:`CENTER() in
+  aboutlabel#set_text("Cards Against Ocaml\nv0.0.05a112215\n\nCharley Chen\nMatthew Li\nAustin Liu \nJared Wong\n
+Some code borrowed from the open-source lablgtk2 libraries.\n\n 2015. All rights reserved.");
+
+about#show()
+
 
 
 let main () =
   ignore(locale());
   let curr_val = ref 30 in
-  let expansion_mode = ref false in
-  let bflip () = flip_bool expansion_mode in
-
+  let icon = GdkPixbuf.from_file "icon.png" in
   let window = GWindow.window 
-      ~border_width:0() ~title:"Cards Against OCaml" in
+      ~border_width:0 ~title:"Cards Against OCaml"() in
+  window#set_icon(Some icon);
   let windowbox = GPack.vbox ~packing:window#add() in
   let menubar = GMenu.menu_bar ~packing:windowbox#pack() in
+  let logo = GdkPixbuf.from_file "logo.jpg" in
+  let logo_widget = GMisc.image ~pixbuf:logo ~packing:windowbox#add () in
+  logo_widget#set_pixbuf logo; 
   let opt_menu = GMenu.menu() in
-  let opt_check = GMenu.check_menu_item ~label:("Use expansion packs") 
-      ~packing:opt_menu#append()  in
-  ignore(opt_check#connect#toggled(bflip));
+  let opt_button = GMenu.menu_item ~label:("More settings") ~packing:opt_menu#append() in
+  ignore(opt_button#connect#activate(options_window));
   let menu_opts = GMenu.menu_item ~label:"Options" ~packing:menubar#append() in
   menu_opts#set_submenu (opt_menu);
   let about_menu = GMenu.menu() in
   let about_button = GMenu.menu_item ~label:("About") ~packing:about_menu#append() in
-  ignore(about_button#connect#activate ~callback:button_callback);
+  ignore(about_button#connect#activate ~callback:about_screen);
   let exit_button = GMenu.menu_item ~label:("Exit") ~packing:about_menu #append() in
   ignore(exit_button#connect#activate ~callback:destroy);
   let menu_about = GMenu.menu_item ~label:"About" ~packing:menubar#append() in
   menu_about#set_submenu(about_menu);
 
-  let title = GMisc.label ~packing:(windowbox#pack ~padding:10)() in
+  (*let title = GMisc.label ~packing:(windowbox#pack ~padding:10)() in*)
   let bcbox = GPack.hbox ~packing:(windowbox#pack ~padding:10)() in
   let mhbox = GPack.vbox ~packing:(windowbox#pack ~padding:5)() in
   let timerframe = GBin.frame ~packing:(bcbox#pack ~padding:5) ~label: "Timer:" ~width: 70 ~height:70 () in
@@ -178,7 +209,7 @@ let main () =
   let button10 = GButton.button ~label:btext ~packing:(card10box#pack ~padding:0)() in
 
 
-  title#set_label("Cards Against OCaml");
+  (*title#set_label("Cards Against OCaml");*)
   (*logo#set_image("cah.jpg");*)
   (*bcard#set_label("Black Card");
     card1#set_label("Card 1 is a very very very long card");
