@@ -1,15 +1,13 @@
 #require "async";;
-#require "lwt";;
 #require "cohttp";;
-#require "cohttp.lwt";;
+#require "cohttp.async"
 
 #directory "_build";;
 #directory ".";;
 
 open Async.Std;;
-open Lwt
 open Cohttp
-open Cohttp_lwt_unix
+open Cohttp_async
 
 let sec = Core.Std.sec;;
 
