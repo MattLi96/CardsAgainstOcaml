@@ -1,17 +1,27 @@
-open Lwt
-open Cohttp
-open Cohttp_lwt_unix
+open Async.Std
+open Cohttp_async
 
-let server =
-  let callback _conn req body =
-    let uri = req |> Request.uri |> Uri.to_string in
-    let meth = req |> Request.meth |> Code.string_of_method in
-    let headers = req |> Request.headers |> Header.to_string in
-    body |> Cohttp_lwt_body.to_string >|= (fun body ->
-      (Printf.sprintf "Uri: %s \n Method: %s \n Headers \n Headers: %s \n Body: %s"
-         uri meth headers body))
-    >>= (fun body -> Server.respond_string ~status:`OK ~body ())
-  in
-  Server.create ~mode:(`TCP (`Port 8000)) (Server.make ~callback ())
+(* compile with: $ corebuild receive_post.native -pkg cohttp.async *)
 
-let () = ignore (Lwt_main.run server)
+let start_server port () =
+  eprintf "Listening for HTTP on port %d\n" port;
+  eprintf "Try 'curl -X POST -d 'foo bar' http://localhost:%d\n" port;
+  Cohttp_async.Server.create ~on_handler_error:`Raise
+    (Tcp.on_port port) (fun ~body _ req ->
+      match req |> Cohttp.Request.meth with
+      | `POST ->
+        (Body.to_string body) >>= (fun body ->
+          Log.Global.info "Body: %s" body;
+          Server.respond `OK)
+      | _ -> Server.respond `Method_not_allowed
+    )
+  >>= fun _ -> Deferred.never ()
+
+let () =
+  Command.async_basic
+    ~summary:"Simple http server that outputs body of POST's"
+    Command.Spec.(empty +>
+                  flag "-p" (optional_with_default 8080 int)
+                    ~doc:"int Source port to listen on"
+                 ) start_server
+  |> Command.run
