@@ -66,28 +66,12 @@
   (*Method to return the list of users who have played in a given round*)
   (* val users_played: c_state -> uID list *)
   let users_played current_state: uID list =
-    let played = (current_state |> get_univ_c).played in
-    let rec extract_uID input =
-      (match input with
-        | [] -> []
-        | h::t ->
-          (match h with
-            | (uid, card) -> uid :: (extract_uID t)))
-    in
-    extract_uID played
+    fst ((current_state |> get_univ_c).played |> List.split)
 
   (*Method to return a list of white cards played*)
   (* val played_white_cards: c_state -> white_card list *)
   let played_white_cards current_state: white_card list =
-    let played = (current_state |> get_univ_c).played in
-    let rec extract_card input =
-      (match input with
-        | [] -> []
-        | h::t ->
-          (match h with
-            | (uid, card) -> card :: (extract_card t)))
-    in
-    extract_card played
+    snd ((current_state |> get_univ_c).played |> List.split)
 
   (*----server state methods------------------------------------------------*)
   (*Method for retrieving a user's UserState*)
