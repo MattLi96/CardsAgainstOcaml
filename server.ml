@@ -1,7 +1,13 @@
 open Async.Std
 open Cohttp_async
+open State
+open Model
 
 (* compile with: $ corebuild receive_post.native -pkg cohttp.async *)
+
+let game_state = ref init_s_state ()
+
+
 
 let start_server port () =
   eprintf "Listening for HTTP on port %d\n" port;
