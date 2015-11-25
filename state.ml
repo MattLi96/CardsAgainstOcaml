@@ -3,8 +3,6 @@
   type black_card = string
   type deck = BDeck of black_card list | WDeck of white_card list
 
-  (*scores is represented by a list of pairs in which the first element of the
-    pair is the uID and the second is the actual score)*)
   type scores = (uID * int) list
 
   type univ_c_state = {
@@ -31,7 +29,8 @@
     b_deck : deck;
     w_deck : deck;
 
-    (*List of (card, player) pairs matching cards played to users who played them*)
+    (*List of (card, player) pairs matching cards played to users who played
+    them*)
     card_to_player : (white_card * uID) list;
     hands          : uID * (white_card list)
   }
@@ -50,42 +49,51 @@
 
   (*get_previous_wins returns all of the card pairs, one white and one black,
     that have won previous rounds*)
-  (* val get_previous_wins: state -> (black_card * white_card) list *)
-
+  (* val get_previous_wins: c_state -> (black_card * white_card) list *)
   let get_previous_wins current_state =
     failwith "to implement"
 
   (*Method to return the current black card in the state*)
-  (* val curr_black_card: state -> black_card *)
-
+  (* val curr_black_card: c_state -> black_card *)
   let curr_black_card current_state =
     (current_state |> get_univ_c).b_card
 
   (*Method to return scores*)
-  (* val scores: state -> scores *)
-
+  (* val scores: c_state -> scores *)
   let scores current_state =
     (current_state |> get_univ_c).scores
 
   (*Method to return the list of users who have played in a given round*)
-  (* val users_played: play_state -> uID list *)
-
+  (* val users_played: c_state -> uID list *)
   let users_played current_state: uID list =
-    failwith "unimplemented"
+    let played = (current_state |> get_univ_c).played in
+    let rec extract_uID input =
+      (match input with
+        | [] -> []
+        | h::t ->
+          (match h with
+            | (uid, card) -> uid :: (extract_uID t)))
+    in
+    extract_uID played
 
   (*Method to return a list of white cards played*)
-  (* val played_white_cards: judge_state -> white_card list *)
-
+  (* val played_white_cards: c_state -> white_card list *)
   let played_white_cards current_state: white_card list =
     failwith "unimplemented"
 
   (*----server state methods------------------------------------------------*)
 
-
-  let new_state () = failwith "unimplemented"
-
+  (*Method for retrieving a user's UserState*)
+  (* val get_user_state: s_state -> uID -> c_state *)
   let get_user_state state u = failwith "unimplemented"
 
+  (*Method for creating an initial server state*)
+  (* val new_state: unit -> s_state *)
+  let new_state () = failwith "unimplemented"
+
+  (*val get_black_deck: s_state -> deck *)
   let get_black_deck d = failwith "unimplemented"
 
+  (*Method to return the entire deck*)
+  (* val get_white_deck: s_state -> deck*)
   let get_white_deck d = failwith "unimplemented"
