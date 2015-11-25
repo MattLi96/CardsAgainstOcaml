@@ -32,7 +32,7 @@
     (*List of (card, player) pairs matching cards played to users who played
     them*)
     card_to_player : (white_card * uID) list;
-    hands          : uID * (white_card list)
+    hands          : (uID * (white_card list)) list
   }
 
   type s_state = Playing of univ_s_state | Judging of univ_s_state
@@ -79,21 +79,43 @@
   (*Method to return a list of white cards played*)
   (* val played_white_cards: c_state -> white_card list *)
   let played_white_cards current_state: white_card list =
-    failwith "unimplemented"
+    let played = (current_state |> get_univ_c).played in
+    let rec extract_card input =
+      (match input with
+        | [] -> []
+        | h::t ->
+          (match h with
+            | (uid, card) -> card :: (extract_card t)))
+    in
+    extract_card played
 
   (*----server state methods------------------------------------------------*)
 
   (*Method for retrieving a user's UserState*)
   (* val get_user_state: s_state -> uID -> c_state *)
-  let get_user_state state u = failwith "unimplemented"
+  let get_user_state state u =
+    (* let all_hands = (state |> get_univ_s).hands in
+    let rec find_match u l_hands =
+      (match l_hands with
+        | [] -> None
+        | h::t ->
+          (match h with
+            | (uid, cards) ->
+              if (uid = u) then Some cards else find_match u t)
+      )
+    in
+    find_match u all_hands *)
+    failwith "unimplemented"
 
   (*Method for creating an initial server state*)
   (* val new_state: unit -> s_state *)
   let new_state () = failwith "unimplemented"
 
   (*val get_black_deck: s_state -> deck *)
-  let get_black_deck d = failwith "unimplemented"
+  let get_black_deck s =
+    (s |> get_univ_s).b_deck
 
   (*Method to return the entire deck*)
   (* val get_white_deck: s_state -> deck*)
-  let get_white_deck d = failwith "unimplemented"
+  let get_white_deck s =
+    (s |> get_univ_s).w_deck
