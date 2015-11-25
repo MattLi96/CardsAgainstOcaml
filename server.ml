@@ -8,7 +8,7 @@ let server =
     let meth = req |> Request.meth |> Code.string_of_method in
     let headers = req |> Request.headers |> Header.to_string in
     body |> Cohttp_lwt_body.to_string >|= (fun body ->
-      (Printf.sprintf "Uri: %s\nMethod: %s\nHeaders\nHeaders: %s\nBody: %s"
+      (Printf.sprintf "Uri: %s \n Method: %s \n Headers \n Headers: %s \n Body: %s"
          uri meth headers body))
     >>= (fun body -> Server.respond_string ~status:`OK ~body ())
   in
