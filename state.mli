@@ -1,23 +1,49 @@
 (*Contains methods for getting various types of information in the game*)
 (* module State = sig *)
-  type uID
-  type white_card
-  type black_card
-  type deck
+  type uID = int
+  type white_card = string
+  type black_card = string
+  type deck = BDeck of black_card list | WDeck of white_card list
 
   (*scores is represented by a list of pairs in which the first element of the
     pair is the uID and the second is the actual score)*)
-  type scores
+  type scores = (uID * int) list
 
   (*c_state refers to the state of the client and contains all fields that
   the client can access*)
-  type univ_c_state
-  type c_state
+  type univ_c_state = {
+    played  : (uID * white_card) list;
+    b_card  : black_card;
+    scores  : scores;
+    winners : (black_card * white_card * uID) option;
+    hand    : white_card list;
+  }
+
+  type c_state = Judging of univ_c_state
+  | Playing of univ_c_state
+  | JWaiting of univ_c_state
+  | PWaiting of univ_c_state
 
   (*s_state refers to the state of the server and contains all fields that the
   server can access*)
-  type univ_s_state
-  type s_state
+  type univ_s_state = {
+    judge  : uID;
+    played : (uID * white_card) list;
+    b_card : black_card;
+    scores : scores;
+    winners: (black_card * white_card * uID) option;
+
+    (*decks*)
+    b_deck : deck;
+    w_deck : deck;
+
+    (*List of (card, player) pairs matching cards played to users who played
+    them*)
+    card_to_player : (uID * white_card option) list;
+    hands          : (uID * (white_card list)) list
+  }
+
+  type s_state = Playing of univ_s_state | Judging of univ_s_state
 
   (*----client state methods------------------------------------------------*)
 

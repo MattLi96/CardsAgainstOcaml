@@ -9,7 +9,7 @@
     played  : (uID * white_card) list;
     b_card  : black_card;
     scores  : scores;
-    winners : (black_card * white_card * uID);
+    winners : (black_card * white_card * uID) option;
     hand    : white_card list;
   }
 
@@ -23,7 +23,7 @@
     played : (uID * white_card) list;
     b_card : black_card;
     scores : scores;
-    winners: (black_card * white_card * uID);
+    winners: (black_card * white_card * uID) option;
 
     (*decks*)
     b_deck : deck;
@@ -31,7 +31,7 @@
 
     (*List of (card, player) pairs matching cards played to users who played
     them*)
-    card_to_player : (white_card * uID) list;
+    card_to_player : (uID * white_card option) list;
     hands          : (uID * (white_card list)) list
   }
 
