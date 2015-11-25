@@ -1,9 +1,11 @@
 #require "async";;
+#require "cohttp";;
 
 #directory "_build";;
 #directory ".";;
 
 open Async.Std;;
+open Cohttp;;
 
 let sec = Core.Std.sec;;
 

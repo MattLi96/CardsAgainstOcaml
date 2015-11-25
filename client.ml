@@ -1,5 +1,6 @@
 (*Client*)
 open Async.Std
+open Cohttp
 open State
 
 type state = c_state
