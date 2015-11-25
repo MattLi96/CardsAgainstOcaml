@@ -1,2 +1,2 @@
-compile.opam_packages=async, cohttp
+compile.opam_packages=async, cohttp, lwt, cohttp.lwt
 compile.thread=true
