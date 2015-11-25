@@ -13,13 +13,15 @@ let start_server port () =
         (Body.to_string body) >>= (fun body ->
           Log.Global.info "Body: %s" body;
           Server.respond `OK)
+      | `GET ->
+        Server.respond `OK
       | _ -> Server.respond `Method_not_allowed
     )
   >>= fun _ -> Deferred.never ()
 
 let () =
   Command.async_basic
-    ~summary:"Simple http server that outputs body of POST's"
+    ~summary:"Simple http server"
     Command.Spec.(empty +>
                   flag "-p" (optional_with_default 8080 int)
                     ~doc:"int Source port to listen on"
