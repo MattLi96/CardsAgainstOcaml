@@ -90,22 +90,33 @@
     extract_card played
 
   (*----server state methods------------------------------------------------*)
-
   (*Method for retrieving a user's UserState*)
   (* val get_user_state: s_state -> uID -> c_state *)
-  let get_user_state state u =
-    (* let all_hands = (state |> get_univ_s).hands in
-    let rec find_match u l_hands =
-      (match l_hands with
-        | [] -> None
-        | h::t ->
-          (match h with
-            | (uid, cards) ->
-              if (uid = u) then Some cards else find_match u t)
-      )
+  let get_user_state (state:s_state) (u:uID):c_state =
+    let get_hand state u =
+      (let all_hands = (state |> get_univ_s).hands in
+      let rec find_match u l_hands =
+        (match l_hands with
+          | [] -> []
+          | h::t ->
+            (match h with
+              | (uid, cards) ->
+                if (uid = u) then cards else find_match u t)
+        )
+      in
+      find_match u all_hands)
     in
-    find_match u all_hands *)
-    failwith "unimplemented"
+    let univ = (state |> get_univ_s) in
+    let univ_c = {
+      played  = univ.played;
+      b_card  = univ.b_card;
+      scores  = univ.scores;
+      winners = univ.winners;
+      hand    = get_hand state u;
+    } in
+    (* Have to select appropriate state*)
+    PWaiting univ_c
+
 
   (*val get_black_deck: s_state -> deck *)
   let get_black_deck s =

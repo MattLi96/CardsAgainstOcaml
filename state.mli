@@ -39,10 +39,7 @@
 
   (*----server state methods------------------------------------------------*)
   (*Method for retrieving a user's UserState*)
-  val get_user_state: s_state -> uID -> c_state option
-
-  (*Method for creating an initial server state*)
-  val new_state: unit -> s_state
+  val get_user_state: s_state -> uID -> c_state
 
   (*Method to return the entire deck*)
   val get_white_deck: s_state -> deck
