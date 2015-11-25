@@ -10,8 +10,9 @@ type state = c_state
 (* val play_white: uID -> white_card -> unit *)
 let play_white (uID:uID) (white:white_card) =
   let temp_header = Header.add (Header.init()) "uID" (string_of_int uID) in
+  let temp_header_with_type = Header.add temp_header "type" "play" in
   let temp_body = Body.of_string white in
-  let post_req = (Client.post (Uri.of_string "http://localhost:8080/") ~headers:temp_header
+  let post_req = (Client.post (Uri.of_string "http://localhost:8080/") ~headers:temp_header_with_type
     ~body:temp_body) in
   post_req >>= (fun (resp, body) ->
   let code = resp |> Response.status |> Code.code_of_status in
@@ -22,7 +23,16 @@ let play_white (uID:uID) (white:white_card) =
 (*judge allows a user to select the winner of a round if he is the judge*)
 (* val judge: uID -> white_card -> unit *)
 let judge uID white =
-  failwith "unimplemented"
+  let temp_header = Header.add (Header.init()) "uID" (string_of_int uID) in
+  let temp_header_with_type = Header.add temp_header "type" "judge" in
+  let temp_body = Body.of_string white in
+  let post_req = (Client.post (Uri.of_string "http://localhost:8080/") ~headers:temp_header_with_type
+    ~body:temp_body) in
+  post_req >>= (fun (resp, body) ->
+  let code = resp |> Response.status |> Code.code_of_status in
+  Printf.printf "Response code: %d\n" code;
+  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
+  return ())
 
 (*get_user_state returns the state of the user*)
 (* val get_user_state: uID -> state *)
