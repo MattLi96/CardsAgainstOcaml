@@ -47,6 +47,9 @@
 
   (*----client state methods------------------------------------------------*)
 
+  (*initialize a client state*)
+  val init_c_state: unit -> c_state
+
   (*get_previous_wins returns all of the card pairs, one white and one black,
     that have won previous rounds*)
   val get_previous_wins: c_state -> (black_card * white_card) list
@@ -64,6 +67,10 @@
   val played_white_cards: c_state -> white_card list
 
   (*----server state methods------------------------------------------------*)
+
+  (*initialize a server state*)
+  val init_s_state: unit -> s_state
+
   (*Method for retrieving a user's UserState*)
   val get_user_state: s_state -> uID -> c_state
 

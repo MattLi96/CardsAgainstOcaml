@@ -47,6 +47,8 @@
 
   (*----client state methods------------------------------------------------*)
 
+  let init_c_state () = failwith "not implemented"
+
   (*get_previous_wins returns all of the card pairs, one white and one black,
     that have won previous rounds*)
   (* val get_previous_wins: c_state -> (black_card * white_card) list *)
@@ -74,6 +76,9 @@
     snd ((current_state |> get_univ_c).played |> List.split)
 
   (*----server state methods------------------------------------------------*)
+
+  let init_s_state () = failwith "not implemented"
+
   (*Method for retrieving a user's UserState*)
   (* val get_user_state: s_state -> uID -> c_state *)
   let get_user_state (state:s_state) (u:uID):c_state =
