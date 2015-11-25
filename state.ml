@@ -107,10 +107,6 @@
     find_match u all_hands *)
     failwith "unimplemented"
 
-  (*Method for creating an initial server state*)
-  (* val new_state: unit -> s_state *)
-  let new_state () = failwith "unimplemented"
-
   (*val get_black_deck: s_state -> deck *)
   let get_black_deck s =
     (s |> get_univ_s).b_deck
