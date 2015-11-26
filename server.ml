@@ -4,29 +4,46 @@ open Cohttp_async
 open State
 open Model
 open Timer
+open Heartbeat
 
 (* compile with: $ corebuild receive_post.native -pkg cohttp.async *)
 
-(*fill the ivar when we are done*)
-type game_state = unit Ivar.t ref * State.s_state ref
-
-(*the gamestate is a game_state*)
-let rec gameloop gamestate =
-  (*figure out if we should change starting time later*)
-  let timer = create_timer 40 in 
+(*Additional state for helping run the server*)
+type a_state = {
+  (*Fill when phase is over, either due to time or everyone played*)
+  mutable phase_over: unit Ivar.t;
   
-  match gamestate with
-  | (ivar, state) ->
+  (*Heartbeat abbreviated for simplicity
+    Heartbeat should not need to be reinitialized ever.
+    A timer is only for the current phase. A new one is created for each loop.
+  *)
+  hb : heartbeat;
+  mutable timer : timer;
+}
+
+(*All the state that should be required to run a server. Abbreviated as f_state
+  in most functions
+*)
+type full_state = a_state * State.s_state ref
+
+(*The main loop for the game. One loop is one turn*)
+let rec gameloop f_state =
+  match f_state with
+  | (a_state, s_state) ->
     (*TODO: make sure this is legit, could be issue if !ivar not evaluate immediately*)
-    bind_timer timer (Ivar.fill_if_empty !ivar);
-    start_timer timer;
+    a_state.timer <- create_timer 40; (*TODO: change 40 later*)
+    bind_timer a_state.timer (Ivar.fill_if_empty a_state.phase_over);
+    start_timer a_state.timer;
     
-    let _ = (Ivar.read (!ivar)) >>= (fun _ ->
-        ivar := Ivar.create ();
-        state := game_next_phase (!state);
-        gameloop gamestate) in
+    let _ = (Ivar.read a_state.phase_over) >>= (fun _ ->
+        a_state.phase_over <- Ivar.create ();
+        s_state := game_next_phase (!s_state);
+        gameloop f_state) in
     return ()
 
+
+
+(*Server functions*)
 let rec get_UID l =
   (match l with
    | [] -> failwith "no uID"
@@ -38,10 +55,10 @@ let rec get_type l =
    | h::t -> if (fst h = "type") then snd h else get_type t)
 
 
-(*TODO: alter post to fill the ivar when the state is done*)
-let respond_post gamestate body req =
-  match gamestate with
-  | (ivar, state) -> (*note ivar and state are references*)
+(*TODO: alter post to fill the a_state.phase_over when turn is done*)
+let respond_post f_state body req =
+  match f_state with
+  | (a_state, s_state) -> (*note ivar and state are references*)
     let l_headers = (Cohttp.Request.headers req) in
     let uID = get_UID (Header.to_list (l_headers)) in
     let typ = get_type (Header.to_list l_headers) in
@@ -49,33 +66,37 @@ let respond_post gamestate body req =
     Log.Global.info "uID found is %i" uID;
     Log.Global.info "type found is %s" typ;
     if (typ = "play") then
-      let new_state = user_play_white (!state) uID body in
-      state := new_state;
+      let new_state = user_play_white (!s_state) uID body in
+      s_state := new_state;
       Server.respond `OK
     else
     if (typ = "judge") then
-      let new_state = user_judge (!state) uID body in
-      state := new_state;
+      let new_state = user_judge (!s_state) uID body in
+      s_state := new_state;
       Server.respond `OK
     else failwith "error"
 
-let respond_get gamestate body req =
-  match gamestate with
-  | (ivar, state) ->
+let respond_get f_state body req =
+  match f_state with
+  | (a_state, s_state) ->
     let l_headers = (Cohttp.Request.headers req) in
     Log.Global.info "GET Body: %s" body;
     Log.Global.info "uID found is %i" (get_UID (Header.to_list (l_headers)));
     Server.respond `OK
 
+(*TODO: call gameloop to start game. Also start scheduler*)
 let start_server port () =
-  let gs = (ref (Ivar.create ()), ref (init_s_state ())) in
+  let state = ({phase_over = Ivar.create (); 
+                hb = create_heartbeat 5; (*Heartbeat cycle set for 5 seconds*)
+                timer = create_timer 0}
+              , ref (init_s_state ())) in
   eprintf "Listening for HTTP on port %d\n" port;
   eprintf "Try 'curl -X POST -d 'foo bar' http://localhost:%d\n" port;
   Cohttp_async.Server.create ~on_handler_error:`Raise
     (Tcp.on_port port) (fun ~body _ req ->
         match req |> Cohttp.Request.meth with
-        | `POST -> (Body.to_string body) >>= (fun body -> respond_post gs body req)
-        | `GET -> (Body.to_string body) >>= (fun body -> respond_get gs body req)
+        | `POST -> (Body.to_string body) >>= (fun body -> respond_post state body req)
+        | `GET -> (Body.to_string body) >>= (fun body -> respond_get state body req)
         | _ -> Server.respond `Method_not_allowed
       )
   >>= fun _ -> Deferred.never ()

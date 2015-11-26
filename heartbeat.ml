@@ -42,4 +42,4 @@ let get_active_users hb =
 
 let beat hb uid =
   match hb with
-  | (_, _, _, l) -> l := (uid::!l)
+  | (_, _, l1, l2) -> l1 := (uid::!l1);l2 := (uid::!l2)
