@@ -164,4 +164,4 @@ let shuffle state = failwith "todo"
 let game_next_phase state =
   match state with
     | Playing x -> Judging x
-    | Judging x -> Playing x
+    | Judging x -> Playing (select_black x)
