@@ -25,10 +25,11 @@ let connect_server url name =
   post_req >>= (fun (resp, body) ->
     let code = resp |> Response.status |> Code.code_of_status in
     let ans = (if (code = 200) then
-      Printf.printf ("Connection successful";
-      c_uID := get_UID (resp |> Response.headers |> Header.to_list);)
+      (Printf.printf ("Connection successful");
+      (c_uID := get_UID (resp |> Response.headers |> Header.to_list));
+      ())
     else
-      (Printf.printf "Response code: %d\n" code;)) in
+      (Printf.printf "Response code: %d\n" code; ())) in
   return ans)
 
 (*play_white allows a user to play a card*)
@@ -75,7 +76,6 @@ let get_user_state uID =
   Printf.printf "Response code: %d\n" code;
   Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
   return ())
-
 
 let client_get_user_state () =
   get_user_state !c_uID

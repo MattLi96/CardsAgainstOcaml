@@ -9,6 +9,7 @@ type black_card = string
 type uID = int
 
 let user_counter = ref 0
+let req_num_of_cards = 10
 
 let fill_deck file_name =
   let json = Yojson.Basic.from_file file_name in
