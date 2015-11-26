@@ -1,16 +1,20 @@
 (*Model*)
-open UserState
+open State
 open Timer
 
 (*A model that contains information about the entire game*)
-type state = server_state
-type card
-type uID
+type state = s_state
+type white_card = string
+type black_card = string
+type uID = int
+
+(*INIT FUNCTIONS: functions that return information about the state*)
+val init_s_state: unit -> state
 
 (*GET FUNCTIONS: functions that return information about the state*)
 
 (*get a list of active users*)
-val get_active_user: unit -> uId list
+val get_active_user: unit -> uID list
 
 (*timing*)
 (*get_time returns the number of seconds remaining in the round*)
@@ -31,10 +35,10 @@ val user_heatbeat: state -> uID -> state
 
 (*user_play_white adds the card played by a player into the list of played
 cards in the state*)
-val user_play_white: state -> uID -> card -> state
+val user_play_white: state -> uID -> white_card -> state
 
 (*judge_select determines the winner of a round*)
-val user_judge: state -> uID -> card -> state
+val user_judge: state -> uID -> white_card -> state
 
 (*reset_all removes all players from the state*)
 val game_reset: state -> uID -> state
