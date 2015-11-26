@@ -37,11 +37,6 @@ let init_s_state () =
 (* val get_active_user: unit -> uId list *)
 let get_active_user () = failwith "todo"
 
-(*timing*)
-(*get_time returns the number of seconds remaining in the round*)
-(* val get_time: unit -> int *)
-let get_time () = failwith "todo"
-
 (*SET FUNCTIONS: functions that modify the state*)
 
 (*add_user takes in a username and adds it to the list of players in the state*)
@@ -52,11 +47,6 @@ let user_add state name = failwith "todo"
 list of players in the state*)
 (* val user_remove: state -> uID -> state *)
 let user_remove state uID = failwith "todo"
-
-(*recognize the fact that a user just has his/her heart beat notified to the
-server side, called by server module when a user's heartbeat is received*)
-(* val user_heatbeat: state -> uID -> state *)
-let user_heatbeat state uID = failwith "todo"
 
 let has_played state uID =
   let rec loop list =

@@ -16,10 +16,6 @@ val init_s_state: unit -> state
 (*get a list of active users*)
 val get_active_user: unit -> uID list
 
-(*timing*)
-(*get_time returns the number of seconds remaining in the round*)
-val get_time: unit -> int
-
 (*SET FUNCTIONS: functions that modify the state*)
 
 (*add_user takes in a username and adds it to the list of players in the state*)
@@ -28,10 +24,6 @@ val user_add: state -> string -> state
 (*remove_user takes in the uID of a player and removes said player from the
 list of players in the state*)
 val user_remove: state -> uID -> state
-
-(*recognize the fact that a user just has his/her heart beat notified to the
-server side, called by server module when a user's heartbeat is received*)
-val user_heatbeat: state -> uID -> state
 
 (*user_play_white adds the card played by a player into the list of played
 cards in the state*)
