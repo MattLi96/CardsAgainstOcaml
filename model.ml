@@ -40,7 +40,15 @@ let get_active_user () = failwith "todo"
 
 (*add_user takes in a username and adds it to the list of players in the state*)
 (* val user_add: state -> string -> state *)
-let user_add state name = failwith "todo"
+let user_add state name =
+  let new_uID = incr user_counter; !user_counter in
+  let new_scores = (new_uID, 0) :: (get_univ_s state).scores in
+  let new_card_to_player = (new_uID, None) :: (get_univ_s state).card_to_player in
+  let new_hands = (new_uID, []) :: (get_univ_s state).hands in
+  let new_state1 = {(get_univ_s state) with scores = new_scores} in
+  let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
+  let new_state3 = {new_state2 with hands = new_hands} in
+  (new_uID, Playing new_state3)
 
 (*remove_user takes in the uID of a player and removes said player from the
 list of players in the state*)
