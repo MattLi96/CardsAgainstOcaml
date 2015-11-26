@@ -1,5 +1,4 @@
 (*Model*)
-open Timer
 open State
 
 (*A model that contains information about the entire game*)
