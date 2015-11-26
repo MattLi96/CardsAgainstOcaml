@@ -3,6 +3,7 @@ open Cohttp
 open Cohttp_async
 open State
 open Model
+open Timer
 
 (* compile with: $ corebuild receive_post.native -pkg cohttp.async *)
 
@@ -11,15 +12,20 @@ type game_state = unit Ivar.t ref * State.s_state ref
 
 (*the gamestate is a game_state*)
 let rec gameloop gamestate =
-  (*start timer here, bind timer to fill ivar*)
+  (*figure out if we should change starting time later*)
+  let timer = create_timer 40 in 
+  
   match gamestate with
   | (ivar, state) ->
+    (*TODO: make sure this is legit, could be issue if !ivar not evaluate immediately*)
+    bind_timer timer (Ivar.fill_if_empty !ivar);
+    start_timer timer;
+    
     let _ = (Ivar.read (!ivar)) >>= (fun _ ->
         ivar := Ivar.create ();
         state := game_next_phase (!state);
         gameloop gamestate) in
     return ()
-
 
 let rec get_UID l =
   (match l with
@@ -35,7 +41,7 @@ let rec get_type l =
 (*TODO: alter post to fill the ivar when the state is done*)
 let respond_post gamestate body req =
   match gamestate with
-  | (ivar, state) ->
+  | (ivar, state) -> (*note ivar and state are references*)
     let l_headers = (Cohttp.Request.headers req) in
     let uID = get_UID (Header.to_list (l_headers)) in
     let typ = get_type (Header.to_list l_headers) in
