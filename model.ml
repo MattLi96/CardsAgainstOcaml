@@ -16,6 +16,7 @@ let fill_deck file_name =
   List.map (fun json -> member "text" json |> to_string) cards
 
 let give_cards temp = failwith "todo"
+let select_black temp = failwith "todo"
 
 (*INIT FUNCTIONS*)
 let init_s_state () =
@@ -27,9 +28,8 @@ let init_s_state () =
     winners = None;
 
     (*decks*)
-    (*CHANGE TO IMPORT DECKS FROM JSON*)
-    b_deck = BDeck [];
-    w_deck = WDeck [];
+    b_deck = BDeck (fill_deck "black.json");
+    w_deck = WDeck (fill_deck "white.json");
 
     (*List of (card, player) pairs matching cards played to users who played
     them*)
