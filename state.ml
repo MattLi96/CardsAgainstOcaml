@@ -2,52 +2,116 @@
   type white_card = string
   type black_card = string
   type deck = BDeck of black_card list | WDeck of white_card list
-  (*scores is represented by a list of pairs in which the first element of the
-    pair is the uID and the second is the actual score)*)
+
   type scores = (uID * int) list
 
-  type play_state = {played : uID list}
-  type judge_state = {played : black_card list} (*played white cards*)
-  type phase_state = Play of play_state | Judge of judge_state
-
-  type state = {
-    phase : phase_state;
-    score : scores;
-    winners : (black_card * white_card * uID);
-    b_card : black_card;
+  type univ_c_state = {
+    played  : (uID * white_card) list;
+    b_card  : black_card;
+    scores  : scores;
+    winners : (black_card * white_card * uID) option;
+    hand    : white_card list;
   }
+
+  type c_state = Judging of univ_c_state
+  | Playing of univ_c_state
+  | JWaiting of univ_c_state
+  | PWaiting of univ_c_state
+
+  type univ_s_state = {
+    judge  : uID;
+    played : (uID * white_card) list;
+    b_card : black_card;
+    scores : scores;
+    winners: (black_card * white_card * uID) option;
+
+    (*decks*)
+    b_deck : deck;
+    w_deck : deck;
+
+    (*List of (card, player) pairs matching cards played to users who played
+    them*)
+    card_to_player : (uID * white_card option) list;
+    hands          : (uID * (white_card list)) list
+  }
+
+  type s_state = Playing of univ_s_state | Judging of univ_s_state
+
+  (*----helper methods------------------------------------------------*)
+
+  let get_univ_c : c_state -> univ_c_state = function
+    | Judging s | Playing s | PWaiting s | JWaiting s -> s
+
+  let get_univ_s : s_state -> univ_s_state = function
+    | Judging s | Playing s -> s
+
+  (*----client state methods------------------------------------------------*)
+
+  let init_c_state () = failwith "not implemented"
 
   (*get_previous_wins returns all of the card pairs, one white and one black,
     that have won previous rounds*)
-  (* val get_previous_wins: state -> (black_card * white_card) list *)
-
+  (* val get_previous_wins: c_state -> (black_card * white_card) list *)
   let get_previous_wins current_state =
     failwith "to implement"
 
   (*Method to return the current black card in the state*)
-  (* val curr_black_card: state -> black_card *)
-
+  (* val curr_black_card: c_state -> black_card *)
   let curr_black_card current_state =
-    current_state.b_card
+    (current_state |> get_univ_c).b_card
 
   (*Method to return scores*)
-  (* val scores: state -> scores *)
-
+  (* val scores: c_state -> scores *)
   let scores current_state =
-    current_state.score
-
-  (*----Play state methods----*)
+    (current_state |> get_univ_c).scores
 
   (*Method to return the list of users who have played in a given round*)
-  (* val users_played: play_state -> uID list *)
-
-  let users_played (current_play_state: play_state): uID list =
-    current_play_state.played
-
-  (*----Judge state methods----*)
+  (* val users_played: c_state -> uID list *)
+  let users_played current_state: uID list =
+    fst ((current_state |> get_univ_c).played |> List.split)
 
   (*Method to return a list of white cards played*)
-  (* val played_white_cards: judge_state -> white_card list *)
+  (* val played_white_cards: c_state -> white_card list *)
+  let played_white_cards current_state: white_card list =
+    snd ((current_state |> get_univ_c).played |> List.split)
 
-  let played_white_cards (current_judge_state:judge_state): white_card list =
-    current_judge_state.played
+  (*----server state methods------------------------------------------------*)
+
+  let init_s_state () = failwith "not implemented"
+
+  (*Method for retrieving a user's UserState*)
+  (* val get_user_state: s_state -> uID -> c_state *)
+  let get_user_state (state:s_state) (u:uID):c_state =
+    let get_hand state u =
+      (let all_hands = (state |> get_univ_s).hands in
+      let rec find_match u l_hands =
+        (match l_hands with
+          | [] -> []
+          | h::t ->
+            (match h with
+              | (uid, cards) ->
+                if (uid = u) then cards else find_match u t)
+        )
+      in
+      find_match u all_hands)
+    in
+    let univ = (state |> get_univ_s) in
+    let univ_c = {
+      played  = univ.played;
+      b_card  = univ.b_card;
+      scores  = univ.scores;
+      winners = univ.winners;
+      hand    = get_hand state u;
+    } in
+    (* Have to select appropriate state*)
+    PWaiting univ_c
+
+
+  (*val get_black_deck: s_state -> deck *)
+  let get_black_deck s =
+    (s |> get_univ_s).b_deck
+
+  (*Method to return the entire deck*)
+  (* val get_white_deck: s_state -> deck*)
+  let get_white_deck s =
+    (s |> get_univ_s).w_deck
