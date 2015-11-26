@@ -10,12 +10,15 @@ open Model
 type game_state = unit Ivar.t ref * State.s_state ref
 
 (*the gamestate is a game_state*)
-let gameloop gamestate =
+let rec gameloop gamestate =
   (*start timer here, bind timer to fill ivar*)
   match gamestate with
   | (ivar, state) -> 
-    let _ = (Ivar.read (!ivar)) >>= (fun _ -> return ()) in
-    failwith "TODO: Go to next state gracefully using bind"
+    let _ = (Ivar.read (!ivar)) >>= (fun _ -> 
+        ivar := Ivar.create ();
+        state := game_next_phase (!state);
+        gameloop gamestate) in
+    return ()
 
 
 let rec get_UID l =
