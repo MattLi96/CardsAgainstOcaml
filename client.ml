@@ -6,13 +6,28 @@ open State
 
 type state = c_state
 
+(*default try to connect to local*)
+let connect_url = ref "http://localhost:8080/"
+
+(*TODO, add function to connect to a server, should take back the uID*)
+(*TODO, modify to take back the uID, will implement server tomorrow*)
+let connect_server url name =
+  connect_url := url;
+  let temp_header = Header.add (Header.init()) "name" (name) in
+  let post_req = (Client.put (Uri.of_string !connect_url) ~headers:temp_header) in
+  post_req >>= (fun (resp, body) ->
+  let code = resp |> Response.status |> Code.code_of_status in
+  Printf.printf "Response code: %d\n" code;
+  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
+  return ())
+
 (*play_white allows a user to play a card*)
 (* val play_white: uID -> white_card -> unit *)
 let play_white (uID:uID) (white:white_card) =
   let temp_header = Header.add (Header.init()) "uID" (string_of_int uID) in
   let temp_header_with_type = Header.add temp_header "type" "play" in
   let temp_body = Body.of_string white in
-  let post_req = (Client.post (Uri.of_string "http://localhost:8080/") ~headers:temp_header_with_type
+  let post_req = (Client.post (Uri.of_string !connect_url) ~headers:temp_header_with_type
     ~body:temp_body) in
   post_req >>= (fun (resp, body) ->
   let code = resp |> Response.status |> Code.code_of_status in
@@ -26,7 +41,7 @@ let judge uID white =
   let temp_header = Header.add (Header.init()) "uID" (string_of_int uID) in
   let temp_header_with_type = Header.add temp_header "type" "judge" in
   let temp_body = Body.of_string white in
-  let post_req = (Client.post (Uri.of_string "http://localhost:8080/") ~headers:temp_header_with_type
+  let post_req = (Client.post (Uri.of_string !connect_url) ~headers:temp_header_with_type
     ~body:temp_body) in
   post_req >>= (fun (resp, body) ->
   let code = resp |> Response.status |> Code.code_of_status in
@@ -38,7 +53,7 @@ let judge uID white =
 (* val get_user_state: uID -> state *)
 let get_user_state uID =
   let temp_header = Header.add (Header.init()) "uID" (string_of_int uID) in
-  let req = (Client.get (Uri.of_string "http://localhost:8080/") ~headers:temp_header) in
+  let req = (Client.get (Uri.of_string !connect_url) ~headers:temp_header) in
   req >>= (fun (resp, body) ->
   let code = resp |> Response.status |> Code.code_of_status in
   Printf.printf "Response code: %d\n" code;
