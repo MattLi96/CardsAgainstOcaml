@@ -84,9 +84,13 @@ let respond_get f_state body req =
   match f_state with
   | (a_state, s_state) ->
     let l_headers = (Cohttp.Request.headers req) in
+    let uID = get_UID (Header.to_list (l_headers)) in
     Log.Global.info "GET Body: %s" body;
-    Log.Global.info "uID found is %i" (get_UID (Header.to_list (l_headers)));
-    Server.respond `OK
+    Log.Global.info "uID found is %i" (uID);
+    let ans = get_univ_c (State.get_user_state (!s_state) uID) in
+
+    let temp_header = Header.add (Header.init()) "b_card" (ans.b_card) in
+    Server.respond `OK ~headers: temp_header
 
 let respond_put (f_state:full_state) body req =
   match f_state with

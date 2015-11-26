@@ -45,6 +45,7 @@
 
   type s_state = Playing of univ_s_state | Judging of univ_s_state
 
+  val get_univ_c : c_state -> univ_c_state
   val get_univ_s : s_state -> univ_s_state
 
   (*----client state methods------------------------------------------------*)
