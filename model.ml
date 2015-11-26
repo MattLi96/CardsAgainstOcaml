@@ -8,6 +8,29 @@ type white_card = string
 type black_card = string
 type uID = int
 
+let user_counter = ref 0
+
+(*INIT FUNCTIONS*)
+let init_s_state () =
+  let temp_state = {
+    judge  = 0;
+    played = [];
+    b_card = "";
+    scores = [];
+    winners = None;
+
+    (*decks*)
+    (*CHANGE TO IMPORT DECKS FROM JSON*)
+    b_deck = BDeck [];
+    w_deck = WDeck [];
+
+    (*List of (card, player) pairs matching cards played to users who played
+    them*)
+    card_to_player = [];
+    hands          = []
+  } in
+  Playing temp_state
+
 (*GET FUNCTIONS: functions that return information about the state*)
 
 (*get a list of active users*)

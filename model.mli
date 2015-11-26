@@ -6,7 +6,10 @@ open Timer
 type state = s_state
 type white_card = string
 type black_card = string
-type uID
+type uID = int
+
+(*INIT FUNCTIONS: functions that return information about the state*)
+val init_s_state: unit -> state
 
 (*GET FUNCTIONS: functions that return information about the state*)
 
