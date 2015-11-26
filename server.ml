@@ -4,13 +4,15 @@ open State
 
 (* compile with: $ corebuild receive_post.native -pkg cohttp.async *)
 
-let game_state = ref (init_s_state ())
+(* let game_state = ref (init_s_state ()) *)
 
 let respond_post body req =
-  failwith "unimplemented"
+  Log.Global.info "Body: %s" body;
+  Server.respond `OK
 
 let respond_get body req =
-  failwith "unimplemented"
+  Log.Global.info "Body: %s" body;
+  Server.respond `OK
 
 let start_server port () =
   eprintf "Listening for HTTP on port %d\n" port;
