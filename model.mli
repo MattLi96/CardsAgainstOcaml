@@ -1,6 +1,5 @@
 (*Model*)
 open State
-open Timer
 
 (*A model that contains information about the entire game*)
 type state = s_state
