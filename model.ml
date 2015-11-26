@@ -47,6 +47,11 @@ list of players in the state*)
 (* val user_remove: state -> uID -> state *)
 let user_remove state uID = failwith "todo"
 
+let rec modify_card_to_player l uID white =
+  match l with
+    | [] -> []
+    | h::t -> if ((fst h) = uID) then (fst h, Some white)::(modify_card_to_player t uID white) else h::(modify_card_to_player t uID white)
+
 let has_played state uID =
   let rec loop list =
     (match list with
@@ -64,7 +69,11 @@ let user_play_white (state:state) (uID:uID) (white:white_card):state =
   if (has_played state uID) then
     state
   else
-    failwith "todo"
+    let new_played = (uID, white) :: ((get_univ_s state).played) in
+    let new_card_to_player = modify_card_to_player (get_univ_s state).card_to_player uID white in
+    let new_state1 = {(get_univ_s state) with played = new_played} in
+    let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
+    Playing new_state2
 
 (*judge_select determines the winner of a round*)
 (* val user_judge: state -> uID -> card -> state *)
