@@ -16,8 +16,6 @@ let rec get_UID l =
    | [] -> failwith "no uID"
    | h::t -> if (fst h = "uid") then int_of_string (snd h) else get_UID t)
 
-(*TODO, add function to connect to a server, should take back the uID*)
-(*TODO, modify to take back the uID, will implement server tomorrow*)
 let connect_server url name =
   connect_url := url;
   let temp_header = Header.add (Header.init()) "name" (name) in
