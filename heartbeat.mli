@@ -8,7 +8,7 @@ val create_heartbeat: int -> heartbeat
 (*stops the heartbeat. Required so you can end the cycle*)
 val end_heartbeat: heartbeat -> unit
 
-(*checks to see the users that have beated within the last 5-10 seconds.*)
+(*Checks to see the users that have beated within the last 5-10 seconds.*)
 val get_active_users: heartbeat -> uID list
 
 (*The beat for a given user*)

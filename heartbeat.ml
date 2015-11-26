@@ -36,9 +36,15 @@ let end_heartbeat hb =
   match hb with
   | (_, ivar, _, _) -> Ivar.fill_if_empty ivar ()
 
+(*Helper function for removing duplicates*)
+let rec remove_dup lst = 
+  match lst with 
+  | [] -> []
+  | h::t -> h::(remove_dup (List.filter (fun x -> x<>h) t))
+
 let get_active_users hb = 
   match hb with
-  | (_, _, l, _) -> !l
+  | (_, _, l, _) -> l := remove_dup !l; !l
 
 let beat hb uid =
   match hb with
