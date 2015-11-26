@@ -55,12 +55,17 @@ let rec modify_card_to_player l uID white =
 let has_played state uID =
   let rec loop list =
     (match list with
-    | [] -> failwith "player doesn't exist"
+    | [] -> false
     | h::t -> if ((fst h) = uID) then
       (if (snd h <> None) then true else false)
     else
       loop t) in
   loop (get_univ_s state).card_to_player
+
+let rec uID_in_list l uID =
+  match l with
+    | [] -> false
+    | h::t -> if ((fst h) = uID) then true else (uID_in_list t uID)
 
 (*user_play_white adds the card played by a player into the list of played
 cards in the state*)
@@ -69,20 +74,26 @@ let user_play_white (state:state) (uID:uID) (white:white_card):state =
   if (has_played state uID) then
     state
   else
-    let new_played = (uID, white) :: ((get_univ_s state).played) in
-    let new_card_to_player = modify_card_to_player (get_univ_s state).card_to_player uID white in
-    let new_state1 = {(get_univ_s state) with played = new_played} in
-    let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
-    Playing new_state2
+    if (uID_in_list (get_univ_s state).card_to_player uID) then
+      let new_played = (uID, white) :: ((get_univ_s state).played) in
+      let new_card_to_player = modify_card_to_player (get_univ_s state).card_to_player uID white in
+      let new_state1 = {(get_univ_s state) with played = new_played} in
+      let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
+      Playing new_state2
+    else
+      state
 
 (*judge_select determines the winner of a round*)
 (* val user_judge: state -> uID -> card -> state *)
 let user_judge (state:state) (uID:uID) (white:white_card):state =
   match state with
     | Judging _ ->
-      let old_black_card = (get_univ_s state).b_card in
-      let new_state = {(get_univ_s state) with winners = Some (old_black_card, white, uID)} in
-      Judging new_state
+      if (uID_in_list (get_univ_s state).card_to_player uID) then
+        let old_black_card = (get_univ_s state).b_card in
+        let new_state = {(get_univ_s state) with winners = Some (old_black_card, white, uID)} in
+        Judging new_state
+      else
+        state
     | _ -> state
 
 (*reset_all removes all players from the state*)
