@@ -69,17 +69,26 @@ let user_play_white (state:state) (uID:uID) (white:white_card):state =
 (*judge_select determines the winner of a round*)
 (* val user_judge: state -> uID -> card -> state *)
 let user_judge (state:state) (uID:uID) (white:white_card):state =
-  let old_black_card = (get_univ_s state).b_card in
-  let new_state = {(get_univ_s state) with winners = Some (old_black_card, white, uID)} in
-  Judging new_state
+  match state with
+    | Judging _ ->
+      let old_black_card = (get_univ_s state).b_card in
+      let new_state = {(get_univ_s state) with winners = Some (old_black_card, white, uID)} in
+      Judging new_state
+    | _ -> state
 
 (*reset_all removes all players from the state*)
 (* val game_reset: state -> uID -> state *)
-let game_reset state uID = failwith "todo"
+let game_reset state uID =
+  match state with
+    | Judging x | Playing x ->
+      let new_state = {(get_univ_s (init_s_state ())) with b_card = x.b_card} in
+      let new_state2 = {new_state with b_deck = x.b_deck} in
+      let new_state3 = {new_state2 with w_deck = x.w_deck} in
+      Playing new_state3
 
 (*game_start begins the game for all players in the list of players*)
 (* val game_start: state -> unit -> state *)
-let game_start state () = failwith "todo"
+let game_start state = failwith "todo"
 
 (*shuffle takes a state, shuffles the deck, and returns the deck*)
 (* val shuffle: state -> state *)
@@ -87,7 +96,10 @@ let shuffle state = failwith "todo"
 
 (*goes to the next game phase*)
 (* val game_next_phase: state -> state *)
-let game_next_phase state = failwith "todo"
+let game_next_phase state =
+  match state with
+    | Playing x -> Judging x
+    | Judging x -> Playing x
 
 
 

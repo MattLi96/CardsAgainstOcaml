@@ -13,8 +13,8 @@ type game_state = unit Ivar.t ref * State.s_state ref
 let rec gameloop gamestate =
   (*start timer here, bind timer to fill ivar*)
   match gamestate with
-  | (ivar, state) -> 
-    let _ = (Ivar.read (!ivar)) >>= (fun _ -> 
+  | (ivar, state) ->
+    let _ = (Ivar.read (!ivar)) >>= (fun _ ->
         ivar := Ivar.create ();
         state := game_next_phase (!state);
         gameloop gamestate) in
