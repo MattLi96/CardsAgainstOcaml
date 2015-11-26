@@ -2,10 +2,11 @@ open Async.Std
 open Cohttp
 open Cohttp_async
 open State
+open Model
 
 (* compile with: $ corebuild receive_post.native -pkg cohttp.async *)
 
-(* let game_state = ref (init_s_state ()) *)
+let game_state = ref (init_s_state ())
 
 let rec get_UID l =
   (match l with
@@ -19,16 +20,28 @@ let rec get_type l =
 
 let respond_post body req =
   let l_headers = (Cohttp.Request.headers req) in
+  let uID = get_UID (Header.to_list (l_headers)) in
+  let typ = get_type (Header.to_list l_headers) in
   Log.Global.info "POST Body: %s" body;
-  Log.Global.info "uID found is %i" (get_UID (Header.to_list (l_headers)));
-  Log.Global.info "type found is %s" (get_type (Header.to_list l_headers));
-  Server.respond `OK
+  Log.Global.info "uID found is %i" uID;
+  Log.Global.info "type found is %s" typ;
+  if (typ = "play") then
+    let new_state = user_play_white (!game_state) uID body in
+    game_state := new_state;
+    Server.respond `OK
+  else
+  if (typ = "judge") then
+    let new_state = user_judge (!game_state) uID body in
+    game_state := new_state;
+    Server.respond `OK
+  else failwith "error"
 
 let respond_get body req =
   let l_headers = (Cohttp.Request.headers req) in
   Log.Global.info "GET Body: %s" body;
   Log.Global.info "uID found is %i" (get_UID (Header.to_list (l_headers)));
   Server.respond `OK
+
 let start_server port () =
   eprintf "Listening for HTTP on port %d\n" port;
   eprintf "Try 'curl -X POST -d 'foo bar' http://localhost:%d\n" port;
