@@ -16,7 +16,34 @@ let fill_deck file_name =
   List.map (fun json -> member "text" json |> to_string) cards
 
 let give_cards temp = failwith "todo"
-let select_black temp = failwith "todo"
+
+let select_black (u_s_state:univ_s_state):univ_s_state =
+  let old_b_deck = (match u_s_state.b_deck with
+    | BDeck x -> x
+    | WDeck _ -> []) in
+  let new_b = (match old_b_deck with
+    | [] -> ""
+    | h::t -> h) in
+  let new_d = (match old_b_deck with
+    | [] -> []
+    | h::t -> t) in
+  let new_state = {
+    judge  = u_s_state.judge;
+    played = [];
+    b_card = new_b;
+    scores = u_s_state.scores;
+    winners = None;
+
+    (*decks*)
+    b_deck = BDeck new_d;
+    w_deck = u_s_state.w_deck;
+
+    (*List of (card, player) pairs matching cards played to users who played
+    them*)
+    card_to_player = List.map (fun (uid, card) -> (uid, None)) u_s_state.card_to_player;
+    hands          = u_s_state.hands
+  } in
+  new_state
 
 (*INIT FUNCTIONS*)
 let init_s_state () =
@@ -36,7 +63,8 @@ let init_s_state () =
     card_to_player = [];
     hands          = []
   } in
-  Playing temp_state
+  let sel_blck = select_black temp_state in
+  Playing sel_blck
 
 (*GET FUNCTIONS: functions that return information about the state*)
 
@@ -136,6 +164,3 @@ let game_next_phase state =
   match state with
     | Playing x -> Judging x
     | Judging x -> Playing x
-
-
-
