@@ -20,7 +20,6 @@ let rec gameloop gamestate =
         gameloop gamestate) in
     return ()
 
-
 let rec get_UID l =
   (match l with
    | [] -> failwith "no uID"
@@ -35,7 +34,7 @@ let rec get_type l =
 (*TODO: alter post to fill the ivar when the state is done*)
 let respond_post gamestate body req =
   match gamestate with
-  | (ivar, state) ->
+  | (ivar, state) -> (*note ivar and state are references*)
     let l_headers = (Cohttp.Request.headers req) in
     let uID = get_UID (Header.to_list (l_headers)) in
     let typ = get_type (Header.to_list l_headers) in
