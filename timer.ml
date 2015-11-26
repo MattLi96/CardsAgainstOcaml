@@ -46,6 +46,3 @@ let start_timer t =
   match t with
   | (_, run_ivar, _) -> run_ivar := Ivar.create (); run_timer t !run_ivar
 
-
-
-
