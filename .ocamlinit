@@ -1,13 +1,17 @@
 #require "async";;
 #require "cohttp";;
 #require "cohttp.async"
+#require "str"
+#require "yojson"
 
 #directory "_build";;
 #directory ".";;
 
-open Async.Std;;
+open Async.Std
 open Cohttp
 open Cohttp_async
+open Yojson
+open Str
 
 let sec = Core.Std.sec;;
 
