@@ -58,14 +58,31 @@ server side, called by server module when a user's heartbeat is received*)
 (* val user_heatbeat: state -> uID -> state *)
 let user_heatbeat state uID = failwith "todo"
 
+let has_played state uID =
+  let rec loop list =
+    (match list with
+    | [] -> failwith "player doesn't exist"
+    | h::t -> if ((fst h) = uID) then
+      (if (snd h <> None) then true else false)
+    else
+      loop t) in
+  loop (get_univ_s state).card_to_player
+
 (*user_play_white adds the card played by a player into the list of played
 cards in the state*)
 (* val user_play_white: state -> uID -> card -> state *)
-let user_play_white state uID white = failwith "todo"
+let user_play_white (state:state) (uID:uID) (white:white_card):state =
+  if (has_played state uID) then
+    state
+  else
+    failwith "todo"
 
 (*judge_select determines the winner of a round*)
 (* val user_judge: state -> uID -> card -> state *)
-let user_judge state uID white = failwith "todo"
+let user_judge (state:state) (uID:uID) (white:white_card):state =
+  let old_black_card = (get_univ_s state).b_card in
+  let new_state = {(get_univ_s state) with winners = Some (old_black_card, white, uID)} in
+  Judging new_state
 
 (*reset_all removes all players from the state*)
 (* val game_reset: state -> uID -> state *)
