@@ -55,13 +55,17 @@ module PullCards = struct
 end 
 
 
-
+(*GTK Initializations*)
 let locale () = GtkMain.Main.init ()
 let destroy () = GMain.Main.quit ()
+
+(*Global references to decks, hands, etc*)
 let score_visible = ref None
 let about_visible = ref None
 let expansion_enabled = ref false
 let czar_mode = ref false
+let player_hand = ref []
+let submissions = ref []
 let gamelog = GText.buffer ()
 
 let new_black_card () = 
@@ -73,6 +77,26 @@ let new_white_card () =
   PullCards.get_random_break whitedeck 20
 
 let score_list = ref []
+
+let rec find_idx n l =
+  match l with
+  | [] -> ""
+  | hd::tl -> if n = 1 then hd else find_idx (n-1) tl  
+
+let rec get_submissions x = 
+  find_idx x (!submissions)
+
+let rec get_hand_num x = 
+  find_idx x (!player_hand)
+
+(*Replaces a card in a deck, if deck is empty returns a new card*)
+let rec new_card_deck idx d = 
+  match d with
+  | [] -> [new_white_card()]
+  | hd::tl -> if idx = 1 then (new_white_card()::tl) else (hd::(new_card_deck (idx-1) tl))
+
+let new_card idx =
+  player_hand:=new_card_deck idx (!player_hand)
 
 let get_scores () = 
   let score_string = ref "" in
@@ -110,29 +134,29 @@ let options_window () =
 (*About screen - includes image, about text*)
 let about_screen () =
   match !about_visible with
- |None ->
-  let icon = GdkPixbuf.from_file "icon.png" in
-  let about = GWindow.window ~title:"About" ~resizable:false 
-      ~border_width:5 () in
-  about#set_icon (Some icon);
-  let myclose _ = about_visible:=None;about#destroy () in
-  ignore(about#connect#destroy(myclose));
-  let vbox = GPack.vbox ~spacing:5 ~packing:about#add() in
-  let logo = GdkPixbuf.from_file "cards.png" in
-  let logo_widget = GMisc.image ~pixbuf:logo ~packing:vbox#add () in
-  logo_widget#set_pixbuf logo;
-  let aboutlabel = GMisc.label ~line_wrap:true ~packing:vbox#add 
-      ~justify:`CENTER() in
-  aboutlabel#set_text("v0.0.05a112415\n\nCharley Chen\nMatthew Li\nAustin Liu 
+  |None ->
+    let icon = GdkPixbuf.from_file "icon.png" in
+    let about = GWindow.window ~title:"About" ~resizable:false 
+        ~border_width:5 () in
+    about#set_icon (Some icon);
+    let myclose _ = about_visible:=None;about#destroy () in
+    ignore(about#connect#destroy(myclose));
+    let vbox = GPack.vbox ~spacing:5 ~packing:about#add() in
+    let logo = GdkPixbuf.from_file "cards.png" in
+    let logo_widget = GMisc.image ~pixbuf:logo ~packing:vbox#add () in
+    logo_widget#set_pixbuf logo;
+    let aboutlabel = GMisc.label ~line_wrap:true ~packing:vbox#add 
+        ~justify:`CENTER() in
+    aboutlabel#set_text("v0.0.05a112415\n\nCharley Chen\nMatthew Li\nAustin Liu 
 Jared Wong\n
 Some code borrowed from the open-source lablgtk2 libraries.\n
  2015. All rights reserved.");
-  let okbutton = GButton.button ~packing:vbox#add () in
-  okbutton#set_label("Close");
-  ignore(okbutton#connect#clicked(myclose));
-  about_visible:= Some about;
-  about#show ()
- |Some s -> ()
+    let okbutton = GButton.button ~packing:vbox#add () in
+    okbutton#set_label("Close");
+    ignore(okbutton#connect#clicked(myclose));
+    about_visible:= Some about;
+    about#show ()
+  |Some s -> ()
 
 (*Score screen popup - includes current scores, and a list of winning cards,
  *black cards, and the players who won the cards*)
@@ -173,6 +197,7 @@ let main () =
   let hbox = GPack.hbox ~packing:(menubox#pack ~padding:50) () in
   let windowbox = GPack.vbox ~packing:(hbox#pack ~padding:50) () in
   let hbox_top = GPack.hbox ~packing:(windowbox#pack ~padding:0) () in
+  let current_mode = GMisc.label ~packing:(hbox_top#pack ~padding:5) () in
   let logo = GdkPixbuf.from_file "logo.png" in
   let logo_widget = GMisc.image ~pixbuf:logo ~packing:hbox_top#add () in
   logo_widget#set_pixbuf logo; 
@@ -283,7 +308,10 @@ let main () =
   let curr_score = ref 0 in
   timer#set_label((string_of_int(!curr_time)));
   score#set_label((string_of_int(!curr_score)));
-  let set_new_cards() = 
+  if(!czar_mode) = false 
+  then current_mode#set_label("Pick the best card!") 
+  else current_mode#set_label("You are the czar!  Pick the best card!");
+  (*let set_new_cards_debug() = 
     card1#set_label (new_white_card());
     card2#set_label (new_white_card());
     card3#set_label (new_white_card());
@@ -295,7 +323,7 @@ let main () =
     card8#set_label (new_white_card());
     card9#set_label (new_white_card());
     card10#set_label (new_white_card()) in
-  set_new_cards();
+  set_new_cards();*)
 
 
   (*Universal Callbacks: Methods for updating score, updating timer - 
@@ -305,10 +333,10 @@ let main () =
   score_list:= ("User", 3)::("Player", 5)::[];
 
   (*Debug Callbacks: Used for testing GUI in offline*)
-  let increment_score() = curr_score:=(!curr_score +1) in
+  (*let increment_score() = curr_score:=(!curr_score +1) in*)
   (*let increment_timer() = curr_time:=(!curr_time +1) in*)
 
-  let cb1 ()= card1#set_label(new_white_card());
+  (*let cb1 ()= card1#set_label(new_white_card());
     bcard#set_label(new_black_card());increment_score() in
   let cb2 ()= card2#set_label(new_white_card());
     bcard#set_label(new_black_card());increment_score() in
@@ -327,24 +355,73 @@ let main () =
   let cb9 ()= card9#set_label(new_white_card());
     bcard#set_label(new_black_card());increment_score() in
   let cb10 ()= card10#set_label(new_white_card());
-    bcard#set_label(new_black_card());increment_score() in
+    bcard#set_label(new_black_card());increment_score() in*)
 
+  (*Debug initializations: Initializes submissions deck*)
+  submissions:= [new_white_card();new_white_card();
+                 new_white_card();
+                 new_white_card();
+                 new_white_card();
+                 new_white_card();
+                 new_white_card();
+                 new_white_card();
+                 new_white_card();
+                 new_white_card()];
+  player_hand:=[new_white_card();new_white_card();
+                new_white_card();new_white_card();
+                new_white_card();new_white_card();
+                new_white_card();new_white_card();
+                new_white_card();new_white_card()];
+
+
+  (*Czar mode callback: Shows Czar Cards*)
+  let czar () =
+    czar_mode:=false; 
+    card1#set_label(get_submissions 1);
+    card2#set_label(get_submissions 2);
+    card3#set_label(get_submissions 3);
+    card4#set_label(get_submissions 4);
+    card5#set_label(get_submissions 5);
+    card6#set_label(get_submissions 6);
+    card7#set_label(get_submissions 7);
+    card8#set_label(get_submissions 8);
+    card9#set_label(get_submissions 9);
+    card10#set_label(get_submissions 10);
+    current_mode#set_label("You are the Czar!") in
+
+  let hand () =
+    card1#set_label(get_hand_num 1);
+    card2#set_label(get_hand_num 2);
+    card3#set_label(get_hand_num 3);
+    card4#set_label(get_hand_num 4);
+    card5#set_label(get_hand_num 5);
+    card6#set_label(get_hand_num 6);
+    card7#set_label(get_hand_num 7);
+    card8#set_label(get_hand_num 8);
+    card9#set_label(get_hand_num 9);
+    card10#set_label(get_hand_num 10);
+    current_mode#set_label("Pick the best card!") in
+
+  bcard#set_label(new_black_card()); 
+  hand();
 
   (*Callbacks: Here is where the callbacks are assigned for each
    *of the 10 buttons in the main interface of the GUI.  When connecting
    *to the server, each of the 10 buttons' callbacks can be used to call
-   *functions which deal with card data from the server.*)
+   *functions which deal with card data from the server.  In the dummy,
+   *all callbacks are identical.  Later, each button can be assigned to
+   *additional callbacks to transmit which card was selected to the server.*)
 
-  let callback1 () = cb1();update_score();update_timer() in
-  let callback2 () = cb2();update_score();update_timer() in
-  let callback3 () = cb3();update_score();update_timer() in
-  let callback4 () = cb4();update_score();update_timer() in
-  let callback5 () = cb5();update_score();update_timer() in
-  let callback6 () = cb6();update_score();update_timer() in
-  let callback7 () = cb7();update_score();update_timer() in
-  let callback8 () = cb8();update_score();update_timer() in
-  let callback9 () = cb9();update_score();update_timer() in
-  let callback10 () = cb10();update_score();update_timer() in
+  let callback1 () = if !czar_mode = true then czar() else new_card 1; hand();update_score();update_timer() in
+  let callback2 () = if !czar_mode = true then czar() else new_card 2; hand();update_score();update_timer() in
+  let callback3 () = if !czar_mode = true then czar() else new_card 3; hand();update_score();update_timer() in
+  let callback4 () = if !czar_mode = true then czar() else new_card 4; hand();update_score();update_timer() in
+  let callback5 () = if !czar_mode = true then czar() else czar_mode:=true;new_card 5; hand();update_score();update_timer() in
+  let callback6 () = if !czar_mode = true then czar() else new_card 6; hand();update_score();update_timer() in
+  let callback7 () = if !czar_mode = true then czar() else new_card 7; hand();update_score();update_timer() in
+  let callback8 () = if !czar_mode = true then czar() else new_card 8; hand();update_score();update_timer() in
+  let callback9 () = if !czar_mode = true then czar() else new_card 9; hand();update_score();update_timer() in
+  let callback10 () = if !czar_mode = true then czar() else new_card 10; hand();update_score();update_timer() in
 
   ignore(window#connect#destroy ~callback:destroy);
   ignore(card1#connect#clicked ~callback:callback1);
