@@ -6,8 +6,15 @@ open State
 
 type state = c_state
 
+let c_uID = ref 0
+
 (*default try to connect to local*)
 let connect_url = ref "http://localhost:8080/"
+
+let rec get_UID l =
+  (match l with
+   | [] -> failwith "no uID"
+   | h::t -> if (fst h = "uid") then int_of_string (snd h) else get_UID t)
 
 (*TODO, add function to connect to a server, should take back the uID*)
 (*TODO, modify to take back the uID, will implement server tomorrow*)
@@ -16,10 +23,13 @@ let connect_server url name =
   let temp_header = Header.add (Header.init()) "name" (name) in
   let post_req = (Client.put (Uri.of_string !connect_url) ~headers:temp_header) in
   post_req >>= (fun (resp, body) ->
-  let code = resp |> Response.status |> Code.code_of_status in
-  Printf.printf "Response code: %d\n" code;
-  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
-  return ())
+    let code = resp |> Response.status |> Code.code_of_status in
+    let ans = (if (code = 200) then
+      Printf.printf ("Connection successful";
+      c_uID := get_UID (resp |> Response.headers |> Header.to_list);)
+    else
+      (Printf.printf "Response code: %d\n" code;)) in
+  return ans)
 
 (*play_white allows a user to play a card*)
 (* val play_white: uID -> white_card -> unit *)
@@ -35,6 +45,9 @@ let play_white (uID:uID) (white:white_card) =
   Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
   return ())
 
+let client_play_white (white:white_card) =
+  play_white !c_uID white
+
 (*judge allows a user to select the winner of a round if he is the judge*)
 (* val judge: uID -> white_card -> unit *)
 let judge uID white =
@@ -49,6 +62,9 @@ let judge uID white =
   Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
   return ())
 
+let client_judge (white:white_card) =
+  judge !c_uID white
+
 (*get_user_state returns the state of the user*)
 (* val get_user_state: uID -> state *)
 let get_user_state uID =
@@ -60,9 +76,12 @@ let get_user_state uID =
   Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
   return ())
 
+
+let client_get_user_state () =
+  get_user_state !c_uID
+
 (*start_heatbeat creates an ivar that represents the heartbeat*)
 (* val start_heartbeat: uID -> 'a Async.Std.Ivar.t *)
-
 let start_heartbeat uID =
   let ivar = Ivar.create () in
   ivar

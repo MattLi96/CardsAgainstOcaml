@@ -12,7 +12,7 @@ open Heartbeat
 type a_state = {
   (*Fill when phase is over, either due to time or everyone played*)
   mutable phase_over: unit Ivar.t;
-  
+
   (*Heartbeat abbreviated for simplicity
     Heartbeat should not need to be reinitialized ever.
     A timer is only for the current phase. A new one is created for each loop.
@@ -34,7 +34,7 @@ let rec gameloop f_state =
     a_state.timer <- create_timer 40; (*TODO: change 40 later*)
     bind_timer a_state.timer (Ivar.fill_if_empty a_state.phase_over);
     start_timer a_state.timer;
-    
+
     let _ = (Ivar.read a_state.phase_over) >>= (fun _ ->
         a_state.phase_over <- Ivar.create ();
         s_state := game_next_phase (!s_state);
@@ -54,6 +54,10 @@ let rec get_type l =
    | [] -> failwith "no type"
    | h::t -> if (fst h = "type") then snd h else get_type t)
 
+let rec get_param l str =
+  (match l with
+   | [] -> failwith ("no " ^ str)
+   | h::t -> if (fst h = str) then snd h else get_param t str)
 
 (*TODO: alter post to fill the a_state.phase_over when turn is done*)
 let respond_post f_state body req =
@@ -84,9 +88,20 @@ let respond_get f_state body req =
     Log.Global.info "uID found is %i" (get_UID (Header.to_list (l_headers)));
     Server.respond `OK
 
+let respond_put (f_state:full_state) body req =
+  match f_state with
+    | (a_state, s_state) ->
+      let l_headers = (Cohttp.Request.headers req) in
+      let name = get_param (Header.to_list (l_headers)) "name" in
+      Log.Global.info "name is %s" (name);
+      let logic = user_add !s_state name in
+      s_state := (snd logic);
+      let temp_header = Header.add (Header.init()) "uID" (string_of_int (fst logic)) in
+      Server.respond `OK ~headers: temp_header
+
 (*TODO: call gameloop to start game. Also start scheduler*)
 let start_server port () =
-  let state = ({phase_over = Ivar.create (); 
+  let state = ({phase_over = Ivar.create ();
                 hb = create_heartbeat 5; (*Heartbeat cycle set for 5 seconds*)
                 timer = create_timer 0}
               , ref (init_s_state ())) in
@@ -97,6 +112,7 @@ let start_server port () =
         match req |> Cohttp.Request.meth with
         | `POST -> (Body.to_string body) >>= (fun body -> respond_post state body req)
         | `GET -> (Body.to_string body) >>= (fun body -> respond_get state body req)
+        | `PUT -> (Body.to_string body) >>= (fun body -> respond_put state body req)
         | _ -> Server.respond `Method_not_allowed
       )
   >>= fun _ -> Deferred.never ()
