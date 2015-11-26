@@ -36,7 +36,14 @@ let judge uID white =
 
 (*get_user_state returns the state of the user*)
 (* val get_user_state: uID -> state *)
-let get_user_state uID = failwith "unimplemented"
+let get_user_state uID =
+  let temp_header = Header.add (Header.init()) "uID" (string_of_int uID) in
+  let req = (Client.get (Uri.of_string "http://localhost:8080/") ~headers:temp_header) in
+  req >>= (fun (resp, body) ->
+  let code = resp |> Response.status |> Code.code_of_status in
+  Printf.printf "Response code: %d\n" code;
+  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
+  return ())
 
 (*start_heatbeat creates an ivar that represents the heartbeat*)
 (* val start_heartbeat: uID -> 'a Async.Std.Ivar.t *)
