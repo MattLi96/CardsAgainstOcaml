@@ -1,5 +1,6 @@
 (*Model*)
 open State
+open Yojson.Basic.Util
 
 (*A model that contains information about the entire game*)
 type state = s_state
@@ -8,6 +9,13 @@ type black_card = string
 type uID = int
 
 let user_counter = ref 0
+
+let fill_deck file_name =
+  let json = Yojson.Basic.from_file file_name in
+  let cards = json |> to_list in
+  List.map (fun json -> member "text" json |> to_string) cards
+
+let give_cards temp = failwith "todo"
 
 (*INIT FUNCTIONS*)
 let init_s_state () =

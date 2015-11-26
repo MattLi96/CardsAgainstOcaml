@@ -80,6 +80,7 @@ let respond_post f_state body req =
       Server.respond `OK
     else failwith "error"
 
+(*TODO pass in other parameters in the header of the response*)
 let respond_get f_state body req =
   match f_state with
   | (a_state, s_state) ->
