@@ -4,6 +4,9 @@ open State
 
 type state
 
+(*connect_server allows the client to connect to a server*)
+val connect_server: string -> string -> unit Deferred.t
+
 (*play_white allows a user to play a card*)
 val play_white: uID -> white_card -> unit Deferred.t
 
