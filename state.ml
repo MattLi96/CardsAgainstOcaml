@@ -184,3 +184,29 @@ let scores_of_string input =
       )
   in
   loop input
+
+(* val string_played: (uID * white_card) list -> string *)
+let string_played input =
+  let rec loop input =
+    (match input with
+      | [] -> ""
+      | h::t -> (string_of_int (fst h)) ^ "." ^ (snd h) ^ "|" ^ loop t)
+  in
+  loop input
+
+(* val played_of_string: string -> (uID * white_card) list *)
+let played_of_string input =
+  let rec loop input =
+    (match input with
+      |"" -> []
+      | x ->
+        let first_break = String.index x '|' in
+        let player = String.sub x 0 first_break in
+        let rest = String.sub x (first_break+1) (String.length x -1 - first_break) in
+        let mid_break = String.index player '.' in
+        let uID = int_of_string (String.sub player 0 mid_break) in
+        let wh = (String.sub player (mid_break+1) (String.length player - 1 - mid_break)) in
+        (uID, wh) :: loop (rest)
+      )
+  in
+  loop input
