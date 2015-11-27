@@ -118,7 +118,6 @@ let respond_put (f_state:full_state) body req =
   match f_state with
   | (a_state, s_state) ->
     if (body = "start") then (
-      (*PLEASE HOOK THIS UP MATT*)
       s_state := game_start !s_state;
       let _ = gameloop f_state in
       (Log.Global.info "Start %s" "triggered";
@@ -133,7 +132,6 @@ let respond_put (f_state:full_state) body req =
            (string_of_int (fst logic)) in
        (Server.respond `OK ~headers: temp_header))
 
-(*TODO: call gameloop to start game. Also start scheduler*)
 let start_server port () =
   let state = ({phase_over = Ivar.create ();
                 hb = create_heartbeat 5; (*Heartbeat cycle set for 5 seconds*)
