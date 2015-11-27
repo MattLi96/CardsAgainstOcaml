@@ -183,10 +183,10 @@ let game_start state = failwith "todo"
 
 (*Shuffle helpers*)
 (*borrowed shuffle_list from google*)
-let shuffle_list d = 
-  let nd = List.map (fun c -> (Random.bits (), c)) d in
-  let sond = List.sort compare nd in
-  List.map snd sond
+let shuffle_list l = 
+  let rand_mapped = List.map (fun e -> (Random.bits (), e)) l in
+  let sorted = List.sort compare rand_mapped in
+  List.map snd sorted
 
 let rec shuffle_help deck = 
   match deck with
