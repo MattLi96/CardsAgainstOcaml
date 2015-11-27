@@ -181,13 +181,30 @@ let game_reset state uID =
 (* val game_start: state -> unit -> state *)
 let game_start state = failwith "todo"
 
+(*Shuffle helpers*)
+let shuffle_list d =
+  let nd = List.map (fun c -> (Random.bits (), c)) d in
+  let sond = List.sort compare nd in
+  List.map snd sond
+
+let rec shuffle_help deck = 
+  match deck with
+  | BDeck d -> BDeck (shuffle_list d)
+  | WDeck d -> WDeck (shuffle_list d)
+
 (*shuffle takes a state, shuffles the deck, and returns the deck*)
 (* val shuffle: state -> state *)
-let shuffle state = failwith "todo"
+let shuffle state =
+  match state with
+  | Judging x -> 
+    Judging {x with b_deck = shuffle_help x.b_deck; w_deck = shuffle_help x.w_deck}
+  | Playing x -> 
+    Playing {x with b_deck = shuffle_help x.b_deck; w_deck = shuffle_help x.w_deck}
+
 
 (*goes to the next game phase*)
 (* val game_next_phase: state -> state *)
 let game_next_phase state =
   match state with
-    | Playing x -> Judging x
-    | Judging x -> Playing (select_black x)
+  | Playing x -> Judging x
+  | Judging x -> Playing (select_black x)
