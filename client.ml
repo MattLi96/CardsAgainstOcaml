@@ -44,6 +44,18 @@ let connect_server url name =
       (Printf.printf "Response code: %d\n" code; ())) in
   return ans)
 
+let trigger_start () =
+  let temp_body = Body.of_string "start" in
+  let post_req = (Client.put (Uri.of_string !connect_url) ~body:temp_body) in
+  post_req >>= (fun (resp, body) ->
+    let code = resp |> Response.status |> Code.code_of_status in
+    let ans = (if (code = 200) then
+      (Printf.printf ("Game Starting");
+      ())
+    else
+      (Printf.printf "Response code: %d\n" code; ())) in
+  return ans)
+
 (*play_white allows a user to play a card*)
 (* val play_white: uID -> white_card -> unit *)
 let play_white (uID:uID) (white:white_card) =
