@@ -15,11 +15,14 @@ open State
 
 type state = c_state
 
+(*Global Variables*)
+(*the c_UID that will be generated upon connection*)
 let c_uID = ref 0
 
 (*default try to connect to local*)
 let connect_url = ref "http://localhost:8080/"
 
+(*Helper Functions*)
 let rec get_UID l =
   (match l with
    | [] -> failwith "no uID"
@@ -30,10 +33,14 @@ let rec get_param l str =
    | [] -> failwith ("no " ^ str)
    | h::t -> if (fst h = str) then snd h else get_param t str)
 
+(*PUT Requests*)
+(*connect_server allows the user to connect to a server at a given url
+  with the username of their choice*)
 let connect_server url name =
   connect_url := url;
   let temp_header = Header.add (Header.init()) "name" (name) in
-  let post_req = (Client.put (Uri.of_string !connect_url) ~headers:temp_header) in
+  let post_req = (Client.put (Uri.of_string !connect_url)
+                  ~headers:temp_header) in
   post_req >>= (fun (resp, body) ->
     let code = resp |> Response.status |> Code.code_of_status in
     let ans = (if (code = 200) then
@@ -44,6 +51,7 @@ let connect_server url name =
       (Printf.printf "Response code: %d\n" code; ())) in
   return ans)
 
+(*trigger_start sends a signal to the server to start the game*)
 let trigger_start () =
   let temp_body = Body.of_string "start" in
   let post_req = (Client.put (Uri.of_string !connect_url) ~body:temp_body) in
@@ -62,7 +70,8 @@ let play_white (uID:uID) (white:white_card) =
   let temp_header = Header.add (Header.init()) "uID" (string_of_int uID) in
   let temp_header_with_type = Header.add temp_header "type" "play" in
   let temp_body = Body.of_string white in
-  let post_req = (Client.post (Uri.of_string !connect_url) ~headers:temp_header_with_type
+  let post_req = (Client.post (Uri.of_string !connect_url)
+    ~headers:temp_header_with_type
     ~body:temp_body) in
   post_req >>= (fun (resp, body) ->
   let code = resp |> Response.status |> Code.code_of_status in
@@ -79,7 +88,8 @@ let judge uID white =
   let temp_header = Header.add (Header.init()) "uID" (string_of_int uID) in
   let temp_header_with_type = Header.add temp_header "type" "judge" in
   let temp_body = Body.of_string white in
-  let post_req = (Client.post (Uri.of_string !connect_url) ~headers:temp_header_with_type
+  let post_req = (Client.post (Uri.of_string !connect_url)
+    ~headers:temp_header_with_type
     ~body:temp_body) in
   post_req >>= (fun (resp, body) ->
   let code = resp |> Response.status |> Code.code_of_status in

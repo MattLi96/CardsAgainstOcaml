@@ -67,7 +67,8 @@ let select_black (u_s_state:univ_s_state):univ_s_state =
     b_deck = BDeck new_d;
     w_deck = u_s_state.w_deck;
 
-    card_to_player = List.map (fun (uid, card) -> (uid, None)) u_s_state.card_to_player;
+    card_to_player = List.map (fun (uid, card) -> (uid, None))
+                     u_s_state.card_to_player;
     hands          = u_s_state.hands
   } in
   new_state
@@ -107,7 +108,8 @@ let get_active_user () = failwith "todo"
 let user_add state name =
   let new_uID = incr user_counter; !user_counter in
   let new_scores = (new_uID, 0) :: (get_univ_s state).scores in
-  let new_card_to_player = (new_uID, None) :: (get_univ_s state).card_to_player in
+  let new_card_to_player = (new_uID, None) ::
+                           (get_univ_s state).card_to_player in
   let new_hands = (new_uID, []) :: (get_univ_s state).hands in
   let new_state1 = {(get_univ_s state) with scores = new_scores} in
   let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
@@ -123,7 +125,10 @@ let user_remove state uID = failwith "todo"
 let rec modify_card_to_player l uID white =
   match l with
     | [] -> []
-    | h::t -> if ((fst h) = uID) then (fst h, Some white)::(modify_card_to_player t uID white) else h::(modify_card_to_player t uID white)
+    | h::t -> if ((fst h) = uID) then
+        (fst h, Some white)::(modify_card_to_player t uID white)
+      else
+        h::(modify_card_to_player t uID white)
 
 let has_played state uID =
   let rec loop list =
@@ -149,7 +154,8 @@ let user_play_white (state:state) (uID:uID) (white:white_card):state =
   else
     if (uID_in_list (get_univ_s state).card_to_player uID) then
       let new_played = (uID, white) :: ((get_univ_s state).played) in
-      let new_card_to_player = modify_card_to_player (get_univ_s state).card_to_player uID white in
+      let new_card_to_player = modify_card_to_player
+                                (get_univ_s state).card_to_player uID white in
       let new_state1 = {(get_univ_s state) with played = new_played} in
       let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
       Playing new_state2
@@ -163,7 +169,8 @@ let user_judge (state:state) (uID:uID) (white:white_card):state =
     | Judging _ ->
       if (uID_in_list (get_univ_s state).card_to_player uID) then
         let old_black_card = (get_univ_s state).b_card in
-        let new_state = {(get_univ_s state) with winners = Some (old_black_card, white, uID)} in
+        let new_state = {(get_univ_s state) with
+          winners = Some (old_black_card, white, uID)} in
         Judging new_state
       else
         state
@@ -200,9 +207,11 @@ let rec shuffle_help deck =
 let shuffle state =
   match state with
   | Judging x ->
-    Judging {x with b_deck = shuffle_help x.b_deck; w_deck = shuffle_help x.w_deck}
+    Judging {x with b_deck = shuffle_help x.b_deck;
+                    w_deck = shuffle_help x.w_deck}
   | Playing x ->
-    Playing {x with b_deck = shuffle_help x.b_deck; w_deck = shuffle_help x.w_deck}
+    Playing {x with b_deck = shuffle_help x.b_deck;
+                    w_deck = shuffle_help x.w_deck}
 
 
 (*goes to the next game phase*)

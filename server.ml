@@ -128,7 +128,8 @@ let respond_put (f_state:full_state) body req =
       Log.Global.info "name is %s" (name);
       let logic = user_add !s_state name in
       s_state := (snd logic);
-      let temp_header = Header.add (Header.init()) "uID" (string_of_int (fst logic)) in
+      let temp_header = Header.add (Header.init()) "uID"
+                                   (string_of_int (fst logic)) in
       (Server.respond `OK ~headers: temp_header))
 
 (*TODO: call gameloop to start game. Also start scheduler*)
@@ -142,9 +143,12 @@ let start_server port () =
   Cohttp_async.Server.create ~on_handler_error:`Raise
     (Tcp.on_port port) (fun ~body _ req ->
         match req |> Cohttp.Request.meth with
-        | `POST -> (Body.to_string body) >>= (fun body -> respond_post state body req)
-        | `GET -> (Body.to_string body) >>= (fun body -> respond_get state body req)
-        | `PUT -> (Body.to_string body) >>= (fun body -> respond_put state body req)
+        | `POST -> (Body.to_string body) >>= (fun body ->
+            respond_post state body req)
+        | `GET -> (Body.to_string body) >>= (fun body ->
+            respond_get state body req)
+        | `PUT -> (Body.to_string body) >>= (fun body ->
+            respond_put state body req)
         | _ -> Server.respond `Method_not_allowed
       )
   >>= fun _ -> Deferred.never ()
