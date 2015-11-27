@@ -87,8 +87,22 @@ let respond_get f_state body req =
     let uID = get_UID (Header.to_list (l_headers)) in
     Log.Global.info "uID found is %i" (uID);
     let ans = get_univ_c (State.get_user_state (!s_state) uID) in
+
+    Log.Global.info "played: %s" (State.string_played (ans.played));
     Log.Global.info "black: %s" (ans.b_card);
+    Log.Global.info "scores: %s" (State.string_scores (ans.scores));
+    Log.Global.info "winners: %s" (State.string_winners (ans.winners));
+    Log.Global.info "hand: %s" (State.string_hand (ans.hand));
     let temp_header = Header.add (Header.init()) "b_card"  (ans.b_card) in
+
+   (*    type univ_c_state = {
+    played  : (uID * white_card) list;
+    b_card  : black_card;
+    scores  : scores;
+    winners : (black_card * white_card * uID) option;
+    hand    : white_card list;
+  } *)
+
     Server.respond `OK ~headers: temp_header
 
 let respond_put (f_state:full_state) body req =
