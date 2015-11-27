@@ -11,7 +11,7 @@ val play_white: uID -> white_card -> unit Deferred.t
 val judge: uID -> white_card -> unit Deferred.t
 
 (*get_user_state returns the state of the user*)
-val get_user_state: uID -> state
+val get_user_state: uID -> state Deferred.t
 
 (*start_heatbeat creates an ivar that represents the heartbeat*)
 val start_heartbeat: uID -> 'a Async.Std.Ivar.t

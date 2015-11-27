@@ -16,6 +16,11 @@ let rec get_UID l =
    | [] -> failwith "no uID"
    | h::t -> if (fst h = "uid") then int_of_string (snd h) else get_UID t)
 
+let rec get_param l str =
+  (match l with
+   | [] -> failwith ("no " ^ str)
+   | h::t -> if (fst h = str) then snd h else get_param t str)
+
 let connect_server url name =
   connect_url := url;
   let temp_header = Header.add (Header.init()) "name" (name) in
@@ -66,14 +71,30 @@ let client_judge (white:white_card) =
 
 (*get_user_state returns the state of the user*)
 (* val get_user_state: uID -> state *)
-let get_user_state uID =
+let get_user_state (uID:uID):state Deferred.t =
   let temp_header = Header.add (Header.init()) "uID" (string_of_int uID) in
   let req = (Client.get (Uri.of_string !connect_url) ~headers:temp_header) in
   req >>= (fun (resp, body) ->
   let code = resp |> Response.status |> Code.code_of_status in
   Printf.printf "Response code: %d\n" code;
   Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
-  return ())
+  let response_h = (resp |> Response.headers |> Header.to_list) in
+
+  let played = played_of_string (get_param response_h "played") in
+  let b_card = (get_param response_h "b_card") in
+  let scores = scores_of_string (get_param response_h "scores") in
+  let winners = winners_of_string (get_param response_h "winners") in
+  let hand = hand_of_string (get_param response_h "hand") in
+  let ans = {
+    played  = played;
+    b_card  = b_card;
+    scores  = scores;
+    winners = winners;
+    hand    = hand;
+  } in
+  let ans2 = PWaiting ans in
+
+  return ans2)
 
 let client_get_user_state () =
   get_user_state !c_uID

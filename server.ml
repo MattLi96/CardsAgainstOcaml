@@ -88,13 +88,23 @@ let respond_get f_state body req =
     Log.Global.info "uID found is %i" (uID);
     let ans = get_univ_c (State.get_user_state (!s_state) uID) in
 
+    let s_played = (State.string_played (ans.played)) in
+    let s_black = (ans.b_card) in
+    let s_scores = (State.string_scores (ans.scores)) in
+    let s_winners = (State.string_winners (ans.winners)) in
+    let s_hand = (State.string_hand (ans.hand)) in
+
     Log.Global.info "played: %s" (State.string_played (ans.played));
     Log.Global.info "black: %s" (ans.b_card);
     Log.Global.info "scores: %s" (State.string_scores (ans.scores));
     Log.Global.info "winners: %s" (State.string_winners (ans.winners));
     Log.Global.info "hand: %s" (State.string_hand (ans.hand));
-    let temp_header = Header.add (Header.init()) "b_card"  (ans.b_card) in
 
+    let temp_header = Header.add (Header.init()) "b_card"  (s_black) in
+    let h2 = Header.add (temp_header) "played" s_played in
+    let h3 = Header.add (h2) "scores" s_scores in
+    let h4 = Header.add (h3) "winners" s_winners in
+    let h5 = Header.add (h4) "hand" s_hand in
    (*    type univ_c_state = {
     played  : (uID * white_card) list;
     b_card  : black_card;
@@ -102,8 +112,7 @@ let respond_get f_state body req =
     winners : (black_card * white_card * uID) option;
     hand    : white_card list;
   } *)
-
-    Server.respond `OK ~headers: temp_header
+    Server.respond `OK ~headers: h5
 
 let respond_put (f_state:full_state) body req =
   match f_state with
