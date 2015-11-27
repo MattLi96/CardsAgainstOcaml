@@ -30,7 +30,7 @@ type full_state = a_state * State.s_state ref
 let rec gameloop f_state =
   match f_state with
   | (a_state, s_state) ->
-    (*TODO: make sure this is legit, could be issue if !ivar not evaluate immediately*)
+    (*TODO: make sure this is legit, could be issue involving phase_over*)
     a_state.timer <- create_timer 40; (*TODO: change 40 later*)
     bind_timer a_state.timer (Ivar.fill_if_empty a_state.phase_over);
     start_timer a_state.timer;
