@@ -91,7 +91,8 @@ let init_s_state () =
     hands          = []
   } in
   let sel_blck = select_black temp_state in
-  Playing sel_blck
+  let card_distro = give_cards sel_blck in
+  Playing card_distro
 
 (*GET FUNCTIONS: functions that return information about the state*)
 
@@ -183,12 +184,12 @@ let game_start state = failwith "todo"
 
 (*Shuffle helpers*)
 (*borrowed shuffle_list from google*)
-let shuffle_list l = 
+let shuffle_list l =
   let rand_mapped = List.map (fun e -> (Random.bits (), e)) l in
   let sorted = List.sort compare rand_mapped in
   List.map snd sorted
 
-let rec shuffle_help deck = 
+let rec shuffle_help deck =
   match deck with
   | BDeck d -> BDeck (shuffle_list d)
   | WDeck d -> WDeck (shuffle_list d)
@@ -197,9 +198,9 @@ let rec shuffle_help deck =
 (* val shuffle: state -> state *)
 let shuffle state =
   match state with
-  | Judging x -> 
+  | Judging x ->
     Judging {x with b_deck = shuffle_help x.b_deck; w_deck = shuffle_help x.w_deck}
-  | Playing x -> 
+  | Playing x ->
     Playing {x with b_deck = shuffle_help x.b_deck; w_deck = shuffle_help x.w_deck}
 
 

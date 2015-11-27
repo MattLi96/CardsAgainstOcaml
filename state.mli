@@ -80,3 +80,14 @@
   (*Method to return the entire deck*)
   val get_white_deck: s_state -> deck
   val get_black_deck: s_state -> deck
+
+  (*----helper methods------------------------------------------------*)
+
+(*     played  : (uID * white_card) list;
+    scores  : (uID * int) list
+    winners : (black_card * white_card * uID) option;
+    hand    : white_card list; *)
+
+  val string_winners: (black_card * white_card * uID) option -> string
+  val winners_of_string: string -> (black_card * white_card * uID) option
+

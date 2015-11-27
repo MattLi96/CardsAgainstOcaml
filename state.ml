@@ -115,3 +115,26 @@
   (* val get_white_deck: s_state -> deck*)
   let get_white_deck s =
     (s |> get_univ_s).w_deck
+
+(*----helper methods------------------------------------------------*)
+
+(* val string_winners: (black_card * white_card * uID) option -> string *)
+let string_winners winners =
+  (match winners with
+    | None -> "None"
+    | Some x ->
+      (match x with
+        | (bl, wh, uID) -> bl ^ "|" ^ wh ^ "|" ^ (string_of_int uID)))
+
+(* val winners_of_string: string -> (black_card * white_card * uID) option *)
+let winners_of_string input =
+  if (input = "None") then
+    None
+  else
+    let first_break = String.index input '|' in
+    let bl = String.sub input 0 first_break in
+    let second_break = String.index_from input (first_break+1) '|' in
+    let wh = String.sub input (first_break+1) (second_break - first_break -1) in
+    let uID = int_of_string (String.sub input (second_break+1) ((String.length input-1) - second_break)) in
+    Some(bl, wh, uID)
+
