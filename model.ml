@@ -16,7 +16,36 @@ let fill_deck file_name =
   let cards = json |> to_list in
   List.map (fun json -> member "text" json |> to_string) cards
 
-let give_cards temp = failwith "todo"
+let transfer l num =
+  let rec loop num ans =
+    (if (num = 0) then ans
+    else
+      (match ans with
+        | (from, dest) ->
+          (match from with
+            | [] -> ans
+            | h::t -> loop (num -1) (t, h::dest))))
+  in
+  loop num (l, [])
+
+let give_cards (u_s_state:univ_s_state):univ_s_state =
+  let deck = ref (match (u_s_state.w_deck) with
+    | WDeck x -> x
+    | BDeck x -> []) in
+  let rec loop d l =
+    (match l with
+      | [] -> []
+      | h::t ->
+        let current_num = List.length (snd h) in
+        let dif = req_num_of_cards - current_num in
+        let trans = transfer !d dif in
+        d := (fst trans);
+        (fst h, (snd h) @ (snd trans)) :: (loop (d) t)) in
+  let new_hands = loop deck u_s_state.hands in
+  let new_state = {u_s_state with hands = new_hands} in
+  {new_state with w_deck = WDeck !deck}
+
+(* (uID * (white_card list)) list *)
 
 let select_black (u_s_state:univ_s_state):univ_s_state =
   let old_b_deck = (match u_s_state.b_deck with
@@ -35,12 +64,9 @@ let select_black (u_s_state:univ_s_state):univ_s_state =
     scores = u_s_state.scores;
     winners = None;
 
-    (*decks*)
     b_deck = BDeck new_d;
     w_deck = u_s_state.w_deck;
 
-    (*List of (card, player) pairs matching cards played to users who played
-    them*)
     card_to_player = List.map (fun (uid, card) -> (uid, None)) u_s_state.card_to_player;
     hands          = u_s_state.hands
   } in
