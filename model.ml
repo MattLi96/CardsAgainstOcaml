@@ -186,10 +186,6 @@ let game_reset state uID =
       let new_state3 = {new_state2 with w_deck = x.w_deck} in
       Playing new_state3
 
-(*game_start begins the game for all players in the list of players*)
-(* val game_start: state -> unit -> state *)
-let game_start state = failwith "todo"
-
 (*Shuffle helpers*)
 (*borrowed shuffle_list from google*)
 let shuffle_list l =
@@ -213,6 +209,13 @@ let shuffle state =
     Playing {x with b_deck = shuffle_help x.b_deck;
                     w_deck = shuffle_help x.w_deck}
 
+
+(*game_start begins the game for all players in the list of players*)
+(* val game_start: state -> state *)
+let game_start state =
+  let s = shuffle state in
+  match s with
+  | Playing x | Judging x -> Playing x
 
 (*goes to the next game phase*)
 (* val game_next_phase: state -> state *)
