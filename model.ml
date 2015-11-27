@@ -182,7 +182,8 @@ let game_reset state uID =
 let game_start state = failwith "todo"
 
 (*Shuffle helpers*)
-let shuffle_list d =
+(*borrowed shuffle_list from google*)
+let shuffle_list d = 
   let nd = List.map (fun c -> (Random.bits (), c)) d in
   let sond = List.sort compare nd in
   List.map snd sond
