@@ -120,16 +120,16 @@ let respond_put (f_state:full_state) body req =
     if (body = "start") then
       (*PLEASE HOOK THIS UP MATT*)
       (* (gameloop f_state); *)
-      Log.Global.info "Game start triggered";
-      Server.respond `OK
+        (Log.Global.info "Start %s" "triggered";
+        Server.respond `OK)
     else
-      let l_headers = (Cohttp.Request.headers req) in
+      (let l_headers = (Cohttp.Request.headers req) in
       let name = get_param (Header.to_list (l_headers)) "name" in
       Log.Global.info "name is %s" (name);
       let logic = user_add !s_state name in
       s_state := (snd logic);
       let temp_header = Header.add (Header.init()) "uID" (string_of_int (fst logic)) in
-      Server.respond `OK ~headers: temp_header
+      (Server.respond `OK ~headers: temp_header))
 
 (*TODO: call gameloop to start game. Also start scheduler*)
 let start_server port () =
