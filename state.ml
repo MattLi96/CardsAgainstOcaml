@@ -158,3 +158,29 @@ let hand_of_string input =
         card::(loop rest)
       )
   in loop input
+
+(* val string_scores: (uID * int) list -> string *)
+let string_scores input =
+  let rec loop input =
+    (match input with
+      | [] -> ""
+      | h::t -> (string_of_int (fst h)) ^ "." ^ (string_of_int (snd h)) ^ "|" ^ loop t)
+  in
+  loop input
+
+(* val scores_of_string: string -> (uID * int) list *)
+let scores_of_string input =
+  let rec loop input =
+    (match input with
+      |"" -> []
+      | x ->
+        let first_break = String.index x '|' in
+        let player = String.sub x 0 first_break in
+        let rest = String.sub x (first_break+1) (String.length x -1 - first_break) in
+        let mid_break = String.index player '.' in
+        let uID = int_of_string (String.sub player 0 mid_break) in
+        let score = int_of_string (String.sub player (mid_break+1) (String.length player - 1 - mid_break)) in
+        (uID, score) :: loop (rest)
+      )
+  in
+  loop input
