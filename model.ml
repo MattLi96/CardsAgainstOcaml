@@ -112,7 +112,8 @@ let user_add state name =
   let new_state1 = {(get_univ_s state) with scores = new_scores} in
   let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
   let new_state3 = {new_state2 with hands = new_hands} in
-  (new_uID, Playing new_state3)
+  let final_state = give_cards new_state3 in
+  (new_uID, Playing final_state)
 
 (*remove_user takes in the uID of a player and removes said player from the
 list of players in the state*)
