@@ -1,4 +1,13 @@
 (*Client*)
+(*Currently to use: load things in utop to test
+
+#load "state.d.cmo"
+#use "client.ml"
+connect_server !connect_url "austin";;
+client_get_user_state ();;
+
+*)
+
 open Async.Std
 open Cohttp
 open Cohttp_async
