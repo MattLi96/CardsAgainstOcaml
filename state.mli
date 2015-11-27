@@ -83,11 +83,13 @@
 
   (*----helper methods------------------------------------------------*)
 
-(*     played  : (uID * white_card) list;
+(*  played  : (uID * white_card) list;
     scores  : (uID * int) list
-    winners : (black_card * white_card * uID) option;
     hand    : white_card list; *)
 
   val string_winners: (black_card * white_card * uID) option -> string
   val winners_of_string: string -> (black_card * white_card * uID) option
+
+  val string_hand: (white_card list) -> string
+  val hand_of_string: string -> (white_card list)
 

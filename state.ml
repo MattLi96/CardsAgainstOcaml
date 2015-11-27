@@ -138,3 +138,23 @@ let winners_of_string input =
     let uID = int_of_string (String.sub input (second_break+1) ((String.length input-1) - second_break)) in
     Some(bl, wh, uID)
 
+(* val string_hand: (white_card list) -> string *)
+let string_hand input =
+  let rec loop input =
+    (match input with
+      | [] -> ""
+      | h::t -> h ^ "|" ^ (loop t))
+  in loop input
+
+(* val hand_of_string: string -> (white_card list) *)
+let hand_of_string input =
+  let rec loop input =
+    (match input with
+      | "" -> []
+      | x ->
+        let first_break = String.index x '|' in
+        let card = String.sub x 0 first_break in
+        let rest = String.sub x (first_break+1) (String.length x -1 - first_break) in
+        card::(loop rest)
+      )
+  in loop input
