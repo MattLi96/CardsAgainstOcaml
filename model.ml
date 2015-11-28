@@ -47,6 +47,16 @@ let give_cards (u_s_state:univ_s_state):univ_s_state =
 
 (* (uID * (white_card list)) list *)
 
+let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge: uID) =
+  let new_list = card_to_player @ card_to_player in
+  let rec loop l id =
+    (match l with
+      | [] -> [(0, None)]
+      | h::t -> if (fst h = id) then t else loop t id) in
+  let part = loop new_list current_judge in
+  fst (List.hd part)
+
+
 let select_black (u_s_state:univ_s_state):univ_s_state =
   let old_b_deck = (match u_s_state.b_deck with
     | BDeck x -> x
@@ -58,7 +68,7 @@ let select_black (u_s_state:univ_s_state):univ_s_state =
     | [] -> []
     | h::t -> t) in
   let new_state = {
-    judge  = u_s_state.judge;
+    judge  = cycle_judge u_s_state.card_to_player u_s_state.judge;
     played = [];
     b_card = new_b;
     scores = u_s_state.scores;
