@@ -47,6 +47,16 @@ let give_cards (u_s_state:univ_s_state):univ_s_state =
 
 (* (uID * (white_card list)) list *)
 
+let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge: uID) =
+  let new_list = card_to_player @ card_to_player in
+  let rec loop l id =
+    (match l with
+      | [] -> [(0, None)]
+      | h::t -> if (fst h = id) then t else loop t id) in
+  let part = loop new_list current_judge in
+  fst (List.hd part)
+
+
 let select_black (u_s_state:univ_s_state):univ_s_state =
   let old_b_deck = (match u_s_state.b_deck with
     | BDeck x -> x
@@ -58,7 +68,7 @@ let select_black (u_s_state:univ_s_state):univ_s_state =
     | [] -> []
     | h::t -> t) in
   let new_state = {
-    judge  = u_s_state.judge;
+    judge  = cycle_judge u_s_state.card_to_player u_s_state.judge;
     played = [];
     b_card = new_b;
     scores = u_s_state.scores;
@@ -181,6 +191,12 @@ let user_play_white (state:state) (uID:uID) (white:white_card):state =
     else
       state
 
+(* type scores = (uID * int) list *)
+let give_point scores uID =
+  let sel_fun = (fun (u, s) ->
+    if (u=uID) then (u, s+1) else (u,s) ) in
+  List.map sel_fun scores
+
 (*judge_select determines the winner of a round*)
 (* val user_judge: state -> uID -> card -> state *)
 let user_judge (state:state) (uID:uID) (white:white_card):state =
@@ -188,9 +204,11 @@ let user_judge (state:state) (uID:uID) (white:white_card):state =
     | Judging _ ->
       if (uID_in_list (get_univ_s state).card_to_player uID) then
         let old_black_card = (get_univ_s state).b_card in
+        let new_scores = give_point (get_univ_s state).scores uID in
         let new_state = {(get_univ_s state) with
           winners = Some (old_black_card, white, uID)} in
-        Judging new_state
+        let new_state2 = {new_state with scores = new_scores} in
+        Judging new_state2
       else
         state
     | _ -> state
