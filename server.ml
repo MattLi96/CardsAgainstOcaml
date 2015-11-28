@@ -71,11 +71,19 @@ let respond_post f_state body req =
     if (typ = "play") then
       let new_state = user_play_white (!s_state) uID body in
       s_state := new_state;
+      (if play_state_finished !s_state then 
+         Ivar.fill_if_empty a_state.phase_over ()
+       else ()
+      );
       Server.respond `OK
     else
     if (typ = "judge") then
       let new_state = user_judge (!s_state) uID body in
       s_state := new_state;
+      (if judge_state_finished !s_state then 
+         Ivar.fill_if_empty a_state.phase_over ()
+       else ()
+      );
       Server.respond `OK
     else failwith "error"
 
@@ -105,13 +113,13 @@ let respond_get f_state body req =
     let h3 = Header.add (h2) "scores" s_scores in
     let h4 = Header.add (h3) "winners" s_winners in
     let h5 = Header.add (h4) "hand" s_hand in
-   (*    type univ_c_state = {
-    played  : (uID * white_card) list;
-    b_card  : black_card;
-    scores  : scores;
-    winners : (black_card * white_card * uID) option;
-    hand    : white_card list;
-  } *)
+    (*    type univ_c_state = {
+          played  : (uID * white_card) list;
+          b_card  : black_card;
+          scores  : scores;
+          winners : (black_card * white_card * uID) option;
+          hand    : white_card list;
+          } *)
     Server.respond `OK ~headers: h5
 
 let respond_put (f_state:full_state) body req =
