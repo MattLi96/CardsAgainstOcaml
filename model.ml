@@ -264,7 +264,8 @@ let game_next_phase state =
 let play_state_finished state =
   match state with
   | Judging x -> false
-  | Playing x -> List.exists (fun p -> (snd p) = None) (get_univ_s state).card_to_player
+  | Playing x -> 
+    not (List.exists (fun p -> (snd p) = None) (get_univ_s state).card_to_player)
 
 let judge_state_finished state =
   match state with
