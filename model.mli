@@ -43,5 +43,8 @@ val shuffle: state -> state
 (*goes to the next game phase*)
 val game_next_phase: state -> state
 
+(*These functions tell when a state is finished and we can move to next phase*)
+val play_state_finished: state -> bool
 
-
+val judge_state_finished: state -> bool
+  

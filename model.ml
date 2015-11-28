@@ -250,3 +250,13 @@ let game_next_phase state =
   match state with
   | Playing x -> Judging x
   | Judging x -> Playing (select_black x)
+
+let play_state_finished state =
+  match state with
+  | Judging x -> false
+  | Playing x -> List.exists (fun p -> (snd p) = None) (get_univ_s state).card_to_player
+
+let judge_state_finished state =
+  match state with
+  | Playing x -> false
+  | Judging x -> (get_univ_s state).winners = None
