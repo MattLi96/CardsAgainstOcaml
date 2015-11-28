@@ -145,6 +145,22 @@ let rec uID_in_list l uID =
     | [] -> false
     | h::t -> if ((fst h) = uID) then true else (uID_in_list t uID)
 
+let remove_card_from_hand hands uID white =
+  let sel_fun = (fun (u, l) ->
+    if (u=uID) then
+      let rec remove hand white =
+        (match hand with
+          | [] -> []
+          | h::t ->
+            (if (h <> white) then
+              h::(remove t white)
+            else
+              (remove t white)))
+      in (u, remove l white)
+    else
+      (u, l)) in
+  List.map (sel_fun) hands
+
 (*user_play_white adds the card played by a player into the list of played
 cards in the state*)
 (* val user_play_white: state -> uID -> card -> state *)
@@ -153,12 +169,15 @@ let user_play_white (state:state) (uID:uID) (white:white_card):state =
     state
   else
     if (uID_in_list (get_univ_s state).card_to_player uID) then
+      let old_hands = (get_univ_s state).hands in
+      let new_hands = (remove_card_from_hand old_hands uID white) in
       let new_played = (uID, white) :: ((get_univ_s state).played) in
       let new_card_to_player = modify_card_to_player
                                 (get_univ_s state).card_to_player uID white in
       let new_state1 = {(get_univ_s state) with played = new_played} in
       let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
-      Playing new_state2
+      let new_state3 = {new_state2 with hands = new_hands} in
+      Playing new_state3
     else
       state
 

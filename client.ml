@@ -124,7 +124,6 @@ let get_user_state (uID:uID):state Deferred.t =
     hand    = hand;
   } in
   let ans2 = PWaiting ans in
-
   return ans2)
 
 let client_get_user_state () =
