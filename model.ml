@@ -181,6 +181,12 @@ let user_play_white (state:state) (uID:uID) (white:white_card):state =
     else
       state
 
+(* type scores = (uID * int) list *)
+let give_point scores uID =
+  let sel_fun = (fun (u, s) ->
+    if (u=uID) then (u, s+1) else (u,s) ) in
+  List.map sel_fun scores
+
 (*judge_select determines the winner of a round*)
 (* val user_judge: state -> uID -> card -> state *)
 let user_judge (state:state) (uID:uID) (white:white_card):state =
@@ -188,9 +194,11 @@ let user_judge (state:state) (uID:uID) (white:white_card):state =
     | Judging _ ->
       if (uID_in_list (get_univ_s state).card_to_player uID) then
         let old_black_card = (get_univ_s state).b_card in
+        let new_scores = give_point (get_univ_s state).scores uID in
         let new_state = {(get_univ_s state) with
           winners = Some (old_black_card, white, uID)} in
-        Judging new_state
+        let new_state2 = {new_state with scores = new_scores} in
+        Judging new_state2
       else
         state
     | _ -> state
