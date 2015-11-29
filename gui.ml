@@ -71,7 +71,7 @@ let about_visible = ref None
 let expansion_enabled = ref false
 let czar_mode = ref false
 let init_state = ref (client_get_user_state ())
-let curr_user_state = ref None
+let (curr_user_state: State.univ_c_state option ref) = ref None
 let player_hand = ref None
 let submissions = ref None
 let gamelog = GText.buffer ()
@@ -102,7 +102,7 @@ let rec get_hand_num x =
   |Some hand ->
   find_idx x (hand)
 
-let get_curr_bl () = 
+let get_curr_bl () =
   match !curr_user_state with
   | None -> "Game has not started"
   | Some x -> x.b_card
