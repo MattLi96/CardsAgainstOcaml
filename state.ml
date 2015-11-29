@@ -103,8 +103,7 @@
       winners = univ.winners;
       hand    = get_hand state u;
     } in
-    (* Have to select appropriate state*)
-    PWaiting univ_c
+    if (u = (get_univ_s state).judge) then JWaiting univ_c else PWaiting univ_c
 
 
   (*val get_black_deck: s_state -> deck *)
