@@ -72,7 +72,7 @@ let select_black (u_s_state:univ_s_state):univ_s_state =
     played = [];
     b_card = new_b;
     scores = u_s_state.scores;
-    winners = None;
+    winners = u_s_state.winners;
 
     b_deck = BDeck new_d;
     w_deck = u_s_state.w_deck;
@@ -90,7 +90,7 @@ let init_s_state () =
     played = [];
     b_card = "";
     scores = [];
-    winners = None;
+    winners = [];
 
     (*decks*)
     b_deck = BDeck (fill_deck "black.json");
@@ -205,8 +205,8 @@ let user_judge (state:state) (uID:uID) (white:white_card):state =
       if (uID_in_list (get_univ_s state).card_to_player uID) then
         let old_black_card = (get_univ_s state).b_card in
         let new_scores = give_point (get_univ_s state).scores uID in
-        let new_state = {(get_univ_s state) with
-          winners = Some (old_black_card, white, uID)} in
+        let new_state = {(get_univ_s state) with winners =
+          (old_black_card, white, uID) :: (get_univ_s state).winners} in
         let new_state2 = {new_state with scores = new_scores} in
         Judging new_state2
       else
@@ -264,7 +264,7 @@ let game_next_phase state =
 let play_state_finished state =
   match state with
   | Judging x -> false
-  | Playing x -> 
+  | Playing x ->
     not (List.exists (fun p -> (snd p) = None) (get_univ_s state).card_to_player)
 
 let judge_state_finished state =
