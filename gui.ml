@@ -70,6 +70,7 @@ let score_visible = ref None
 let about_visible = ref None
 let expansion_enabled = ref false
 let czar_mode = ref false
+let init_state = ref (client_get_user_state ())
 let curr_user_state = ref None
 let player_hand = ref None
 let submissions = ref None
@@ -100,6 +101,11 @@ let rec get_hand_num x =
   |None -> "Waiting on response"
   |Some hand ->
   find_idx x (hand)
+
+let get_curr_bl () = 
+  match !curr_user_state with
+  | None -> "Game has not started"
+  | Some x -> x.b_card
 
 (*Replaces a card in a deck, if deck is empty returns a new card*)
 let rec new_card_deck idx d =
@@ -278,7 +284,7 @@ let main () =
   let card10frame = GBin.frame ~packing:(card10box#pack ~padding:0)
       ~width:160 ~height:160 () in
 
-  let btext = "Select!" in
+  let btext = "Game has not started" in
   let bcard = GMisc.label ~packing:bcframe#add ~line_wrap:true () in
   let card1 = GButton.button ~label:btext
       ~packing:(card1frame#add) ~relief:`NONE () in
@@ -348,31 +354,7 @@ let main () =
   (*let increment_score() = curr_score:=(!curr_score +1) in*)
   (*let increment_timer() = curr_time:=(!curr_time +1) in*)
 
-  (*let cb1 ()= card1#set_label(new_white_card());
-    bcard#set_label(new_black_card());increment_score() in
-  let cb2 ()= card2#set_label(new_white_card());
-    bcard#set_label(new_black_card());increment_score() in
-  let cb3 ()= card3#set_label(new_white_card());
-    bcard#set_label(new_black_card());increment_score() in
-  let cb4 ()= card4#set_label(new_white_card());
-    bcard#set_label(new_black_card());increment_score() in
-  let cb5 ()= card5#set_label(new_white_card());
-    bcard#set_label(new_black_card());increment_score() in
-  let cb6 ()= card6#set_label(new_white_card());
-    bcard#set_label(new_black_card());increment_score() in
-  let cb7 ()= card7#set_label(new_white_card());
-    bcard#set_label(new_black_card());increment_score() in
-  let cb8 ()= card8#set_label(new_white_card());
-    bcard#set_label(new_black_card());increment_score() in
-  let cb9 ()= card9#set_label(new_white_card());
-    bcard#set_label(new_black_card());increment_score() in
-  let cb10 ()= card10#set_label(new_white_card());
-    bcard#set_label(new_black_card());increment_score() in*)
 
-  let init_state = client_get_user_state () in
-  upon init_state (fun curr_state ->
-      curr_user_state:= Some (get_univ_c curr_state);
-      player_hand:= Some (get_univ_c curr_state).hand);
 
 
   (*Czar mode callback: Shows Czar Cards*)
@@ -390,7 +372,11 @@ let main () =
     card10#set_label(get_submissions 10);
     current_mode#set_label("You are the Czar!") in
 
-  let hand () =
+  let update_gui () =
+    init_state:= client_get_user_state ();
+    upon !init_state (fun curr_state ->
+        curr_user_state:= Some (get_univ_c curr_state);
+        player_hand:= Some (get_univ_c curr_state).hand;
     card1#set_label(get_hand_num 1);
     card2#set_label(get_hand_num 2);
     card3#set_label(get_hand_num 3);
@@ -401,10 +387,10 @@ let main () =
     card8#set_label(get_hand_num 8);
     card9#set_label(get_hand_num 9);
     card10#set_label(get_hand_num 10);
-    current_mode#set_label("Pick the best card!") in
+    current_mode#set_label("Pick the best card!")) in
 
   bcard#set_label(new_black_card());
-  hand();
+  update_gui();
 
   (*Callbacks: Here is where the callbacks are assigned for each
    *of the 10 buttons in the main interface of the GUI.  When connecting
@@ -413,16 +399,16 @@ let main () =
    *all callbacks are identical.  Later, each button can be assigned to
    *additional callbacks to transmit which card was selected to the server.*)
 
-  let callback1 () = if !czar_mode = true then czar() else hand();update_score();update_timer() in
-  let callback2 () = if !czar_mode = true then czar() else hand();update_score();update_timer() in
-  let callback3 () = if !czar_mode = true then czar() else hand();update_score();update_timer() in
-  let callback4 () = if !czar_mode = true then czar() else hand();update_score();update_timer() in
-  let callback5 () = if !czar_mode = true then czar() else czar_mode:=true;hand();update_score();update_timer() in
-  let callback6 () = if !czar_mode = true then czar() else hand();update_score();update_timer() in
-  let callback7 () = if !czar_mode = true then czar() else hand();update_score();update_timer() in
-  let callback8 () = if !czar_mode = true then czar() else hand();update_score();update_timer() in
-  let callback9 () = if !czar_mode = true then czar() else hand();update_score();update_timer() in
-  let callback10 () = if !czar_mode = true then czar() else hand();update_score();update_timer() in
+  let callback1 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
+  let callback2 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
+  let callback3 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
+  let callback4 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
+  let callback5 () = if !czar_mode = true then czar() else czar_mode:=true;update_gui();update_score();update_timer() in
+  let callback6 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
+  let callback7 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
+  let callback8 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
+  let callback9 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
+  let callback10 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
 
   ignore(window#connect#destroy ~callback:destroy);
   ignore(card1#connect#clicked ~callback:callback1);
