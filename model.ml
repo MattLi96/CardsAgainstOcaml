@@ -48,10 +48,11 @@ let give_cards (u_s_state:univ_s_state):univ_s_state =
 (* (uID * (white_card list)) list *)
 
 let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge: uID) =
+  (Printf.printf "current_judge: %i" current_judge);
   let new_list = card_to_player @ card_to_player in
   let rec loop l id =
     (match l with
-      | [] -> [(0, None)]
+      | [] -> [(1, None)]
       | h::t -> if (fst h = id || id = 0) then t else loop t id) in
   let part = loop new_list current_judge in
   fst (List.hd part)
