@@ -9,7 +9,7 @@
     played  : (uID * white_card) list;
     b_card  : black_card;
     scores  : scores;
-    winners : (black_card * white_card * uID) option;
+    winners : (black_card * white_card * uID) list;
     hand    : white_card list;
   }
 
@@ -23,7 +23,7 @@
     played : (uID * white_card) list;
     b_card : black_card;
     scores : scores;
-    winners: (black_card * white_card * uID) option;
+    winners: (black_card * white_card * uID) list;
 
     (*decks*)
     b_deck : deck;
@@ -53,7 +53,7 @@
     that have won previous rounds*)
   (* val get_previous_wins: c_state -> (black_card * white_card) list *)
   let get_previous_wins current_state =
-    failwith "to implement"
+    (current_state |> get_univ_c).winners
 
   (*Method to return the current black card in the state*)
   (* val curr_black_card: c_state -> black_card *)
@@ -118,25 +118,34 @@
 
 (*----helper methods------------------------------------------------*)
 
-(* val string_winners: (black_card * white_card * uID) option -> string *)
+(* val string_winners: (black_card * white_card * uID) list -> string *)
 let string_winners winners =
-  (match winners with
-    | None -> "None"
-    | Some x ->
-      (match x with
-        | (bl, wh, uID) -> bl ^ "|" ^ wh ^ "|" ^ (string_of_int uID)))
+  let rec loop winners =
+    (match winners with
+      | [] -> ""
+      | h::t ->
+        (match h with
+          | (b,w,u) -> b^"*"^w^"*"^(string_of_int u)^ "|" ^ loop t))
+  in
+  loop winners
 
-(* val winners_of_string: string -> (black_card * white_card * uID) option *)
+(* val winners_of_string: string -> (black_card * white_card * uID) list *)
 let winners_of_string input =
-  if (input = "None") then
-    None
-  else
-    let first_break = String.index input '|' in
-    let bl = String.sub input 0 first_break in
-    let second_break = String.index_from input (first_break+1) '|' in
-    let wh = String.sub input (first_break+1) (second_break - first_break -1) in
-    let uID = int_of_string (String.sub input (second_break+1) ((String.length input-1) - second_break)) in
-    Some(bl, wh, uID)
+  let rec loop input =
+    (match input with
+      | "" -> []
+      | x ->
+        let first_break = String.index x '|' in
+        let win = String.sub x 0 first_break in
+        let rest = String.sub x (first_break+1) (String.length x -1 - first_break) in
+        let cutoff_b = String.index x '*' in
+        let black = String.sub win 0 cutoff_b in
+        let cutoff_w = String.index_from x (cutoff_b+1) '*' in
+        let white = String.sub win (cutoff_b+1) (cutoff_w-1-cutoff_b) in
+        let uID = int_of_string(String.sub win (cutoff_w+1) (String.length win - 1 - cutoff_w)) in
+        (black, white, uID) :: loop (rest)
+      )
+  in loop input
 
 (* val string_hand: (white_card list) -> string *)
 let string_hand input =

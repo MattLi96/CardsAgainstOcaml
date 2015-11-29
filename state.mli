@@ -15,7 +15,7 @@
     played  : (uID * white_card) list;
     b_card  : black_card;
     scores  : scores;
-    winners : (black_card * white_card * uID) option;
+    winners : (black_card * white_card * uID) list;
     hand    : white_card list;
   }
 
@@ -31,7 +31,7 @@
     played : (uID * white_card) list;
     b_card : black_card;
     scores : scores;
-    winners: (black_card * white_card * uID) option;
+    winners: (black_card * white_card * uID) list;
 
     (*decks*)
     b_deck : deck;
@@ -55,7 +55,7 @@
 
   (*get_previous_wins returns all of the card pairs, one white and one black,
     that have won previous rounds*)
-  val get_previous_wins: c_state -> (black_card * white_card) list
+  val get_previous_wins: c_state -> (black_card * white_card * uID) list
 
   (*Method to return the current black card in the state*)
   val curr_black_card: c_state -> black_card
@@ -83,8 +83,8 @@
 
   (*----helper methods------------------------------------------------*)
 
-  val string_winners: (black_card * white_card * uID) option -> string
-  val winners_of_string: string -> (black_card * white_card * uID) option
+  val string_winners: (black_card * white_card * uID) list -> string
+  val winners_of_string: string -> (black_card * white_card * uID) list
 
   val string_hand: (white_card list) -> string
   val hand_of_string: string -> (white_card list)
