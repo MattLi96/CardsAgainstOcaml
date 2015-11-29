@@ -65,26 +65,30 @@ let respond_post f_state body req =
     let l_headers = (Cohttp.Request.headers req) in
     let uID = get_UID (Header.to_list (l_headers)) in
     let typ = get_type (Header.to_list l_headers) in
+    let c_uID = int_of_string (get_param (Header.to_list l_headers) "client") in
     Log.Global.info "POST Body: %s" body;
     Log.Global.info "uID found is %i" uID;
     Log.Global.info "type found is %s" typ;
     if (typ = "play") then
       let new_state = user_play_white (!s_state) uID body in
       s_state := new_state;
-      (if play_state_finished !s_state then 
+      (if play_state_finished !s_state then
          Ivar.fill_if_empty a_state.phase_over ()
        else ()
       );
       Server.respond `OK
     else
     if (typ = "judge") then
-      let new_state = user_judge (!s_state) uID body in
-      s_state := new_state;
-      (if judge_state_finished !s_state then 
-         Ivar.fill_if_empty a_state.phase_over ()
-       else ()
-      );
-      Server.respond `OK
+      if (c_uID = (get_univ_s (!s_state)).judge) then
+        let new_state = user_judge (!s_state) uID body in
+        s_state := new_state;
+        (if judge_state_finished !s_state then
+           Ivar.fill_if_empty a_state.phase_over ()
+         else ()
+        );
+        Server.respond `OK
+      else
+        Server.respond `Found
     else failwith "error"
 
 (*TODO pass in other parameters in the header of the response*)
@@ -113,13 +117,6 @@ let respond_get f_state body req =
     let h3 = Header.add (h2) "scores" s_scores in
     let h4 = Header.add (h3) "winners" s_winners in
     let h5 = Header.add (h4) "hand" s_hand in
-    (*    type univ_c_state = {
-          played  : (uID * white_card) list;
-          b_card  : black_card;
-          scores  : scores;
-          winners : (black_card * white_card * uID) option;
-          hand    : white_card list;
-          } *)
     Server.respond `OK ~headers: h5
 
 let respond_put (f_state:full_state) body req =
