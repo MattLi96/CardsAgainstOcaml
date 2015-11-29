@@ -1,32 +1,32 @@
 (*Module written as a dummy for running the GUI separately*)
-module PullCards = struct 
+module PullCards = struct
 
   type cardsfile = Yojson.Basic.json
 
-  let rec wordlist (x:string) = 
+  let rec wordlist (x:string) =
     if String.length x = 0 then [] else
     if String.contains x ' ' then
       let currindex = (String.index x ' ') in
-      let remainingstring = String.sub x (currindex + 1) 
+      let remainingstring = String.sub x (currindex + 1)
           (String.length x - (currindex + 1)) in
-      String.sub x 0 currindex::wordlist remainingstring 
+      String.sub x 0 currindex::wordlist remainingstring
     else x::[]
 
 
-  let break_line (x: string) (break: int) =  
+  let break_line (x: string) (break: int) =
     let rec recompose (acc: string) (l: string list) (break: int) =
       match l with
       | [] -> acc
-      | hd::tl -> 
-        if String.length (acc^hd) < break 
+      | hd::tl ->
+        if String.length (acc^hd) < break
         then recompose (acc^hd^" ") tl break
         else acc^"\n"^(recompose (hd^" ") tl break)
-    in 
+    in
     let ls = wordlist x in
     recompose "" ls break
 
 
-  let get_deck (x: string) = 
+  let get_deck (x: string) =
     let open Yojson.Basic.Util in
     let try_deck = try Some (Yojson.Basic.from_file x) with
         _ -> None in
@@ -35,10 +35,10 @@ module PullCards = struct
       | Some d -> d in
     [deck] |> flatten |> filter_member "text" |> filter_string
 
-  let get_random x = 
+  let get_random x =
     let r = Random.int ((List.length x)) in
-    let rec rand_acc x n = 
-      if n = 0 then 
+    let rec rand_acc x n =
+      if n = 0 then
         match x with
         | [] -> "error_done"
         | hd::tl -> hd
@@ -52,7 +52,7 @@ module PullCards = struct
     break_line (get_random x) n
 
 
-end 
+end
 
 (*Open system files*)
 open Client
@@ -75,7 +75,7 @@ let player_hand = ref None
 let submissions = ref None
 let gamelog = GText.buffer ()
 
-let new_black_card () = 
+let new_black_card () =
   let blackdeck = PullCards.get_deck "black.json" in
   PullCards.get_random_break blackdeck 50
 
@@ -88,9 +88,9 @@ let score_list = ref []
 let rec find_idx n l =
   match l with
   | [] -> ""
-  | hd::tl -> if n = 1 then hd else find_idx (n-1) tl  
+  | hd::tl -> if n = 1 then hd else find_idx (n-1) tl
 
-let rec get_submissions x = 
+let rec get_submissions x =
   match !submissions with
   |None -> "Waiting on submissions"
   |Some ls -> find_idx x ls
@@ -98,11 +98,11 @@ let rec get_submissions x =
 let rec get_hand_num x =
   match !player_hand with
   |None -> "Waiting on response"
-  |Some hand ->  
+  |Some hand ->
   find_idx x (hand)
 
 (*Replaces a card in a deck, if deck is empty returns a new card*)
-let rec new_card_deck idx d = 
+let rec new_card_deck idx d =
   match d with
   | [] -> [new_white_card()]
   | hd::tl -> if idx = 1 then (new_white_card()::tl) else (hd::(new_card_deck (idx-1) tl))
@@ -110,28 +110,28 @@ let rec new_card_deck idx d =
 (*let new_card idx =
   player_hand:=new_card_deck idx (!player_hand)*)
 
-let get_scores () = 
+let get_scores () =
   let score_string = ref "" in
   let rec generate_string l =
     match l with
     | [] -> if (!score_string) = "" then  score_string:= "No players currently online" else ()
-    | (pid, s)::tl -> 
-      score_string:= (!score_string)^pid^":   "^(string_of_int s)^"\n"; 
+    | (pid, s)::tl ->
+      score_string:= (!score_string)^pid^":   "^(string_of_int s)^"\n";
       generate_string tl in
   generate_string (!score_list); !score_string
 
 
 (*Options window, currently only contains one option*)
 let options_window () =
-  let option_window = GWindow.window ~title:"Options" ~resizable:false 
+  let option_window = GWindow.window ~title:"Options" ~resizable:false
       ~border_width:5 () in
   let myclose _ = option_window#destroy() in
   ignore(option_window#connect#destroy ~callback:(myclose));
   let vbox = GPack.vbox ~spacing:5 ~packing:option_window#add () in
-  let info = GMisc.label ~line_wrap:true 
+  let info = GMisc.label ~line_wrap:true
     (*~text:"Enable/disable expansion pack.  Warning: This will reset your
-      current game and all data will be lost."*) ~packing:vbox#add () in 
-  let checkbox = GButton.check_button ~active:(!expansion_enabled) 
+      current game and all data will be lost."*) ~packing:vbox#add () in
+  let checkbox = GButton.check_button ~active:(!expansion_enabled)
       ~packing:vbox#add () in
   let confirm = GButton.button ~packing:vbox#add ~label:"Confirm!"() in
   info#set_text("Enable/disable expansion packs. Warning: This will reset your
@@ -148,7 +148,7 @@ let about_screen () =
   match !about_visible with
   |None ->
     let icon = GdkPixbuf.from_file "res/icon.png" in
-    let about = GWindow.window ~title:"About" ~resizable:false 
+    let about = GWindow.window ~title:"About" ~resizable:false
         ~border_width:5 () in
     about#set_icon (Some icon);
     let myclose _ = about_visible:=None;about#destroy () in
@@ -157,9 +157,9 @@ let about_screen () =
     let logo = GdkPixbuf.from_file "res/cards.png" in
     let logo_widget = GMisc.image ~pixbuf:logo ~packing:vbox#add () in
     logo_widget#set_pixbuf logo;
-    let aboutlabel = GMisc.label ~line_wrap:true ~packing:vbox#add 
+    let aboutlabel = GMisc.label ~line_wrap:true ~packing:vbox#add
         ~justify:`CENTER() in
-    aboutlabel#set_text("v0.0.05a112415\n\nCharley Chen\nMatthew Li\nAustin Liu 
+    aboutlabel#set_text("v0.0.05a112415\n\nCharley Chen\nMatthew Li\nAustin Liu
 Jared Wong\n
 Some code borrowed from the open-source lablgtk2 libraries.\n
  2015. All rights reserved.");
@@ -175,9 +175,9 @@ Some code borrowed from the open-source lablgtk2 libraries.\n
 
 let score_dialog () =
   let icon = GdkPixbuf.from_file "res/icon.png" in
-  let score = GWindow.window ~title:"Game Stats" ~resizable:false 
+  let score = GWindow.window ~title:"Game Stats" ~resizable:false
       ~border_width:5 ~height:600 ~width: 270 () in
-  score#set_icon(Some icon); 
+  score#set_icon(Some icon);
   score_visible:= Some score;
   let myclose _ =score_visible:=None;score#destroy() in
   ignore(score#connect#destroy(myclose));
@@ -201,7 +201,7 @@ let score_dialog () =
 let main () =
   ignore(locale ());
   let icon = GdkPixbuf.from_file "res/icon.png" in
-  let window = GWindow.window 
+  let window = GWindow.window
       ~resizable:false ~border_width:0 ~title:"Cards Against OCaml" () in
   window#set_icon(Some icon);
   let menubox = GPack.vbox ~packing:window#add () in
@@ -212,18 +212,18 @@ let main () =
   let current_mode = GMisc.label ~packing:(hbox_top#pack ~padding:5) () in
   let logo = GdkPixbuf.from_file "res/logo.png" in
   let logo_widget = GMisc.image ~pixbuf:logo ~packing:hbox_top#add () in
-  logo_widget#set_pixbuf logo; 
+  logo_widget#set_pixbuf logo;
   let opt_menu = GMenu.menu () in
-  let opt_button = GMenu.menu_item ~label:("More settings") 
+  let opt_button = GMenu.menu_item ~label:("More settings")
       ~packing:opt_menu#append () in
   ignore(opt_button#connect#activate(options_window));
   let menu_opts = GMenu.menu_item ~label:"Options" ~packing:menubar#append () in
   menu_opts#set_submenu (opt_menu);
   let about_menu = GMenu.menu () in
-  let about_button = GMenu.menu_item ~label:("About") 
+  let about_button = GMenu.menu_item ~label:("About")
       ~packing:about_menu#append () in
   ignore(about_button#connect#activate ~callback:about_screen);
-  let exit_button = GMenu.menu_item ~label:("Exit") 
+  let exit_button = GMenu.menu_item ~label:("Exit")
       ~packing:about_menu #append () in
   ignore(exit_button#connect#activate ~callback:destroy);
   let menu_about = GMenu.menu_item ~label:"About" ~packing:menubar#append() in
@@ -231,15 +231,15 @@ let main () =
 
   let bcbox = GPack.hbox ~packing:(windowbox#pack ~padding:10) () in
   let mhbox = GPack.vbox ~packing:(windowbox#pack ~padding:0) () in
-  let timerframe = GBin.frame ~packing:(bcbox#pack ~padding:5) 
+  let timerframe = GBin.frame ~packing:(bcbox#pack ~padding:5)
       ~label: "Timer:" ~width: 70 ~height:70 () in
   let timer = GMisc.label ~packing:(timerframe#add) () in
-  let bcframe = GBin.frame ~packing:(bcbox#pack ~padding:50) 
+  let bcframe = GBin.frame ~packing:(bcbox#pack ~padding:50)
       ~label:"Current Black Card" ~width:540 ~height:95 () in
-  let scoreframe = GBin.frame ~packing:(bcbox#pack ~padding:5) 
+  let scoreframe = GBin.frame ~packing:(bcbox#pack ~padding:5)
       ~label: "Score:" ~width:70 ~height:70 () in
   let show_score = GButton.button ~packing:(hbox_top#pack ~padding:5) ~label:("Show scores") () in
-  let score_dialog_opt () = 
+  let score_dialog_opt () =
     match !score_visible with
     |None -> score_dialog ()
     |Some window -> window#destroy () in
@@ -257,57 +257,57 @@ let main () =
   let card8box = GPack.vbox ~packing:(cbox2#pack ~padding:0) () in
   let card9box = GPack.vbox ~packing:(cbox2#pack ~padding:0) () in
   let card10box = GPack.vbox ~packing:(cbox2#pack ~padding:0) () in
-  let card1frame = GBin.frame ~packing:(card1box#pack ~padding:0) 
+  let card1frame = GBin.frame ~packing:(card1box#pack ~padding:0)
       ~width:160 ~height:160 () in
-  let card2frame = GBin.frame ~packing:(card2box#pack ~padding:0) 
+  let card2frame = GBin.frame ~packing:(card2box#pack ~padding:0)
       ~width:160 ~height:160 () in
-  let card3frame = GBin.frame ~packing:(card3box#pack ~padding:0) 
+  let card3frame = GBin.frame ~packing:(card3box#pack ~padding:0)
       ~width:160 ~height:160 () in
-  let card4frame = GBin.frame ~packing:(card4box#pack ~padding:0) 
+  let card4frame = GBin.frame ~packing:(card4box#pack ~padding:0)
       ~width:160 ~height:160 () in
-  let card5frame = GBin.frame ~packing:(card5box#pack ~padding:0) 
+  let card5frame = GBin.frame ~packing:(card5box#pack ~padding:0)
       ~width:160 ~height:160 () in
-  let card6frame = GBin.frame ~packing:(card6box#pack ~padding:0) 
+  let card6frame = GBin.frame ~packing:(card6box#pack ~padding:0)
       ~width:160 ~height:160 () in
-  let card7frame = GBin.frame ~packing:(card7box#pack ~padding:0) 
+  let card7frame = GBin.frame ~packing:(card7box#pack ~padding:0)
       ~width:160 ~height:160 () in
-  let card8frame = GBin.frame ~packing:(card8box#pack ~padding:0) 
+  let card8frame = GBin.frame ~packing:(card8box#pack ~padding:0)
       ~width:160 ~height:160 () in
-  let card9frame = GBin.frame ~packing:(card9box#pack ~padding:0) 
+  let card9frame = GBin.frame ~packing:(card9box#pack ~padding:0)
       ~width:160 ~height:160 () in
-  let card10frame = GBin.frame ~packing:(card10box#pack ~padding:0) 
+  let card10frame = GBin.frame ~packing:(card10box#pack ~padding:0)
       ~width:160 ~height:160 () in
 
   let btext = "Select!" in
   let bcard = GMisc.label ~packing:bcframe#add ~line_wrap:true () in
-  let card1 = GButton.button ~label:btext 
+  let card1 = GButton.button ~label:btext
       ~packing:(card1frame#add) ~relief:`NONE () in
   card1#set_focus_on_click(false);
-  let card2 = GButton.button ~label:btext 
+  let card2 = GButton.button ~label:btext
       ~packing:(card2frame#add) ~relief:`NONE () in
   card2#set_focus_on_click(false);
-  let card3 = GButton.button ~label:btext 
+  let card3 = GButton.button ~label:btext
       ~packing:(card3frame#add) ~relief:`NONE () in
   card3#set_focus_on_click(false);
-  let card4 = GButton.button ~label:btext 
+  let card4 = GButton.button ~label:btext
       ~packing:(card4frame#add) ~relief:`NONE () in
   card4#set_focus_on_click(false);
-  let card5 = GButton.button ~label:btext 
+  let card5 = GButton.button ~label:btext
       ~packing:(card5frame#add) ~relief:`NONE () in
   card5#set_focus_on_click(false);
-  let card6 = GButton.button ~label:btext 
+  let card6 = GButton.button ~label:btext
       ~packing:(card6frame#add) ~relief:`NONE () in
   card6#set_focus_on_click(false);
-  let card7 = GButton.button ~label:btext 
+  let card7 = GButton.button ~label:btext
       ~packing:(card7frame#add) ~relief:`NONE () in
   card7#set_focus_on_click(false);
-  let card8 = GButton.button ~label:btext 
+  let card8 = GButton.button ~label:btext
       ~packing:(card8frame#add) ~relief:`NONE () in
   card8#set_focus_on_click(false);
-  let card9 = GButton.button ~label:btext 
+  let card9 = GButton.button ~label:btext
       ~packing:(card9frame#add) ~relief:`NONE () in
   card9#set_focus_on_click(false);
-  let card10 = GButton.button ~label:btext 
+  let card10 = GButton.button ~label:btext
       ~packing:(card10frame#add) ~relief:`NONE() in
   card10#set_focus_on_click(false);
 
@@ -320,10 +320,10 @@ let main () =
   let curr_score = ref 0 in
   timer#set_label((string_of_int(!curr_time)));
   score#set_label((string_of_int(!curr_score)));
-  if(!czar_mode) = false 
-  then current_mode#set_label("Pick the best card!") 
+  if(!czar_mode) = false
+  then current_mode#set_label("Pick the best card!")
   else current_mode#set_label("You are the czar!  Pick the best card!");
-  (*let set_new_cards_debug() = 
+  (*let set_new_cards_debug() =
     card1#set_label (new_white_card());
     card2#set_label (new_white_card());
     card3#set_label (new_white_card());
@@ -338,7 +338,7 @@ let main () =
   set_new_cards();*)
 
 
-  (*Universal Callbacks: Methods for updating score, updating timer - 
+  (*Universal Callbacks: Methods for updating score, updating timer -
    *bound to every button currently, primarily for debug.  Can be modified*)
   let update_score() = score#set_label((string_of_int(!curr_score))) in
   let update_timer() = timer#set_label((string_of_int(!curr_time))) in
@@ -370,14 +370,14 @@ let main () =
     bcard#set_label(new_black_card());increment_score() in*)
 
   let init_state = client_get_user_state () in
-  upon init_state (fun curr_state -> 
+  upon init_state (fun curr_state ->
       curr_user_state:= Some (get_univ_c curr_state);
       player_hand:= Some (get_univ_c curr_state).hand);
 
 
   (*Czar mode callback: Shows Czar Cards*)
   let czar () =
-    czar_mode:=false; 
+    czar_mode:=false;
     card1#set_label(get_submissions 1);
     card2#set_label(get_submissions 2);
     card3#set_label(get_submissions 3);
@@ -403,7 +403,7 @@ let main () =
     card10#set_label(get_hand_num 10);
     current_mode#set_label("Pick the best card!") in
 
-  bcard#set_label(new_black_card()); 
+  bcard#set_label(new_black_card());
   hand();
 
   (*Callbacks: Here is where the callbacks are assigned for each
