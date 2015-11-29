@@ -52,7 +52,7 @@ let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge:
   let rec loop l id =
     (match l with
       | [] -> [(0, None)]
-      | h::t -> if (fst h = id or id = 0) then t else loop t id) in
+      | h::t -> if (fst h = id || id = 0) then t else loop t id) in
   let part = loop new_list current_judge in
   fst (List.hd part)
 
