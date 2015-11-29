@@ -246,7 +246,6 @@ let shuffle state =
     Playing {x with b_deck = shuffle_help x.b_deck;
                     w_deck = shuffle_help x.w_deck}
 
-
 (*game_start begins the game for all players in the list of players*)
 (* val game_start: state -> state *)
 let game_start state =
@@ -270,4 +269,8 @@ let play_state_finished state =
 let judge_state_finished state =
   match state with
   | Playing x -> false
-  | Judging x -> (get_univ_s state).winners = None
+  | Judging x ->
+    if ((get_univ_s state).winners = []) then false else
+    let first_el = List.hd (get_univ_s state).winners in
+    (match (first_el) with
+      | (b, w, u) -> b = (get_univ_s state).b_card)
