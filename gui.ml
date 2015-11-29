@@ -98,13 +98,13 @@ let rec get_submissions x =
 
 let rec get_hand_num x =
   match !player_hand with
-  |None -> "Waiting on response"
+  |None -> "Waiting on server"
   |Some hand ->
   find_idx x (hand)
 
 let get_curr_bl () =
   match !curr_user_state with
-  | None -> "Game has not started"
+  | None -> "Waiting on server"
   | Some x -> x.b_card
 
 (*Replaces a card in a deck, if deck is empty returns a new card*)
@@ -204,7 +204,7 @@ let score_dialog () =
   score#show ()
 
 
-let main () =
+let main_window () =
   ignore(locale ());
   let icon = GdkPixbuf.from_file "res/icon.png" in
   let window = GWindow.window
@@ -284,7 +284,7 @@ let main () =
   let card10frame = GBin.frame ~packing:(card10box#pack ~padding:0)
       ~width:160 ~height:160 () in
 
-  let btext = "Game has not started" in
+  let btext = "Waiting on server" in
   let bcard = GMisc.label ~packing:bcframe#add ~line_wrap:true () in
   let card1 = GButton.button ~label:btext
       ~packing:(card1frame#add) ~relief:`NONE () in
@@ -329,19 +329,6 @@ let main () =
   if(!czar_mode) = false
   then current_mode#set_label("Pick the best card!")
   else current_mode#set_label("You are the czar!  Pick the best card!");
-  (*let set_new_cards_debug() =
-    card1#set_label (new_white_card());
-    card2#set_label (new_white_card());
-    card3#set_label (new_white_card());
-    card4#set_label (new_white_card());
-    card5#set_label (new_white_card());
-    bcard#set_label (new_black_card());
-    card6#set_label (new_white_card());
-    card7#set_label (new_white_card());
-    card8#set_label (new_white_card());
-    card9#set_label (new_white_card());
-    card10#set_label (new_white_card()) in
-  set_new_cards();*)
 
 
   (*Universal Callbacks: Methods for updating score, updating timer -
@@ -353,9 +340,6 @@ let main () =
   (*Debug Callbacks: Used for testing GUI in offline*)
   (*let increment_score() = curr_score:=(!curr_score +1) in*)
   (*let increment_timer() = curr_time:=(!curr_time +1) in*)
-
-
-
 
   (*Czar mode callback: Shows Czar Cards*)
   let czar () =
@@ -377,19 +361,18 @@ let main () =
     upon !init_state (fun curr_state ->
         curr_user_state:= Some (get_univ_c curr_state);
         player_hand:= Some (get_univ_c curr_state).hand;
-    card1#set_label(get_hand_num 1);
-    card2#set_label(get_hand_num 2);
-    card3#set_label(get_hand_num 3);
-    card4#set_label(get_hand_num 4);
-    card5#set_label(get_hand_num 5);
-    card6#set_label(get_hand_num 6);
-    card7#set_label(get_hand_num 7);
-    card8#set_label(get_hand_num 8);
-    card9#set_label(get_hand_num 9);
-    card10#set_label(get_hand_num 10);
-    current_mode#set_label("Pick the best card!")) in
-
-  bcard#set_label(new_black_card());
+        card1#set_label(get_hand_num 1);
+        card2#set_label(get_hand_num 2);
+        card3#set_label(get_hand_num 3);
+        card4#set_label(get_hand_num 4);
+        card5#set_label(get_hand_num 5);
+        card6#set_label(get_hand_num 6);
+        card7#set_label(get_hand_num 7);
+        card8#set_label(get_hand_num 8);
+        card9#set_label(get_hand_num 9);
+        card10#set_label(get_hand_num 10);
+        current_mode#set_label("Pick the best card!");
+        bcard#set_label(get_curr_bl ())) in
   update_gui();
 
   (*Callbacks: Here is where the callbacks are assigned for each
@@ -424,4 +407,9 @@ let main () =
   window#show();
   GMain.Main.main()
 
+let main () =
+  upon (trigger_start()) main_window
+
+
 let _ = main()
+let _ = Scheduler.go ()
