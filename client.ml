@@ -116,6 +116,7 @@ let get_user_state (uID:uID):state Deferred.t =
   let scores = scores_of_string (get_param response_h "scores") in
   let winners = winners_of_string (get_param response_h "winners") in
   let hand = hand_of_string (get_param response_h "hand") in
+  let str_state = get_param response_h "state" in
   let ans = {
     played  = played;
     b_card  = b_card;
@@ -123,7 +124,7 @@ let get_user_state (uID:uID):state Deferred.t =
     winners = winners;
     hand    = hand;
   } in
-  let ans2 = PWaiting ans in
+  let ans2 = State.state_of_string ans str_state in
   return ans2)
 
 let client_get_user_state () =

@@ -100,13 +100,15 @@ let respond_get f_state body req =
     let l_headers = (Cohttp.Request.headers req) in
     let uID = get_UID (Header.to_list (l_headers)) in
     Log.Global.info "uID found is %i" (uID);
-    let ans = get_univ_c (State.get_user_state (!s_state) uID) in
+    let cstate = State.get_user_state (!s_state) uID in
+    let ans = get_univ_c cstate in
 
     let s_played = (State.string_played (ans.played)) in
     let s_black = (ans.b_card) in
     let s_scores = (State.string_scores (ans.scores)) in
     let s_winners = (State.string_winners (ans.winners)) in
     let s_hand = (State.string_hand (ans.hand)) in
+    let s_gstate = State.string_state cstate in
 
     Log.Global.info "played: %s" (State.string_played (ans.played));
     Log.Global.info "black: %s" (ans.b_card);
@@ -121,7 +123,8 @@ let respond_get f_state body req =
     let h3 = Header.add (h2) "scores" s_scores in
     let h4 = Header.add (h3) "winners" s_winners in
     let h5 = Header.add (h4) "hand" s_hand in
-    Server.respond `OK ~headers: h5
+    let h6 = Header.add (h5) "state" s_gstate in
+    Server.respond `OK ~headers: h6
 
 let respond_put (f_state:full_state) body req =
   match f_state with
