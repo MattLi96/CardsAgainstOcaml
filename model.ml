@@ -45,8 +45,6 @@ let give_cards (u_s_state:univ_s_state):univ_s_state =
   let new_state = {u_s_state with hands = new_hands} in
   {new_state with w_deck = WDeck !deck}
 
-(* (uID * (white_card list)) list *)
-
 let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge: uID) =
   (Printf.printf "current_judge: %i" current_judge);
   let new_list = card_to_player @ card_to_player in
@@ -109,7 +107,6 @@ let init_s_state () =
 let get_active_user () = failwith "todo"
 
 (*SET FUNCTIONS: functions that modify the state*)
-
 (*univ_s is a univ_s_state. Rest are the same*)
 let user_add_helper univ_s name =
   let new_uID = incr user_counter; !user_counter in
