@@ -103,7 +103,11 @@
       winners = univ.winners;
       hand    = get_hand state u;
     } in
-    if (u = (get_univ_s state).judge) then JWaiting univ_c else PWaiting univ_c
+    match state with
+    | Playing _ ->
+      if (u = (get_univ_s state).judge) then JWaiting univ_c else Playing univ_c
+    | Judging _ ->
+      if (u = (get_univ_s state).judge) then Judging univ_c else PWaiting univ_c
 
 
   (*val get_black_deck: s_state -> deck *)
@@ -218,3 +222,18 @@ let played_of_string input =
       )
   in
   loop input
+
+  let string_state (cstate:c_state) =
+    match cstate with
+    | JWaiting _ -> "JWaiting"
+    | Judging _ -> "Judging"
+    | Playing _ -> "Playing"
+    | PWaiting _ -> "PWaiting"
+
+  let state_of_string ustate str =
+    match str with
+    | "PWaiting" -> PWaiting ustate
+    | "Judging" -> Judging ustate
+    | "Playing" -> Playing ustate
+    | "JWaiting" -> JWaiting ustate
+    | _ -> failwith "error in transmission"
