@@ -163,26 +163,29 @@ let get_user_state (uID:uID):state Deferred.t =
   let temp_header = Header.add (Header.init()) "uID" (string_of_int uID) in
   let req = (Client.get (Uri.of_string !connect_url) ~headers:temp_header) in
   req >>= (fun (resp, body) ->
-  let code = resp |> Response.status |> Code.code_of_status in
-  print_string "Response Code: "; print_int code; print_endline "";
-  print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string);
-  let response_h = (resp |> Response.headers |> Header.to_list) in
+      try
+        let code = resp |> Response.status |> Code.code_of_status in
+        print_string "Response Code: "; print_int code; print_endline "";
+        print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string);
+        let response_h = (resp |> Response.headers |> Header.to_list) in
 
-  let played = played_of_string (get_param response_h "played") in
-  let b_card = (get_param response_h "b_card") in
-  let scores = scores_of_string (get_param response_h "scores") in
-  let winners = winners_of_string (get_param response_h "winners") in
-  let hand = hand_of_string (get_param response_h "hand") in
-  let str_state = get_param response_h "state" in
-  let ans = {
-    played  = played;
-    b_card  = b_card;
-    scores  = scores;
-    winners = winners;
-    hand    = hand;
-  } in
-  let ans2 = State.state_of_string ans str_state in
-  return ans2)
+        let played = played_of_string (get_param response_h "played") in
+        let b_card = (get_param response_h "b_card") in
+        let scores = scores_of_string (get_param response_h "scores") in
+        let winners = winners_of_string (get_param response_h "winners") in
+        let hand = hand_of_string (get_param response_h "hand") in
+        let str_state = get_param response_h "state" in
+        let ans = {
+          played  = played;
+          b_card  = b_card;
+          scores  = scores;
+          winners = winners;
+          hand    = hand;
+        } in
+        let ans2 = State.state_of_string ans str_state in
+        return ans2
+      with _ -> return (State.init_c_state ()) (*We got a malformed response*)
+    )
 
 let client_get_user_state () =
   get_user_state !c_uID

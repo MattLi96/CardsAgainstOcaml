@@ -81,22 +81,13 @@ let select_black (u_s_state:univ_s_state) : univ_s_state =
 
 (*INIT FUNCTIONS*)
 let init_s_state () =
-  Playing {
-    judge  = 0;
-    played = [];
-    b_card = "";
-    scores = [];
-    winners = [];
-
-    (*decks*)
-    b_deck = BDeck (fill_deck "black.json");
-    w_deck = WDeck (fill_deck "white.json");
-
-    (*List of (card, player) pairs matching cards played to users who played
-      them*)
-    card_to_player = [];
-    hands          = []
-  }
+  match State.init_s_state () with
+  | Playing x | Judging x ->
+    Playing {x with
+             (*decks*)
+             b_deck = BDeck (fill_deck "black.json");
+             w_deck = WDeck (fill_deck "white.json");
+            }
 
 (*GET FUNCTIONS: functions that return information about the state*)
 
@@ -199,15 +190,15 @@ let give_point scores uID =
 (* val user_judge: state -> uID -> card -> state *)
 let user_judge (state:state) (uID:uID) (white:white_card):state =
   if (white = "") then state else
-  ((if (uID_in_list (get_univ_s state).card_to_player uID) then
-     let old_black_card = (get_univ_s state).b_card in
-     let new_scores = give_point (get_univ_s state).scores uID in
-     let new_state = {(get_univ_s state) with winners =
-                                                (old_black_card, white, uID) :: (get_univ_s state).winners} in
-     let new_state2 = {new_state with scores = new_scores} in
-     Judging new_state2
-   else
-     state))
+    ((if (uID_in_list (get_univ_s state).card_to_player uID) then
+        let old_black_card = (get_univ_s state).b_card in
+        let new_scores = give_point (get_univ_s state).scores uID in
+        let new_state = {(get_univ_s state) with winners =
+                                                   (old_black_card, white, uID) :: (get_univ_s state).winners} in
+        let new_state2 = {new_state with scores = new_scores} in
+        Judging new_state2
+      else
+        state))
 
 (*reset_all removes all players from the state*)
 (* val game_reset: state -> uID -> state *)
