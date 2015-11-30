@@ -538,15 +538,18 @@ let initial_window () =
       ~packing:vbox#add () in
   let start_button = GButton.button ~label:("Click to start!") 
       ~packing:vbox#add () in
+  let init_start () = 
+    upon (Client.trigger_start()) (fun () -> (main_window();main_destroy())) in
   let init_connect () = 
     let server_input = server#get_text () in
     upon (connect_server server_input "string") (fun () ->
+        ignore(start_button#connect#clicked ~callback:init_start);
         indicator#set_label("You are now connected!")) in
-  let init_start () = 
-    upon (Client.trigger_start()) (fun () -> (main_window();main_destroy())) in
+  let connect_first () = 
+    indicator#set_label("Connect to server first!") in
 
   ignore(connect_button#connect#clicked ~callback:init_connect);
-  ignore(start_button#connect#clicked ~callback:init_start);
+  ignore(start_button#connect#clicked ~callback:connect_first);
   (*ignore(splash#connect#destroy(confirm_exit));*)
   splash#show(); ()
 
