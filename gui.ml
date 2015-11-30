@@ -108,11 +108,7 @@ let rec get_submissions x =
   match !submissions with
   | None -> "Waiting on submissions"
   | Some ls -> 
-    let rec get_sublist l = 
-      match l with
-      | [] -> []
-      | (a,b)::tl -> b::(get_sublist tl) in
-    find_idx x (get_sublist ls)
+    find_idx x (List.map snd ls)
 
 let rec get_hand_num x l =
   match l with
