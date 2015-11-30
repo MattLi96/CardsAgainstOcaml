@@ -70,7 +70,7 @@ let score_visible = ref None
 let about_visible = ref None
 let expansion_enabled = ref false
 let czar_mode = ref false
-let init_state = ref (client_get_user_state ())
+(*let init_state = ref (client_get_user_state ())*)
 let (curr_user_state: State.univ_c_state option ref) = ref None
 let player_hand = ref None
 let submissions = ref None
@@ -216,6 +216,7 @@ let score_dialog () =
   scores_list#set_text(get_scores ());
 
   score#show ()
+
 
 
 let main_window () =
@@ -373,7 +374,9 @@ let main_window () =
     current_mode#set_label("You are the Czar!") in
 
   let update_gui () =
+    Pervasives.print_string("Printing before upon");
     upon (client_get_user_state ()) (fun curr_state ->
+        Pervasives.print_string("Printing after fun");
         curr_user_state:= Some (get_univ_c curr_state);
         player_hand:= Some (get_univ_c curr_state).hand;
         card1#set_label(get_hand_num 1);
@@ -388,7 +391,7 @@ let main_window () =
         card10#set_label(get_hand_num 10);
         current_mode#set_label("Pick the best card!");
         bcard#set_label(get_curr_bl ()));
-        score#set_label(get_current_score())
+    score#set_label(get_current_score())
   in
   update_gui();
 
@@ -424,10 +427,32 @@ let main_window () =
   window#show();
   GMain.Main.main()
 
+
+let initial_window () = 
+  ignore(locale ());
+  let icon = GdkPixbuf.from_file "res/icon.png" in
+  let splash = GWindow.window 
+      ~resizable:false ~border_width:0 ~title:"Cards Against OCaml" () in
+  splash#set_icon(Some icon);
+  let main_destroy _ = destroy();ignore(exit 0);() in
+  ignore(splash#connect#destroy(main_destroy));
+  let vbox = GPack.vbox ~packing:(splash#add) () in
+  let logo = GdkPixbuf.from_file "res/cards.png" in
+  let logo_widget = GMisc.image ~pixbuf:logo ~packing:vbox#add () in
+  logo_widget#set_pixbuf logo;
+  let main_button = GButton.button ~label:("Click to launch the game!") 
+      ~packing:vbox#add () in
+  let init_main () = 
+    upon (connect_server "http://localhost:8080/" "string") (fun () ->
+        upon (Client.trigger_start()) (fun () -> (splash#destroy();main_window())));
+    ignore(Scheduler.go()) in
+
+  ignore(main_button#connect#clicked ~callback:init_main);
+  ignore(splash#connect#destroy ~callback:main_destroy);
+  splash#show();
+  GMain.Main.main()
+
 let main () =
-  upon (connect_server "http://localhost:8080/" "string") (fun () ->
-      upon (Client.trigger_start()) main_window)
+  initial_window()
 
-
-let _ = main()
-let _ = Scheduler.go ()
+let _ = main ()
