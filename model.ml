@@ -259,9 +259,12 @@ let game_start state =
 
 (*goes to the next game phase*)
 (* val game_next_phase: state -> state *)
-let game_next_phase state =
+let rec game_next_phase state =
   match state with
-  | Playing x -> Judging x
+  | Playing x -> 
+    if (List.exists (fun p -> (snd p) <> None) x.card_to_player) 
+    then Judging x
+    else game_next_phase (Judging x)
   | Judging x -> Playing (select_black x)
 
 let play_state_finished state =

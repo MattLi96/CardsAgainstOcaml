@@ -12,7 +12,7 @@ open Heartbeat
 type a_state = {
   (*Fill when phase is over, either due to time or everyone played*)
   mutable phase_over: unit Ivar.t;
-
+  mutable started: bool;
   (*Heartbeat abbreviated for simplicity
     Heartbeat should not need to be reinitialized ever.
     A timer is only for the current phase. A new one is created for each loop.
@@ -93,6 +93,11 @@ let respond_post f_state body req =
         Server.respond `Found
     | "pause" -> pause_timer a_state.timer; Server.respond `OK
     | "resume" -> start_timer a_state.timer; Server.respond `OK
+    | "beat" -> let time = get_time a_state.timer in
+        let h = Header.add (Header.init()) "time"  (string_of_int time) in
+        Heartbeat.beat a_state.hb uID;
+        (Log.Global.info "CLIENT HEARTBEAT: %i" uID);
+        Server.respond `OK ~headers: h
     | _ -> failwith "wierd type of post"
 
 (*TODO pass in other parameters in the header of the response*)
@@ -132,10 +137,13 @@ let respond_put (f_state:full_state) body req =
   match f_state with
   | (a_state, s_state) ->
     if (body = "start") then (
+      if (not a_state.started) then
+      (a_state.started <- true;
       s_state := game_start !s_state;
       let _ = gameloop f_state in
       (Log.Global.info "Start %s" "triggered";
-       Server.respond `OK)
+      Server.respond `OK))
+      else Server.respond `Found
     )else
       (let l_headers = (Cohttp.Request.headers req) in
        let name = get_param (Header.to_list (l_headers)) "name" in
@@ -148,6 +156,7 @@ let respond_put (f_state:full_state) body req =
 
 let start_server port () =
   let state = ({phase_over = Ivar.create ();
+                started = false;
                 hb = create_heartbeat 5; (*Heartbeat cycle set for 5 seconds*)
                 timer = create_timer 0}
               , ref (init_s_state ())) in
