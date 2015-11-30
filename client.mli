@@ -11,6 +11,12 @@ val client_play_white: white_card -> unit Deferred.t
 val client_judge: white_card -> unit Deferred.t
 val client_get_user_state: unit -> state Deferred.t
 
+(*pause the game*)
+val client_pause: unit -> unit Deferred.t
+
+(*resume the game(start game timer)*)
+val client_resume: unit -> unit Deferred.t
+
 (*play_white allows a user to play a card*)
 val play_white: uID -> white_card -> unit Deferred.t
 
@@ -25,3 +31,5 @@ val start_heartbeat: uID -> 'a Async.Std.Ivar.t
 
 (*check_heartbeat returns false if the heartbeat ever fails*)
 val check_heartbeat: uID -> bool
+
+val trigger_start: unit -> unit Deferred.t

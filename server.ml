@@ -68,7 +68,8 @@ let respond_post f_state body req =
     Log.Global.info "POST Body: %s" body;
     Log.Global.info "uID found is %i" uID;
     Log.Global.info "type found is %s" typ;
-    if (typ = "play") then
+    match typ with
+    | "play" ->
       let new_state = user_play_white (!s_state) uID body in
       s_state := new_state;
       (if play_state_finished !s_state then
@@ -76,8 +77,7 @@ let respond_post f_state body req =
        else ()
       );
       Server.respond `OK
-    else
-    if (typ = "judge") then
+    | "judge" ->
       let c_uID = int_of_string (get_param (Header.to_list l_headers) "client") in
       (Log.Global.info "JUDGE: %i" (get_univ_s (!s_state)).judge);
       (Log.Global.info "CLIENT REQ UID: %i" c_uID);
@@ -91,7 +91,9 @@ let respond_post f_state body req =
         Server.respond `OK
       else
         Server.respond `Found
-    else failwith "error"
+    | "pause" -> pause_timer a_state.timer; Server.respond `OK
+    | "resume" -> start_timer a_state.timer; Server.respond `OK
+    | _ -> failwith "wierd type of post"
 
 (*TODO pass in other parameters in the header of the response*)
 let respond_get f_state body req =
