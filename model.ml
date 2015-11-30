@@ -57,7 +57,6 @@ let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge:
   let part = loop new_list current_judge in
   fst (List.hd part)
 
-
 let select_black (u_s_state:univ_s_state):univ_s_state =
   let old_b_deck = (match u_s_state.b_deck with
     | BDeck x -> x
@@ -86,7 +85,7 @@ let select_black (u_s_state:univ_s_state):univ_s_state =
 
 (*INIT FUNCTIONS*)
 let init_s_state () =
-  let temp_state = {
+  Playing {
     judge  = 0;
     played = [];
     b_card = "";
@@ -101,10 +100,7 @@ let init_s_state () =
     them*)
     card_to_player = [];
     hands          = []
-  } in
-  let sel_blck = select_black temp_state in
-  let card_distro = give_cards sel_blck in
-  Playing card_distro
+  }
 
 (*GET FUNCTIONS: functions that return information about the state*)
 
@@ -114,19 +110,24 @@ let get_active_user () = failwith "todo"
 
 (*SET FUNCTIONS: functions that modify the state*)
 
+(*univ_s is a univ_s_state. Rest are the same*)
+let user_add_helper univ_s name =
+  let new_uID = incr user_counter; !user_counter in
+  let new_scores = (new_uID, 0) :: univ_s.scores in
+  let new_card_to_player = (new_uID, None) ::
+                           univ_s.card_to_player in
+  let new_hands = (new_uID, []) :: univ_s.hands in
+  let new_state1 = {univ_s with scores = new_scores} in
+  let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
+  let final_state = {new_state2 with hands = new_hands} in
+  (new_uID, Playing final_state)
+
 (*add_user takes in a username and adds it to the list of players in the state*)
 (* val user_add: state -> string -> state *)
 let user_add state name =
-  let new_uID = incr user_counter; !user_counter in
-  let new_scores = (new_uID, 0) :: (get_univ_s state).scores in
-  let new_card_to_player = (new_uID, None) ::
-                           (get_univ_s state).card_to_player in
-  let new_hands = (new_uID, []) :: (get_univ_s state).hands in
-  let new_state1 = {(get_univ_s state) with scores = new_scores} in
-  let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
-  let new_state3 = {new_state2 with hands = new_hands} in
-  let final_state = give_cards new_state3 in
-  (new_uID, Playing final_state)
+  match state with
+  | Playing x -> user_add_helper x name
+  | Judging x -> user_add_helper x name 
 
 (*remove_user takes in the uID of a player and removes said player from the
 list of players in the state*)
@@ -250,7 +251,10 @@ let game_start state =
   Random.self_init ();
   let s = shuffle state in
   match s with
-  | Playing x | Judging x -> Playing x
+  | Judging x | Playing x ->
+    let sel_blck = select_black x in
+    let card_distro = give_cards sel_blck in
+    Playing card_distro
 
 (*goes to the next game phase*)
 (* val game_next_phase: state -> state *)
@@ -270,6 +274,6 @@ let judge_state_finished state =
   | Playing x -> false
   | Judging x ->
     if (x.winners = []) then false else
-    let first_el = List.hd x.winners in
-    (match (first_el) with
-      | (b, _, _) -> b = x.b_card)
+      let first_el = List.hd x.winners in
+      (match (first_el) with
+       | (b, _, _) -> b = x.b_card)
