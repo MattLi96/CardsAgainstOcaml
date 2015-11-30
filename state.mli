@@ -94,3 +94,6 @@
 
   val string_played: (uID * white_card) list -> string
   val played_of_string: string -> (uID * white_card) list
+
+  val string_state: c_state -> string
+  val state_of_string: univ_c_state -> string -> c_state
