@@ -65,9 +65,9 @@ let respond_post f_state body req =
     let l_headers = (Cohttp.Request.headers req) in
     let uID = get_UID (Header.to_list (l_headers)) in
     let typ = get_type (Header.to_list l_headers) in
-(*     Log.Global.info "POST Body: %s" body;
-    Log.Global.info "uID found is %i" uID;
-    Log.Global.info "type found is %s" typ; *)
+    (*     Log.Global.info "POST Body: %s" body;
+           Log.Global.info "uID found is %i" uID;
+           Log.Global.info "type found is %s" typ; *)
     match typ with
     | "play" ->
       let new_state = user_play_white (!s_state) uID body in
@@ -94,10 +94,10 @@ let respond_post f_state body req =
     | "pause" -> pause_timer a_state.timer; Server.respond `OK
     | "resume" -> start_timer a_state.timer; Server.respond `OK
     | "beat" -> let time = get_time a_state.timer in
-        let h = Header.add (Header.init()) "time"  (string_of_int time) in
-        Heartbeat.beat a_state.hb uID;
-        (* (Log.Global.info "CLIENT HEARTBEAT: %i" uID); *)
-        Server.respond `OK ~headers: h
+      let h = Header.add (Header.init()) "time"  (string_of_int time) in
+      Heartbeat.beat a_state.hb uID;
+      (* (Log.Global.info "CLIENT HEARTBEAT: %i" uID); *)
+      Server.respond `OK ~headers: h
     | _ -> failwith "wierd type of post"
 
 (*TODO pass in other parameters in the header of the response*)
@@ -138,11 +138,11 @@ let respond_put (f_state:full_state) body req =
   | (a_state, s_state) ->
     if (body = "start") then (
       if (not a_state.started) then
-      (a_state.started <- true;
-      s_state := game_start !s_state;
-      let _ = gameloop f_state in
-      (Log.Global.info "Start %s" "triggered";
-      Server.respond `OK))
+        (a_state.started <- true;
+         s_state := game_start !s_state;
+         let _ = gameloop f_state in
+         (Log.Global.info "Start %s" "triggered";
+          Server.respond `OK))
       else Server.respond `Found
     )else
       (let l_headers = (Cohttp.Request.headers req) in
