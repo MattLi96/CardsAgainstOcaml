@@ -262,13 +262,13 @@ let play_state_finished state =
   match state with
   | Judging x -> false
   | Playing x ->
-    not (List.exists (fun p -> (snd p) = None) (get_univ_s state).card_to_player)
+    (List.length (List.filter (fun p -> (snd p) = None) x.card_to_player) = 1)
 
 let judge_state_finished state =
   match state with
   | Playing x -> false
   | Judging x ->
-    if ((get_univ_s state).winners = []) then false else
-    let first_el = List.hd (get_univ_s state).winners in
+    if (x.winners = []) then false else
+    let first_el = List.hd x.winners in
     (match (first_el) with
-      | (b, w, u) -> b = (get_univ_s state).b_card)
+      | (b, _, _) -> b = x.b_card)
