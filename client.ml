@@ -162,6 +162,9 @@ let start_heartbeat uID =
   let ivar = Ivar.create () in
   ivar
 
+let current_id () =
+  !c_uID
+
 (*check_heartbeat returns false if the heartbeat ever fails*)
 (* val check_heartbeat: uID -> boolean *)
 let check_heartbeat uID = failwith "unimplemented"
