@@ -120,14 +120,15 @@ let user_add_helper univ_s name =
   let new_state1 = {univ_s with scores = new_scores} in
   let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
   let final_state = {new_state2 with hands = new_hands} in
-  (new_uID, Playing final_state)
+  (new_uID, final_state)
 
 (*add_user takes in a username and adds it to the list of players in the state*)
 (* val user_add: state -> string -> state *)
 let user_add state name =
-  match state with
-  | Playing x -> user_add_helper x name
-  | Judging x -> user_add_helper x name 
+  let res = user_add_helper (get_univ_s state) name in
+  match (state, res) with
+  | (Playing _, (uid, s)) -> (uid, Playing s)
+  | (Judging _, (uid, s)) -> (uid, Judging s)
 
 (*remove_user takes in the uID of a player and removes said player from the
 list of players in the state*)
