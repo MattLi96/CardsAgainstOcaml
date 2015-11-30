@@ -224,6 +224,8 @@ let main_window () =
   let window = GWindow.window
       ~resizable:false ~border_width:0 ~title:"Cards Against OCaml" () in
   window#set_icon(Some icon);
+  let main_destroy _ = destroy();ignore(exit 0);() in
+  ignore(window#connect#destroy(main_destroy));
   let menubox = GPack.vbox ~packing:window#add () in
   let menubar = GMenu.menu_bar ~packing:menubox#pack() in
   let hbox = GPack.hbox ~packing:(menubox#pack ~padding:50) () in
@@ -408,7 +410,7 @@ let main_window () =
   let callback9 () = if !czar_mode = true then czar() else update_gui() in
   let callback10 () = if !czar_mode = true then czar() else update_gui() in
 
-  ignore(window#connect#destroy ~callback:destroy);
+  ignore(window#connect#destroy ~callback:main_destroy);
   ignore(card1#connect#clicked ~callback:callback1);
   ignore(card2#connect#clicked ~callback:callback2);
   ignore(card3#connect#clicked ~callback:callback3);
