@@ -346,10 +346,10 @@ let main_window () =
    *when this is fully implemented.*)
 
 
-  let curr_time = ref 30 in
+  (*let curr_time = ref 30 in
   let curr_score = ref 0 in
   timer#set_label((string_of_int(!curr_time)));
-  score#set_label((string_of_int(!curr_score)));
+  score#set_label((string_of_int(!curr_score)));*)
 
 
   (*Universal Callbacks: Methods for updating score, updating timer -
@@ -413,7 +413,7 @@ let main_window () =
           card10#set_label("Waiting for players");
           bcard#set_label("Waiting for players");
           current_mode#set_label("You are the Czar!");
-          upon (after (Core.Std.sec 1.0)) (fun () -> update_gui_func())
+          upon (after (Core.Std.sec 2.0)) (fun () -> update_gui_func())
         | PWaiting st ->
           judging_mode:=false; 
           card1#set_label("Waiting for czar");
@@ -428,12 +428,15 @@ let main_window () =
           card10#set_label("Waiting for czar");
           bcard#set_label("Waiting for czar");
           current_mode#set_label("Pick the best card!"));
-          upon (after (Core.Std.sec 1.0)) (fun () -> update_gui_func())
+          upon (after (Core.Std.sec 2.0)) (fun () -> update_gui_func())
 
   in
-  let update_gui () = GtkThread.async update_gui_func () in
-  update_gui();
-
+  let update_gui () = GtkThread.sync update_gui_func () in
+  update_gui ();
+  let rec update_timer () = 
+    upon (after (Core.Std.sec 1.0)) 
+      (fun () -> timer#set_label(string_of_int (!Client.time));update_timer ())
+  in update_timer();
   (*Callbacks: Here is where the callbacks are assigned for each
    *of the 10 buttons in the main interface of the GUI.  When connecting
    *to the server, each of the 10 buttons' callbacks can be used to call
@@ -443,44 +446,44 @@ let main_window () =
 
   let callback1 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true then (upon (client_judge (submit_judge_num 1)) (fun () -> update_gui ())) else
-  upon (client_play_white (submit_hand_num 1)) (fun () ->
-        update_gui()) in
+      upon (client_play_white (submit_hand_num 1)) (fun () ->
+          update_gui()) in
   let callback2 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true then (upon (client_judge (submit_judge_num 2)) (fun () -> update_gui ())) else
-    upon (client_play_white (submit_hand_num 2)) (fun () ->
-        update_gui()) in
+      upon (client_play_white (submit_hand_num 2)) (fun () ->
+          update_gui()) in
   let callback3 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true then (upon (client_judge (submit_judge_num 3)) (fun () -> update_gui ())) else
-    upon (client_play_white (submit_hand_num 3)) (fun () ->
-       update_gui()) in
+      upon (client_play_white (submit_hand_num 3)) (fun () ->
+          update_gui()) in
   let callback4 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true then (upon (client_judge (submit_judge_num 4)) (fun () -> update_gui ())) else
-    upon (client_play_white (submit_hand_num 4)) (fun () ->
-       update_gui()) in
+      upon (client_play_white (submit_hand_num 4)) (fun () ->
+          update_gui()) in
   let callback5 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true then (upon (client_judge (submit_judge_num 5)) (fun () -> update_gui ())) else
-    upon (client_play_white (submit_hand_num 5)) (fun () ->
-        update_gui())in
+      upon (client_play_white (submit_hand_num 5)) (fun () ->
+          update_gui())in
   let callback6 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true then (upon (client_judge (submit_judge_num 6)) (fun () -> update_gui ())) else
-    upon (client_play_white (submit_hand_num 6)) (fun () ->
-        update_gui()) in
+      upon (client_play_white (submit_hand_num 6)) (fun () ->
+          update_gui()) in
   let callback7 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true then (upon (client_judge (submit_judge_num 7)) (fun () -> update_gui ())) else
-    upon (client_play_white (submit_hand_num 7)) (fun () ->
-        update_gui()) in
+      upon (client_play_white (submit_hand_num 7)) (fun () ->
+          update_gui()) in
   let callback8 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true then (upon (client_judge (submit_judge_num 8)) (fun () -> update_gui ())) else
-    upon (client_play_white (submit_hand_num 8)) (fun () ->
-        update_gui()) in
+      upon (client_play_white (submit_hand_num 8)) (fun () ->
+          update_gui()) in
   let callback9 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true then (upon (client_judge (submit_judge_num 9)) (fun () -> update_gui ())) else
-    upon (client_play_white (submit_hand_num 9)) (fun () ->
-        update_gui()) in
+      upon (client_play_white (submit_hand_num 9)) (fun () ->
+          update_gui()) in
   let callback10 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true then (upon (client_judge (submit_judge_num 10)) (fun () -> update_gui ())) else
-    upon (client_play_white (submit_hand_num 10)) (fun () ->
-        update_gui()) in
+      upon (client_play_white (submit_hand_num 10)) (fun () ->
+          update_gui()) in
 
   ignore(window#connect#destroy ~callback:main_destroy);
   ignore(card1#connect#clicked ~callback:callback1);
