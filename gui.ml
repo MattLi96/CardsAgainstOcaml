@@ -519,7 +519,7 @@ let initial_window () =
   ignore(locale ());
   let icon = GdkPixbuf.from_file "res/icon.png" in
   let splash = GWindow.window 
-      ~resizable:false ~border_width:0 ~title:"Cards Against OCaml" () in
+      ~resizable:false ~border_width:10 ~title:"Cards Against OCaml" () in
   splash#set_icon(Some icon);
   let main_destroy _ = splash#destroy() in
   (*ignore(splash#connect#destroy(main_destroy));*)
@@ -529,12 +529,18 @@ let initial_window () =
   logo_widget#set_pixbuf logo;
   let indicator = GMisc.label ~packing:(vbox#add) () in
   indicator#set_label("Connect to server before starting game.");
+  let boxbuffer = GBin.frame ~packing:(vbox#pack ~padding:5) ~label:"Server address" () in
+  let server = GText.buffer () in
+  let server_box = GText.view ~packing:(boxbuffer#add) () in
+  server#set_text("http://localhost:8080");
+  server_box#set_buffer(server);
   let connect_button = GButton.button ~label:("Click to connect to server!") 
       ~packing:vbox#add () in
   let start_button = GButton.button ~label:("Click to start!") 
       ~packing:vbox#add () in
   let init_connect () = 
-    upon (connect_server "http://localhost:8080/" "string") (fun () ->
+    let server_input = server#get_text () in
+    upon (connect_server server_input "string") (fun () ->
         indicator#set_label("You are now connected!")) in
   let init_start () = 
     upon (Client.trigger_start()) (fun () -> (main_window();main_destroy())) in
