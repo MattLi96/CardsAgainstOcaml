@@ -58,7 +58,6 @@ end
 open Client
 open State
 open Async.Std
-open Timer
 
 let flush () = after(Core.Std.sec 0.)
 
@@ -435,7 +434,7 @@ let main_window () =
   update_gui ();
   let rec update_timer () = 
     upon (after (Core.Std.sec 0.2)) 
-      (fun () -> timer#set_label(string_of_int (!Client.time));update_timer ())
+      (fun () -> timer#set_label(string_of_int (Client.get_time ()));update_timer ())
   in update_timer();
   (*Callbacks: Here is where the callbacks are assigned for each
    *of the 10 buttons in the main interface of the GUI.  When connecting

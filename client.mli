@@ -4,9 +4,7 @@ open State
 
 type state = c_state
 
-val time: int ref
-
-val c_uID: int ref
+val get_time: unit -> int
 
 (*connect_server allows the client to connect to a server*)
 val connect_server: string -> string -> unit Deferred.t

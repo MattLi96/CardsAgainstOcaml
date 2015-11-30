@@ -24,6 +24,9 @@ let time = ref 40
 (*default try to connect to local*)
 let connect_url = ref "http://localhost:8080/"
 
+let get_time () =
+  !time
+
 (*Helper Functions*)
 let rec get_UID l =
   (match l with
