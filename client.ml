@@ -187,6 +187,3 @@ let client_get_user_state () =
 (*check_heartbeat returns false if the heartbeat ever fails*)
 (* val check_heartbeat: uID -> boolean *)
 let check_heartbeat uID = failwith "unimplemented"
-
-let _ = ignore(connect_server !connect_url "Charley");
-  ignore (trigger_start ()); ignore(Scheduler.go ())
