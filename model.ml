@@ -247,6 +247,7 @@ let shuffle state =
 (*game_start begins the game for all players in the list of players*)
 (* val game_start: state -> state *)
 let game_start state =
+  Random.self_init ();
   let s = shuffle state in
   match s with
   | Playing x | Judging x -> Playing x
