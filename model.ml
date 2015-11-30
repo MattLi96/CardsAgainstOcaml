@@ -54,7 +54,7 @@ let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge:
      | [] -> []
      | h::t -> if (fst h = id || id = 0) then t else loop t id) in
   match loop new_list current_judge with
-  | [] -> 1 (*default to first user, this happens when we reach the end*)
+  | [] -> 1 (*default to first user*)
   | h::t -> fst h
 
 let select_black (u_s_state:univ_s_state) : univ_s_state =
