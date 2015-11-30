@@ -39,7 +39,7 @@ let give_cards (u_s_state:univ_s_state):univ_s_state =
        let current_num = List.length (snd h) in
        let dif = req_num_of_cards - current_num in
        let trans = transfer !d dif in
-       d := (fst trans);
+       d := (fst trans) @ (snd trans); (*cycle cards to the back*)
        (fst h, (snd h) @ (snd trans)) :: (loop (d) t)) in
   let new_hands = loop deck u_s_state.hands in
   let new_state = {u_s_state with hands = new_hands} in
@@ -66,7 +66,7 @@ let select_black (u_s_state:univ_s_state):univ_s_state =
       | h::t -> h) in
   let new_d = (match old_b_deck with
       | [] -> []
-      | h::t -> t) in
+      | h::t -> t @ [h]) in
   let new_state = {
     judge  = cycle_judge u_s_state.card_to_player u_s_state.judge;
     played = [];
