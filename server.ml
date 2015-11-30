@@ -65,9 +65,9 @@ let respond_post f_state body req =
     let l_headers = (Cohttp.Request.headers req) in
     let uID = get_UID (Header.to_list (l_headers)) in
     let typ = get_type (Header.to_list l_headers) in
-    Log.Global.info "POST Body: %s" body;
+(*     Log.Global.info "POST Body: %s" body;
     Log.Global.info "uID found is %i" uID;
-    Log.Global.info "type found is %s" typ;
+    Log.Global.info "type found is %s" typ; *)
     match typ with
     | "play" ->
       let new_state = user_play_white (!s_state) uID body in
@@ -96,7 +96,7 @@ let respond_post f_state body req =
     | "beat" -> let time = get_time a_state.timer in
         let h = Header.add (Header.init()) "time"  (string_of_int time) in
         Heartbeat.beat a_state.hb uID;
-        (Log.Global.info "CLIENT HEARTBEAT: %i" uID);
+        (* (Log.Global.info "CLIENT HEARTBEAT: %i" uID); *)
         Server.respond `OK ~headers: h
     | _ -> failwith "wierd type of post"
 
