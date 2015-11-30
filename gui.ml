@@ -86,7 +86,7 @@ let new_white_card () =
 
 let score_list = ref []
 
-let get_current_score () = 
+let get_current_score () =
   match !curr_user_state with
   | None -> "Waiting on server"
   | Some s -> "Implement me"
@@ -98,7 +98,7 @@ let format_scores () =
     | [] -> "" in
   match !curr_user_state with
   | None -> "Error: invalid data"
-  | Some s -> format_list (s.scores) 
+  | Some s -> format_list (s.scores)
 
 let rec find_idx n l =
   match l with
@@ -371,8 +371,7 @@ let main_window () =
     current_mode#set_label("You are the Czar!") in
 
   let update_gui () =
-    init_state:= client_get_user_state ();
-    upon !init_state (fun curr_state ->
+    upon (client_get_user_state ()) (fun curr_state ->
         curr_user_state:= Some (get_univ_c curr_state);
         player_hand:= Some (get_univ_c curr_state).hand;
         card1#set_label(get_hand_num 1);
@@ -425,7 +424,7 @@ let main_window () =
 
 let main () =
   upon (connect_server "http://localhost:8080/" "string") (fun () ->
-      upon (trigger_start()) main_window)
+      upon (Client.trigger_start()) main_window)
 
 
 let _ = main()
