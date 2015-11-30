@@ -33,3 +33,5 @@ val start_heartbeat: uID -> 'a Async.Std.Ivar.t
 val check_heartbeat: uID -> bool
 
 val trigger_start: unit -> unit Deferred.t
+
+val current_id: unit -> uID
