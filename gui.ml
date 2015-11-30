@@ -412,7 +412,9 @@ let main_window () =
           card10#set_label("Waiting for players");
           bcard#set_label("Waiting for players");
           current_mode#set_label("You are the Czar!");
-          upon (after (Core.Std.sec 2.0)) (fun () -> update_gui_func())
+          let _ = after (Core.Std.sec 2.0) >>= 
+            (fun () -> update_gui_func(); return ()) in
+          ()
         | PWaiting st ->
           judging_mode:=false; 
           card1#set_label("Waiting for czar");
@@ -427,15 +429,20 @@ let main_window () =
           card10#set_label("Waiting for czar");
           bcard#set_label("Waiting for czar");
           current_mode#set_label("Pick the best card!"));
-          upon (after (Core.Std.sec 2.0)) (fun () -> update_gui_func())
-
+          let _ = after (Core.Std.sec 2.0) >>= 
+            (fun () -> update_gui_func(); return ()) in
+          ()
   in
-  let update_gui () = (*GtkThread.sync*) update_gui_func () in
+  let update_gui () = update_gui_func () in
   update_gui ();
   let rec update_timer () = 
-    upon (after (Core.Std.sec 0.2)) 
-      (fun () -> timer#set_label(string_of_int (Client.get_time ()));update_timer ())
-  in update_timer();
+    let _  = after (Core.Std.sec 0.2) >>= 
+      (fun () -> timer#set_label(string_of_int (Client.get_time ())); 
+        update_timer ();
+        return ()) in
+    () 
+  in
+  update_timer();
   (*Callbacks: Here is where the callbacks are assigned for each
    *of the 10 buttons in the main interface of the GUI.  When connecting
    *to the server, each of the 10 buttons' callbacks can be used to call
