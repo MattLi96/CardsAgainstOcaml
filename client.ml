@@ -100,6 +100,32 @@ let judge uID white =
 let client_judge (white:white_card) =
   judge !c_uID white
 
+(*pausing and resuming the game*)
+let client_pause () =
+  let temp_header = Header.add (Header.init()) "uID" (string_of_int !c_uID) in
+  let temp_header_with_type = Header.add temp_header "type" "pause" in
+  let post_req = (Client.post (Uri.of_string !connect_url)
+    ~headers:temp_header_with_type
+    ~body:(Body.of_string "")) in
+  post_req >>= (fun (resp,body) ->
+  let code = resp |> Response.status |> Code.code_of_status in
+  Printf.printf "Response code: %d\n" code;
+  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
+  return ())
+
+let client_resume () =
+  let temp_header = Header.add (Header.init()) "uID" (string_of_int !c_uID) in
+  let temp_header_with_type = Header.add temp_header "type" "resume" in
+  let post_req = (Client.post (Uri.of_string !connect_url)
+    ~headers:temp_header_with_type
+    ~body:(Body.of_string "")) in
+  post_req >>= (fun (resp,body) ->
+  let code = resp |> Response.status |> Code.code_of_status in
+  Printf.printf "Response code: %d\n" code;
+  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
+  return ())
+
+
 (*get_user_state returns the state of the user*)
 (* val get_user_state: uID -> state *)
 let get_user_state (uID:uID):state Deferred.t =
