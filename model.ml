@@ -28,6 +28,7 @@ let transfer l num =
   in
   loop num (l, [])
 
+(*fills hands up with white cards*)
 let give_cards (u_s_state:univ_s_state):univ_s_state =
   let deck = ref (match (u_s_state.w_deck) with
       | WDeck x -> x
@@ -50,36 +51,33 @@ let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge:
   let new_list = card_to_player @ card_to_player in
   let rec loop l id =
     (match l with
-     | [] -> [(1, None)]
+     | [] -> []
      | h::t -> if (fst h = id || id = 0) then t else loop t id) in
-  let part = loop new_list current_judge in
-  fst (List.hd part)
+  match loop new_list current_judge with
+  | [] -> 1 (*default to first user*)
+  | h::t -> fst h
 
-let select_black (u_s_state:univ_s_state):univ_s_state =
-  let old_b_deck = (match u_s_state.b_deck with
-      | BDeck x -> x
-      | WDeck _ -> []) in
-  let new_b = (match old_b_deck with
-      | [] -> ""
-      | h::t -> h) in
-  let new_d = (match old_b_deck with
-      | [] -> []
-      | h::t -> t @ [h]) in
-  let new_state = {
+let select_black (u_s_state:univ_s_state) : univ_s_state =
+  let old_b_deck = (
+    match u_s_state.b_deck with
+    | BDeck x -> x
+    | WDeck _ -> []) in
+  let (new_b, new_d) = (
+    match old_b_deck with
+    | [] -> ("", [])
+    | h::t -> (h, t @ [h])) in
+  {
     judge  = cycle_judge u_s_state.card_to_player u_s_state.judge;
     played = [];
     b_card = new_b;
     scores = u_s_state.scores;
     winners = u_s_state.winners;
-
     b_deck = BDeck new_d;
     w_deck = u_s_state.w_deck;
-
-    card_to_player = List.map (fun (uid, card) -> (uid, None))
+    card_to_player = List.map (fun (uid, _) -> (uid, None)) 
         u_s_state.card_to_player;
-    hands          = u_s_state.hands
-  } in
-  give_cards new_state
+    hands = u_s_state.hands
+  }
 
 (*INIT FUNCTIONS*)
 let init_s_state () =
@@ -263,7 +261,7 @@ let rec game_next_phase state =
     if (List.exists (fun p -> (snd p) <> None) x.card_to_player)
     then Judging x
     else game_next_phase (Judging x)
-  | Judging x -> Playing (select_black x)
+  | Judging x -> Playing (give_cards (select_black x))
 
 let play_state_finished state =
   match state with
