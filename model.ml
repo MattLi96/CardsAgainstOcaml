@@ -200,7 +200,8 @@ let give_point scores uID =
 (*judge_select determines the winner of a round*)
 (* val user_judge: state -> uID -> card -> state *)
 let user_judge (state:state) (uID:uID) (white:white_card):state =
-  (if (uID_in_list (get_univ_s state).card_to_player uID) then
+  if (white = "") then state else
+  ((if (uID_in_list (get_univ_s state).card_to_player uID) then
      let old_black_card = (get_univ_s state).b_card in
      let new_scores = give_point (get_univ_s state).scores uID in
      let new_state = {(get_univ_s state) with winners =
@@ -208,7 +209,7 @@ let user_judge (state:state) (uID:uID) (white:white_card):state =
      let new_state2 = {new_state with scores = new_scores} in
      Judging new_state2
    else
-     state)
+     state))
 
 (*reset_all removes all players from the state*)
 (* val game_reset: state -> uID -> state *)
@@ -258,8 +259,8 @@ let game_start state =
 (* val game_next_phase: state -> state *)
 let rec game_next_phase state =
   match state with
-  | Playing x -> 
-    if (List.exists (fun p -> (snd p) <> None) x.card_to_player) 
+  | Playing x ->
+    if (List.exists (fun p -> (snd p) <> None) x.card_to_player)
     then Judging x
     else game_next_phase (Judging x)
   | Judging x -> Playing (select_black x)
