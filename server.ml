@@ -93,6 +93,11 @@ let respond_post f_state body req =
         Server.respond `Found
     | "pause" -> pause_timer a_state.timer; Server.respond `OK
     | "resume" -> start_timer a_state.timer; Server.respond `OK
+    | "beat" -> let time = get_time a_state.timer in
+        let h = Header.add (Header.init()) "time"  (string_of_int time) in
+        Heartbeat.beat a_state.hb uID;
+        (Log.Global.info "CLIENT HEARTBEAT: %i" uID);
+        Server.respond `OK ~headers: h
     | _ -> failwith "wierd type of post"
 
 (*TODO pass in other parameters in the header of the response*)

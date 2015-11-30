@@ -4,6 +4,8 @@ open State
 
 type state = c_state
 
+val time: int ref
+
 (*connect_server allows the client to connect to a server*)
 val connect_server: string -> string -> unit Deferred.t
 
@@ -25,9 +27,6 @@ val judge: uID -> white_card -> unit Deferred.t
 
 (*get_user_state returns the state of the user*)
 val get_user_state: uID -> state Deferred.t
-
-(*start_heatbeat creates an ivar that represents the heartbeat*)
-val start_heartbeat: uID -> 'a Async.Std.Ivar.t
 
 (*check_heartbeat returns false if the heartbeat ever fails*)
 val check_heartbeat: uID -> bool
