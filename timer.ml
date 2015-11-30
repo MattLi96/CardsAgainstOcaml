@@ -36,7 +36,7 @@ let rec run_timer (t:timer) run_ivar =
       else (
         i := (!i-1);
         let _ = after (Core.Std.Time.Span.of_sec 1.0) >>=
-          (fun _ -> (Log.Global.info "TIMER: %i" !i); run_timer t run_ivar; return ()) in
+          (fun _ -> run_timer t run_ivar; return ()) in
         ()
 
       )

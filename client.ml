@@ -44,10 +44,10 @@ let trigger_start () =
   post_req >>= (fun (resp, body) ->
     let code = resp |> Response.status |> Code.code_of_status in
     let ans = (if (code = 200) then
-      (Printf.printf ("Game Starting");
+      (print_endline ("Game Starting");
       ())
     else
-      (Printf.printf "Response code: %d\n" code; ())) in
+      (print_string "Response Code: "; print_int code; print_endline ""; ())) in
   return ans)
 
 (*play_white allows a user to play a card*)
@@ -61,8 +61,8 @@ let play_white (uID:uID) (white:white_card) =
     ~body:temp_body) in
   post_req >>= (fun (resp, body) ->
   let code = resp |> Response.status |> Code.code_of_status in
-  Printf.printf "Response code: %d\n" code;
-  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
+  print_string "Response Code: "; print_int code; print_endline "";
+  print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string);
   return ())
 
 let client_play_white (white:white_card) =
@@ -80,8 +80,8 @@ let judge uID white =
     ~body:temp_body) in
   post_req >>= (fun (resp, body) ->
   let code = resp |> Response.status |> Code.code_of_status in
-  Printf.printf "Response code: %d\n" code;
-  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
+  print_string "Response Code: "; print_int code; print_endline "";
+  print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string);
   return ())
 
 let client_judge (white:white_card) =
@@ -96,8 +96,8 @@ let client_pause () =
     ~body:(Body.of_string "")) in
   post_req >>= (fun (resp,body) ->
   let code = resp |> Response.status |> Code.code_of_status in
-  Printf.printf "Response code: %d\n" code;
-  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
+  print_string "Response Code: "; print_int code; print_endline "";
+  print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string);
   return ())
 
 let client_resume () =
@@ -108,8 +108,8 @@ let client_resume () =
     ~body:(Body.of_string "")) in
   post_req >>= (fun (resp,body) ->
   let code = resp |> Response.status |> Code.code_of_status in
-  Printf.printf "Response code: %d\n" code;
-  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
+  print_string "Response Code: "; print_int code; print_endline "";
+  print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string);
   return ())
 
 let client_beat () =
@@ -119,9 +119,9 @@ let client_beat () =
     ~headers:temp_header_with_type
     ~body:(Body.of_string "")) in
   post_req >>= (fun (resp,body) ->
-  let code = resp |> Response.status |> Code.code_of_status in
-  Printf.printf "Response code: %d\n" code;
-  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
+  (* let code = resp |> Response.status |> Code.code_of_status in
+  print_string "Response Code: "; print_int code; print_endline "";
+  print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string); *)
   time := (get_param (resp |> Response.headers |> Header.to_list) "time") |> int_of_string;
   return ())
 
@@ -132,7 +132,7 @@ let start_heartbeat () =
   let rec beat () =
     ignore(client_beat ());
     let _ = after (Core.Std.Time.Span.of_sec 0.1) >>=
-      (fun _ -> beat (); print_endline (!time |> string_of_int); return ()) in
+      (fun _ -> beat (); return ()) in
   () in
   beat ()
 
@@ -146,12 +146,12 @@ let connect_server url name =
   post_req >>= (fun (resp, body) ->
     let code = resp |> Response.status |> Code.code_of_status in
     let ans = (if (code = 200) then
-      (Printf.printf ("Connection successful");
+      (print_endline ("Connection successful");
       start_heartbeat ();
       (c_uID := get_UID (resp |> Response.headers |> Header.to_list));
       ())
     else
-      (Printf.printf "Response code: %d\n" code; ())) in
+      (print_string "Response Code: "; print_int code; print_endline ""; ())) in
   return ans)
 
 (*get_user_state returns the state of the user*)
@@ -161,8 +161,8 @@ let get_user_state (uID:uID):state Deferred.t =
   let req = (Client.get (Uri.of_string !connect_url) ~headers:temp_header) in
   req >>= (fun (resp, body) ->
   let code = resp |> Response.status |> Code.code_of_status in
-  Printf.printf "Response code: %d\n" code;
-  Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
+  print_string "Response Code: "; print_int code; print_endline "";
+  print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string);
   let response_h = (resp |> Response.headers |> Header.to_list) in
 
   let played = played_of_string (get_param response_h "played") in

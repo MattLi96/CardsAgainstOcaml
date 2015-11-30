@@ -103,6 +103,7 @@
       winners = univ.winners;
       hand    = get_hand state u;
     } in
+    if (state |> get_univ_s).judge = 0 then PWaiting univ_c else
     match state with
     | Playing _ ->
       if (u = (get_univ_s state).judge) then JWaiting univ_c else Playing univ_c

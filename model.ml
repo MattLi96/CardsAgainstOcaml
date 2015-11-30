@@ -19,54 +19,52 @@ let fill_deck file_name =
 let transfer l num =
   let rec loop num ans =
     (if (num = 0) then ans
-    else
-      (match ans with
+     else
+       (match ans with
         | (from, dest) ->
           (match from with
-            | [] -> ans
-            | h::t -> loop (num -1) (t, h::dest))))
+           | [] -> ans
+           | h::t -> loop (num -1) (t, h::dest))))
   in
   loop num (l, [])
 
 let give_cards (u_s_state:univ_s_state):univ_s_state =
   let deck = ref (match (u_s_state.w_deck) with
-    | WDeck x -> x
-    | BDeck x -> []) in
+      | WDeck x -> x
+      | BDeck x -> []) in
   let rec loop d l =
     (match l with
-      | [] -> []
-      | h::t ->
-        let current_num = List.length (snd h) in
-        let dif = req_num_of_cards - current_num in
-        let trans = transfer !d dif in
-        d := (fst trans);
-        (fst h, (snd h) @ (snd trans)) :: (loop (d) t)) in
+     | [] -> []
+     | h::t ->
+       let current_num = List.length (snd h) in
+       let dif = req_num_of_cards - current_num in
+       let trans = transfer !d dif in
+       d := (fst trans) @ (snd trans); (*cycle cards to the back*)
+       (fst h, (snd h) @ (snd trans)) :: (loop (d) t)) in
   let new_hands = loop deck u_s_state.hands in
   let new_state = {u_s_state with hands = new_hands} in
   {new_state with w_deck = WDeck !deck}
-
-(* (uID * (white_card list)) list *)
 
 let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge: uID) =
   (Printf.printf "current_judge: %i" current_judge);
   let new_list = card_to_player @ card_to_player in
   let rec loop l id =
     (match l with
-      | [] -> [(1, None)]
-      | h::t -> if (fst h = id || id = 0) then t else loop t id) in
+     | [] -> [(1, None)]
+     | h::t -> if (fst h = id || id = 0) then t else loop t id) in
   let part = loop new_list current_judge in
   fst (List.hd part)
 
 let select_black (u_s_state:univ_s_state):univ_s_state =
   let old_b_deck = (match u_s_state.b_deck with
-    | BDeck x -> x
-    | WDeck _ -> []) in
+      | BDeck x -> x
+      | WDeck _ -> []) in
   let new_b = (match old_b_deck with
-    | [] -> ""
-    | h::t -> h) in
+      | [] -> ""
+      | h::t -> h) in
   let new_d = (match old_b_deck with
-    | [] -> []
-    | h::t -> t) in
+      | [] -> []
+      | h::t -> t @ [h]) in
   let new_state = {
     judge  = cycle_judge u_s_state.card_to_player u_s_state.judge;
     played = [];
@@ -78,7 +76,7 @@ let select_black (u_s_state:univ_s_state):univ_s_state =
     w_deck = u_s_state.w_deck;
 
     card_to_player = List.map (fun (uid, card) -> (uid, None))
-                     u_s_state.card_to_player;
+        u_s_state.card_to_player;
     hands          = u_s_state.hands
   } in
   give_cards new_state
@@ -97,7 +95,7 @@ let init_s_state () =
     w_deck = WDeck (fill_deck "white.json");
 
     (*List of (card, player) pairs matching cards played to users who played
-    them*)
+      them*)
     card_to_player = [];
     hands          = []
   }
@@ -109,7 +107,6 @@ let init_s_state () =
 let get_active_user () = failwith "todo"
 
 (*SET FUNCTIONS: functions that modify the state*)
-
 (*univ_s is a univ_s_state. Rest are the same*)
 let user_add_helper univ_s name =
   let new_uID = incr user_counter; !user_counter in
@@ -131,97 +128,97 @@ let user_add state name =
   | (Judging _, (uid, s)) -> (uid, Judging s)
 
 (*remove_user takes in the uID of a player and removes said player from the
-list of players in the state*)
+  list of players in the state*)
 (* val user_remove: state -> uID -> state *)
 let user_remove state uID = failwith "todo"
 
 let rec modify_card_to_player l uID white =
   match l with
-    | [] -> []
-    | h::t -> if ((fst h) = uID) then
-        (fst h, Some white)::(modify_card_to_player t uID white)
-      else
-        h::(modify_card_to_player t uID white)
+  | [] -> []
+  | h::t -> if ((fst h) = uID) then
+      (fst h, Some white)::(modify_card_to_player t uID white)
+    else
+      h::(modify_card_to_player t uID white)
 
 let has_played state uID =
   let rec loop list =
     (match list with
-    | [] -> false
-    | h::t -> if ((fst h) = uID) then
-      (if (snd h <> None) then true else false)
-    else
-      loop t) in
+     | [] -> false
+     | h::t -> if ((fst h) = uID) then
+         (if (snd h <> None) then true else false)
+       else
+         loop t) in
   loop (get_univ_s state).card_to_player
 
 let rec uID_in_list l uID =
   match l with
-    | [] -> false
-    | h::t -> if ((fst h) = uID) then true else (uID_in_list t uID)
+  | [] -> false
+  | h::t -> if ((fst h) = uID) then true else (uID_in_list t uID)
 
 let remove_card_from_hand hands uID white =
   let sel_fun = (fun (u, l) ->
-    if (u=uID) then
-      let rec remove hand white =
-        (match hand with
-          | [] -> []
-          | h::t ->
-            (if (h <> white) then
-              h::(remove t white)
-            else
-              (remove t white)))
-      in (u, remove l white)
-    else
-      (u, l)) in
+      if (u=uID) then
+        let rec remove hand white =
+          (match hand with
+           | [] -> []
+           | h::t ->
+             (if (h <> white) then
+                h::(remove t white)
+              else
+                (remove t white)))
+        in (u, remove l white)
+      else
+        (u, l)) in
   List.map (sel_fun) hands
 
 (*user_play_white adds the card played by a player into the list of played
-cards in the state*)
+  cards in the state*)
 (* val user_play_white: state -> uID -> card -> state *)
 let user_play_white (state:state) (uID:uID) (white:white_card):state =
   if (has_played state uID) then
     state
   else
-    if (uID_in_list (get_univ_s state).card_to_player uID) then
-      let old_hands = (get_univ_s state).hands in
-      let new_hands = (remove_card_from_hand old_hands uID white) in
-      let new_played = (uID, white) :: ((get_univ_s state).played) in
-      let new_card_to_player = modify_card_to_player
-                                (get_univ_s state).card_to_player uID white in
-      let new_state1 = {(get_univ_s state) with played = new_played} in
-      let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
-      let new_state3 = {new_state2 with hands = new_hands} in
-      Playing new_state3
-    else
-      state
+  if (uID_in_list (get_univ_s state).card_to_player uID) then
+    let old_hands = (get_univ_s state).hands in
+    let new_hands = (remove_card_from_hand old_hands uID white) in
+    let new_played = (uID, white) :: ((get_univ_s state).played) in
+    let new_card_to_player = modify_card_to_player
+        (get_univ_s state).card_to_player uID white in
+    let new_state1 = {(get_univ_s state) with played = new_played} in
+    let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
+    let new_state3 = {new_state2 with hands = new_hands} in
+    Playing new_state3
+  else
+    state
 
 (* type scores = (uID * int) list *)
 let give_point scores uID =
   let sel_fun = (fun (u, s) ->
-    if (u=uID) then (u, s+1) else (u,s) ) in
+      if (u=uID) then (u, s+1) else (u,s) ) in
   List.map sel_fun scores
 
 (*judge_select determines the winner of a round*)
 (* val user_judge: state -> uID -> card -> state *)
 let user_judge (state:state) (uID:uID) (white:white_card):state =
-    (if (uID_in_list (get_univ_s state).card_to_player uID) then
-      let old_black_card = (get_univ_s state).b_card in
-      let new_scores = give_point (get_univ_s state).scores uID in
-      let new_state = {(get_univ_s state) with winners =
-        (old_black_card, white, uID) :: (get_univ_s state).winners} in
-      let new_state2 = {new_state with scores = new_scores} in
-      Judging new_state2
-    else
-      state)
+  (if (uID_in_list (get_univ_s state).card_to_player uID) then
+     let old_black_card = (get_univ_s state).b_card in
+     let new_scores = give_point (get_univ_s state).scores uID in
+     let new_state = {(get_univ_s state) with winners =
+                                                (old_black_card, white, uID) :: (get_univ_s state).winners} in
+     let new_state2 = {new_state with scores = new_scores} in
+     Judging new_state2
+   else
+     state)
 
 (*reset_all removes all players from the state*)
 (* val game_reset: state -> uID -> state *)
 let game_reset state uID =
   match state with
-    | Judging x | Playing x ->
-      let new_state = {(get_univ_s (init_s_state ())) with b_card = x.b_card} in
-      let new_state2 = {new_state with b_deck = x.b_deck} in
-      let new_state3 = {new_state2 with w_deck = x.w_deck} in
-      Playing new_state3
+  | Judging x | Playing x ->
+    let new_state = {(get_univ_s (init_s_state ())) with b_card = x.b_card} in
+    let new_state2 = {new_state with b_deck = x.b_deck} in
+    let new_state3 = {new_state2 with w_deck = x.w_deck} in
+    Playing new_state3
 
 (*Shuffle helpers*)
 (*borrowed shuffle_list from google*)
