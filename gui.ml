@@ -58,6 +58,7 @@ end
 open Client
 open State
 open Async.Std
+open Timer
 
 let flush () = after(Core.Std.sec 0.)
 
@@ -69,7 +70,6 @@ let destroy () = GMain.Main.quit ()
 let score_visible = ref None
 let about_visible = ref None
 let expansion_enabled = ref false
-let czar_mode = ref false
 (*let init_state = ref (client_get_user_state ())*)
 let (curr_user_state: State.univ_c_state option ref) = ref None
 let player_hand = ref None
@@ -78,11 +78,6 @@ let gamelog = GText.buffer ()
 
 
 let score_list = ref []
-
-let get_current_score () =
-  match !curr_user_state with
-  | None -> "Waiting on server"
-  | Some s -> "Implement me"
 
 let format_scores () =
   let rec format_list l =
@@ -98,16 +93,35 @@ let rec find_idx n l =
   | [] -> ""
   | hd::tl -> if n = 1 then hd else find_idx (n-1) tl
 
+let get_current_score () =
+  match !curr_user_state with
+  | None -> "N/A"
+  | Some s -> 
+    let rec find_score n l =
+      match l with
+      | [] -> (-1,-1)
+      | hd::tl -> if n = 1 then hd else find_score (n-1) tl in
+    string_of_int (fst(find_score (Client.current_id ()) s.scores))
+
+
 let rec get_submissions x =
   match !submissions with
-  |None -> "Waiting on submissions"
-  |Some ls -> find_idx x ls
+  | None -> "Waiting on submissions"
+  | Some ls -> 
+    let rec get_sublist l = 
+      match l with
+      | [] -> []
+      | (a,b)::tl -> b::(get_sublist tl) in
+    find_idx x (get_sublist ls)
 
-let rec get_hand_num x =
-  match !player_hand with
-  |None -> "Waiting on server"
-  |Some hand ->
-  FormatOps.break_line (find_idx x (hand)) 22
+let rec get_hand_num x l =
+  match l with
+  | None -> "Waiting on server"
+  | Some hand ->
+    FormatOps.break_line (find_idx x (hand)) 22
+
+let submit_hand_num n = 
+  get_hand_num n !player_hand
 
 let get_curr_bl () =
   match !curr_user_state with
@@ -336,15 +350,12 @@ let main_window () =
   let curr_score = ref 0 in
   timer#set_label((string_of_int(!curr_time)));
   score#set_label((string_of_int(!curr_score)));
-  if(!czar_mode) = false
-  then current_mode#set_label("Pick the best card!")
-  else current_mode#set_label("You are the czar!  Pick the best card!");
 
 
   (*Universal Callbacks: Methods for updating score, updating timer -
    *bound to every button currently, primarily for debug.  Can be modified*)
   (*let update_score() = score#set_label((string_of_int(!curr_score))) in
-  let update_timer() = timer#set_label((string_of_int(!curr_time))) in*)
+    let update_timer() = timer#set_label((string_of_int(!curr_time))) in*)
   score_list:= ("User", 3)::("Player", 5)::[];
 
   (*Debug Callbacks: Used for testing GUI in offline*)
@@ -352,42 +363,72 @@ let main_window () =
   (*let increment_timer() = curr_time:=(!curr_time +1) in*)
 
   (*Czar mode callback: Shows Czar Cards*)
-  let czar () =
-    czar_mode:=false;
-    card1#set_label(get_submissions 1);
-    card2#set_label(get_submissions 2);
-    card3#set_label(get_submissions 3);
-    card4#set_label(get_submissions 4);
-    card5#set_label(get_submissions 5);
-    card6#set_label(get_submissions 6);
-    card7#set_label(get_submissions 7);
-    card8#set_label(get_submissions 8);
-    card9#set_label(get_submissions 9);
-    card10#set_label(get_submissions 10);
-    current_mode#set_label("You are the Czar!") in
 
-  let update_gui_func () =
-    Pervasives.print_string("Printing before upon");
+  let rec update_gui_func () =
     upon (client_get_user_state ()) (fun curr_state ->
-        Pervasives.print_string("Printing after fun");
-        curr_user_state:= Some (get_univ_c curr_state);
-        player_hand:= Some (get_univ_c curr_state).hand;
-        card1#set_label(get_hand_num 1);
-        card2#set_label(get_hand_num 2);
-        card3#set_label(get_hand_num 3);
-        card4#set_label(get_hand_num 4);
-        card5#set_label(get_hand_num 5);
-        card6#set_label(get_hand_num 6);
-        card7#set_label(get_hand_num 7);
-        card8#set_label(get_hand_num 8);
-        card9#set_label(get_hand_num 9);
-        card10#set_label(get_hand_num 10);
-        current_mode#set_label("Pick the best card!");
-        bcard#set_label((get_univ_c curr_state).b_card);
-    score#set_label(get_current_score()))
+        match curr_state with
+        | Playing st->
+          curr_user_state:= Some st;
+          player_hand:= Some st.hand;
+          let h = Some st.hand in
+          card1#set_label(get_hand_num 1 h);
+          card2#set_label(get_hand_num 2 h);
+          card3#set_label(get_hand_num 3 h);
+          card4#set_label(get_hand_num 4 h);
+          card5#set_label(get_hand_num 5 h);
+          card6#set_label(get_hand_num 6 h);
+          card7#set_label(get_hand_num 7 h);
+          card8#set_label(get_hand_num 8 h);
+          card9#set_label(get_hand_num 9 h);
+          card10#set_label(get_hand_num 10 h);
+          current_mode#set_label("Pick the best card!");
+          bcard#set_label(st.b_card);
+          score#set_label(get_current_score())
+        | Judging st ->
+          submissions:= Some st.played; 
+          card1#set_label(get_submissions 1);
+          card2#set_label(get_submissions 2);
+          card3#set_label(get_submissions 3);
+          card4#set_label(get_submissions 4);
+          card5#set_label(get_submissions 5);
+          card6#set_label(get_submissions 6);
+          card7#set_label(get_submissions 7);
+          card8#set_label(get_submissions 8);
+          card9#set_label(get_submissions 9);
+          card10#set_label(get_submissions 10);
+          bcard#set_label (st.b_card);
+          current_mode#set_label("You are the Czar!") 
+        | JWaiting st ->
+          card1#set_label("Waiting for players");
+          card2#set_label("Waiting for players");
+          card3#set_label("Waiting for players");
+          card4#set_label("Waiting for players");
+          card5#set_label("Waiting for players");
+          card6#set_label("Waiting for players");
+          card7#set_label("Waiting for players");
+          card8#set_label("Waiting for players");
+          card9#set_label("Waiting for players");
+          card10#set_label("Waiting for players");
+          bcard#set_label("Waiting for players");
+          current_mode#set_label("You are the Czar!");
+          upon (after (Core.Std.sec 1.0)) (fun () -> update_gui_func())
+        | PWaiting st -> 
+          card1#set_label("Waiting for czar");
+          card2#set_label("Waiting for czar");
+          card3#set_label("Waiting for czar");
+          card4#set_label("Waiting for czar");
+          card5#set_label("Waiting for czar");
+          card6#set_label("Waiting for czar");
+          card7#set_label("Waiting for czar");
+          card8#set_label("Waiting for czar");
+          card9#set_label("Waiting for czar");
+          card10#set_label("Waiting for czar");
+          bcard#set_label("Waiting for czar");
+          current_mode#set_label("Pick the best card!"));
+          upon (after (Core.Std.sec 1.0)) (fun () -> update_gui_func())
+
   in
-  let update_gui () = (*let t = Thread.create (update_gui_func) () in
-    Thread.join t;() in*) GtkThread.async update_gui_func () in
+  let update_gui () = GtkThread.async update_gui_func () in
   update_gui();
 
   (*Callbacks: Here is where the callbacks are assigned for each
@@ -397,16 +438,36 @@ let main_window () =
    *all callbacks are identical.  Later, each button can be assigned to
    *additional callbacks to transmit which card was selected to the server.*)
 
-  let callback1 () = if !czar_mode = true then czar() else update_gui() in
-  let callback2 () = if !czar_mode = true then czar() else update_gui() in
-  let callback3 () = if !czar_mode = true then czar() else update_gui() in
-  let callback4 () = if !czar_mode = true then czar() else update_gui() in
-  let callback5 () = if !czar_mode = true then czar() else czar_mode:=true;update_gui() in
-  let callback6 () = if !czar_mode = true then czar() else update_gui() in
-  let callback7 () = if !czar_mode = true then czar() else update_gui() in
-  let callback8 () = if !czar_mode = true then czar() else update_gui() in
-  let callback9 () = if !czar_mode = true then czar() else update_gui() in
-  let callback10 () = if !czar_mode = true then czar() else update_gui() in
+  let callback1 () = bcard#set_label("Waiting for other players");
+    upon (client_play_white (submit_hand_num 1)) (fun () ->
+        update_gui()) in
+  let callback2 () = bcard#set_label("Waiting for other players");
+    upon (client_play_white (submit_hand_num 2)) (fun () ->
+        update_gui()) in
+  let callback3 () = bcard#set_label("Waiting for other players");
+    upon (client_play_white (submit_hand_num 3)) (fun () ->
+       update_gui()) in
+  let callback4 () = bcard#set_label("Waiting for other players");
+    upon (client_play_white (submit_hand_num 4)) (fun () ->
+       update_gui()) in
+  let callback5 () = bcard#set_label("Waiting for other players");
+    upon (client_play_white (submit_hand_num 5)) (fun () ->
+        update_gui())in
+  let callback6 () = bcard#set_label("Waiting for other players");
+    upon (client_play_white (submit_hand_num 6)) (fun () ->
+        update_gui()) in
+  let callback7 () = bcard#set_label("Waiting for other players");
+    upon (client_play_white (submit_hand_num 7)) (fun () ->
+        update_gui()) in
+  let callback8 () = bcard#set_label("Waiting for other players");
+    upon (client_play_white (submit_hand_num 8)) (fun () ->
+        update_gui()) in
+  let callback9 () = bcard#set_label("Waiting for other players");
+    upon (client_play_white (submit_hand_num 9)) (fun () ->
+        update_gui()) in
+  let callback10 () = bcard#set_label("Waiting for other players");
+    upon (client_play_white (submit_hand_num 10)) (fun () ->
+        update_gui()) in
 
   ignore(window#connect#destroy ~callback:main_destroy);
   ignore(card1#connect#clicked ~callback:callback1);
@@ -450,13 +511,20 @@ let initial_window () =
   let logo = GdkPixbuf.from_file "res/cards.png" in
   let logo_widget = GMisc.image ~pixbuf:logo ~packing:vbox#add () in
   logo_widget#set_pixbuf logo;
-  let main_button = GButton.button ~label:("Click to launch the game!") 
+  let indicator = GMisc.label ~packing:(vbox#add) () in
+  indicator#set_label("Connect to server before starting game.");
+  let connect_button = GButton.button ~label:("Click to connect to server!") 
       ~packing:vbox#add () in
-  let init_main () = 
+  let start_button = GButton.button ~label:("Click to start!") 
+      ~packing:vbox#add () in
+  let init_connect () = 
     upon (connect_server "http://localhost:8080/" "string") (fun () ->
-        upon (Client.trigger_start()) (fun () -> (main_window();main_destroy()))) in
+        indicator#set_label("You are now connected!")) in
+  let init_start () = 
+    upon (Client.trigger_start()) (fun () -> (main_window();main_destroy())) in
 
-  ignore(main_button#connect#clicked ~callback:init_main);
+  ignore(connect_button#connect#clicked ~callback:init_connect);
+  ignore(start_button#connect#clicked ~callback:init_start);
   (*ignore(splash#connect#destroy(confirm_exit));*)
   splash#show(); ()
 
