@@ -34,3 +34,5 @@ val get_user_state: uID -> state Deferred.t
 val check_heartbeat: uID -> bool
 
 val trigger_start: unit -> unit Deferred.t
+
+val current_id: unit -> uID

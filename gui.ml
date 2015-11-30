@@ -1,5 +1,5 @@
 (*Module written as a dummy for running the GUI separately*)
-module PullCards = struct
+module FormatOps = struct
 
   type cardsfile = Yojson.Basic.json
 
@@ -70,19 +70,12 @@ let score_visible = ref None
 let about_visible = ref None
 let expansion_enabled = ref false
 let czar_mode = ref false
-let init_state = ref (client_get_user_state ())
+(*let init_state = ref (client_get_user_state ())*)
 let (curr_user_state: State.univ_c_state option ref) = ref None
 let player_hand = ref None
 let submissions = ref None
 let gamelog = GText.buffer ()
 
-let new_black_card () =
-  let blackdeck = PullCards.get_deck "black.json" in
-  PullCards.get_random_break blackdeck 50
-
-let new_white_card () =
-  let whitedeck = PullCards.get_deck "white.json" in
-  PullCards.get_random_break whitedeck 20
 
 let score_list = ref []
 
@@ -114,7 +107,7 @@ let rec get_hand_num x =
   match !player_hand with
   |None -> "Waiting on server"
   |Some hand ->
-  find_idx x (hand)
+  FormatOps.break_line (find_idx x (hand)) 22
 
 let get_curr_bl () =
   match !curr_user_state with
@@ -122,10 +115,10 @@ let get_curr_bl () =
   | Some x -> x.b_card
 
 (*Replaces a card in a deck, if deck is empty returns a new card*)
-let rec new_card_deck idx d =
+(*let rec new_card_deck idx d =
   match d with
   | [] -> [new_white_card()]
-  | hd::tl -> if idx = 1 then (new_white_card()::tl) else (hd::(new_card_deck (idx-1) tl))
+  | hd::tl -> if idx = 1 then (new_white_card()::tl) else (hd::(new_card_deck (idx-1) tl))*)
 
 (*let new_card idx =
   player_hand:=new_card_deck idx (!player_hand)*)
@@ -218,11 +211,12 @@ let score_dialog () =
   score#show ()
 
 
+
 let main_window () =
   ignore(locale ());
   let icon = GdkPixbuf.from_file "res/icon.png" in
   let window = GWindow.window
-      ~resizable:false ~border_width:0 ~title:"Cards Against OCaml" () in
+      ~resizable:false ~border_width:0 ~title:"Cards Against OCaml"() in
   window#set_icon(Some icon);
   let main_destroy _ = destroy();ignore(exit 0);() in
   ignore(window#connect#destroy(main_destroy));
@@ -372,8 +366,10 @@ let main_window () =
     card10#set_label(get_submissions 10);
     current_mode#set_label("You are the Czar!") in
 
-  let update_gui () =
+  let update_gui_func () =
+    Pervasives.print_string("Printing before upon");
     upon (client_get_user_state ()) (fun curr_state ->
+        Pervasives.print_string("Printing after fun");
         curr_user_state:= Some (get_univ_c curr_state);
         player_hand:= Some (get_univ_c curr_state).hand;
         card1#set_label(get_hand_num 1);
@@ -387,9 +383,11 @@ let main_window () =
         card9#set_label(get_hand_num 9);
         card10#set_label(get_hand_num 10);
         current_mode#set_label("Pick the best card!");
-        bcard#set_label(get_curr_bl ()));
-        score#set_label(get_current_score())
+        bcard#set_label((get_univ_c curr_state).b_card);
+    score#set_label(get_current_score()))
   in
+  let update_gui () = (*let t = Thread.create (update_gui_func) () in
+    Thread.join t;() in*) GtkThread.async update_gui_func () in
   update_gui();
 
   (*Callbacks: Here is where the callbacks are assigned for each
@@ -421,13 +419,50 @@ let main_window () =
   ignore(card8#connect#clicked ~callback:callback8);
   ignore(card9#connect#clicked ~callback:callback9);
   ignore(card10#connect#clicked ~callback:callback10);
-  window#show();
-  GMain.Main.main()
+  window#show()
+
+(*let confirm_exit () = 
+  let icon = GdkPixbuf.from_file "res/icon.png" in
+  let conf = GWindow.window 
+      ~resizable:false ~border_width:0 ~title:"Leaving?" () in
+  conf#set_icon(Some icon);
+  let vbox = GPack.vbox ~packing:(conf#add) () in
+  let txt = GMisc.label ~packing:(vbox#add) () in
+  let hbox = GPack.hbox ~packing:(vbox#add) () in
+  let yes = GButton.button ~packing:(hbox#add) ~label:("Yes")() in
+  let no = GButton.button ~packing:(hbox#add) ~label:("No")() in
+  txt#set_label("Are you sure you want to leave?");
+  ignore(no#connect#clicked(fun () -> conf#destroy()));
+  ignore(yes#connect#clicked(fun () -> (destroy();ignore(exit 0);())));
+  conf#show()*)
+
+
+
+let initial_window () = 
+  ignore(locale ());
+  let icon = GdkPixbuf.from_file "res/icon.png" in
+  let splash = GWindow.window 
+      ~resizable:false ~border_width:0 ~title:"Cards Against OCaml" () in
+  splash#set_icon(Some icon);
+  let main_destroy _ = splash#destroy() in
+  (*ignore(splash#connect#destroy(main_destroy));*)
+  let vbox = GPack.vbox ~packing:(splash#add) () in
+  let logo = GdkPixbuf.from_file "res/cards.png" in
+  let logo_widget = GMisc.image ~pixbuf:logo ~packing:vbox#add () in
+  logo_widget#set_pixbuf logo;
+  let main_button = GButton.button ~label:("Click to launch the game!") 
+      ~packing:vbox#add () in
+  let init_main () = 
+    upon (connect_server "http://localhost:8080/" "string") (fun () ->
+        upon (Client.trigger_start()) (fun () -> (main_window();main_destroy()))) in
+
+  ignore(main_button#connect#clicked ~callback:init_main);
+  (*ignore(splash#connect#destroy(confirm_exit));*)
+  splash#show(); ()
 
 let main () =
-  upon (connect_server "http://localhost:8080/" "string") (fun () ->
-      upon (Client.trigger_start()) main_window)
+  initial_window ();
+  let _ = GtkThread.start () in
+  GtkThread.sync Scheduler.go ()
 
-
-let _ = main()
-let _ = Scheduler.go ()
+let _ = main ()

@@ -184,6 +184,15 @@ let get_user_state (uID:uID):state Deferred.t =
 let client_get_user_state () =
   get_user_state !c_uID
 
+(*start_heatbeat creates an ivar that represents the heartbeat*)
+(* val start_heartbeat: uID -> 'a Async.Std.Ivar.t *)
+let start_heartbeat uID =
+  let ivar = Ivar.create () in
+  ivar
+
+let current_id () =
+  !c_uID
+
 (*check_heartbeat returns false if the heartbeat ever fails*)
 (* val check_heartbeat: uID -> boolean *)
 let check_heartbeat uID = failwith "unimplemented"
