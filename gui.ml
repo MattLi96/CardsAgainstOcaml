@@ -431,10 +431,10 @@ let main_window () =
           upon (after (Core.Std.sec 2.0)) (fun () -> update_gui_func())
 
   in
-  let update_gui () = GtkThread.sync update_gui_func () in
+  let update_gui () = (*GtkThread.sync*) update_gui_func () in
   update_gui ();
   let rec update_timer () = 
-    upon (after (Core.Std.sec 1.0)) 
+    upon (after (Core.Std.sec 0.2)) 
       (fun () -> timer#set_label(string_of_int (!Client.time));update_timer ())
   in update_timer();
   (*Callbacks: Here is where the callbacks are assigned for each
