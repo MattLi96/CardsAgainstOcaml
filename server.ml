@@ -157,7 +157,7 @@ let start_server port () =
                 timer = create_timer 0}
               , ref (init_s_state ())) in
   eprintf "Listening for HTTP on port %d\n" port;
-  eprintf "Try 'curl -X POST -d 'foo bar' http://localhost:%d\n" port;
+  eprintf "Try (this will crash the server): curl -X POST -d 'foo bar' http://localhost:%d\n" port;
   Cohttp_async.Server.create ~on_handler_error:`Raise
     (Tcp.on_port port) (fun ~body _ req ->
         match req |> Cohttp.Request.meth with
