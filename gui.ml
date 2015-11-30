@@ -59,7 +59,7 @@ open Client
 open State
 open Async.Std
 
-
+let flush () = after(Core.Std.sec 0.)
 
 (*GTK Initializations*)
 let locale () = GtkMain.Main.init ()
@@ -85,6 +85,20 @@ let new_white_card () =
   PullCards.get_random_break whitedeck 20
 
 let score_list = ref []
+
+let get_current_score () =
+  match !curr_user_state with
+  | None -> "Waiting on server"
+  | Some s -> "Implement me"
+
+let format_scores () =
+  let rec format_list l =
+    match l with
+    | (u,s)::tl -> (string_of_int u)^": "^(string_of_int s)^"\n"^(format_list tl)
+    | [] -> "" in
+  match !curr_user_state with
+  | None -> "Error: invalid data"
+  | Some s -> format_list (s.scores)
 
 let rec find_idx n l =
   match l with
@@ -333,8 +347,8 @@ let main_window () =
 
   (*Universal Callbacks: Methods for updating score, updating timer -
    *bound to every button currently, primarily for debug.  Can be modified*)
-  let update_score() = score#set_label((string_of_int(!curr_score))) in
-  let update_timer() = timer#set_label((string_of_int(!curr_time))) in
+  (*let update_score() = score#set_label((string_of_int(!curr_score))) in
+  let update_timer() = timer#set_label((string_of_int(!curr_time))) in*)
   score_list:= ("User", 3)::("Player", 5)::[];
 
   (*Debug Callbacks: Used for testing GUI in offline*)
@@ -357,8 +371,7 @@ let main_window () =
     current_mode#set_label("You are the Czar!") in
 
   let update_gui () =
-    init_state:= client_get_user_state ();
-    upon !init_state (fun curr_state ->
+    upon (client_get_user_state ()) (fun curr_state ->
         curr_user_state:= Some (get_univ_c curr_state);
         player_hand:= Some (get_univ_c curr_state).hand;
         card1#set_label(get_hand_num 1);
@@ -372,7 +385,9 @@ let main_window () =
         card9#set_label(get_hand_num 9);
         card10#set_label(get_hand_num 10);
         current_mode#set_label("Pick the best card!");
-        bcard#set_label(get_curr_bl ())) in
+        bcard#set_label(get_curr_bl ()));
+        score#set_label(get_current_score())
+  in
   update_gui();
 
   (*Callbacks: Here is where the callbacks are assigned for each
@@ -382,16 +397,16 @@ let main_window () =
    *all callbacks are identical.  Later, each button can be assigned to
    *additional callbacks to transmit which card was selected to the server.*)
 
-  let callback1 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
-  let callback2 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
-  let callback3 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
-  let callback4 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
-  let callback5 () = if !czar_mode = true then czar() else czar_mode:=true;update_gui();update_score();update_timer() in
-  let callback6 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
-  let callback7 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
-  let callback8 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
-  let callback9 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
-  let callback10 () = if !czar_mode = true then czar() else update_gui();update_score();update_timer() in
+  let callback1 () = if !czar_mode = true then czar() else update_gui() in
+  let callback2 () = if !czar_mode = true then czar() else update_gui() in
+  let callback3 () = if !czar_mode = true then czar() else update_gui() in
+  let callback4 () = if !czar_mode = true then czar() else update_gui() in
+  let callback5 () = if !czar_mode = true then czar() else czar_mode:=true;update_gui() in
+  let callback6 () = if !czar_mode = true then czar() else update_gui() in
+  let callback7 () = if !czar_mode = true then czar() else update_gui() in
+  let callback8 () = if !czar_mode = true then czar() else update_gui() in
+  let callback9 () = if !czar_mode = true then czar() else update_gui() in
+  let callback10 () = if !czar_mode = true then czar() else update_gui() in
 
   ignore(window#connect#destroy ~callback:destroy);
   ignore(card1#connect#clicked ~callback:callback1);
@@ -408,7 +423,8 @@ let main_window () =
   GMain.Main.main()
 
 let main () =
-  upon (trigger_start()) main_window
+  upon (connect_server "http://localhost:8080/" "string") (fun () ->
+      upon (Client.trigger_start()) main_window)
 
 
 let _ = main()
