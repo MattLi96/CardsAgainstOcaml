@@ -76,14 +76,14 @@ let (curr_user_state: State.univ_c_state option ref) = ref None
 let player_hand = ref None
 let submissions = ref None
 let gamelog = GText.buffer ()
+let winner_log = ref None
 
-
-let score_list = ref []
 
 let format_scores () =
   let rec format_list l =
     match l with
-    | (u,s)::tl -> (string_of_int u)^": "^(string_of_int s)^"\n"^(format_list tl)
+    | (u,s)::tl -> (string_of_int u)^": "
+                   ^(string_of_int s)^"\n"^(format_list tl)
     | [] -> "" in
   match !curr_user_state with
   | None -> "Error: invalid data"
@@ -128,28 +128,23 @@ let get_curr_bl () =
   | None -> "Waiting on server"
   | Some x -> x.b_card
 
-(*Replaces a card in a deck, if deck is empty returns a new card*)
-(*let rec new_card_deck idx d =
-  match d with
-  | [] -> [new_white_card()]
-  | hd::tl -> if idx = 1 then (new_white_card()::tl) else (hd::(new_card_deck (idx-1) tl))*)
-
-(*let new_card idx =
-  player_hand:=new_card_deck idx (!player_hand)*)
-
-let get_scores () =
+let get_winners () =
   let score_string = ref "" in
   let rec generate_string l =
     match l with
-    | [] -> if (!score_string) = "" then  score_string:= "No players currently online" else ()
-    | (pid, s)::tl ->
-      score_string:= (!score_string)^pid^":   "^(string_of_int s)^"\n";
-      generate_string tl in
-  generate_string (!score_list); !score_string
+    | [] -> !score_string
+    | (bc, wc, _)::tl ->
+      (FormatOps.break_line bc 50)^"\n-->"^(FormatOps.break_line wc 50)^"\n\n"^
+      (generate_string tl) in
+  match !winner_log with
+  | None -> gamelog#set_text "No winners yet!"
+  | Some s -> 
+    let log = generate_string s in
+    gamelog#set_text log
 
 
 (*Options window, currently only contains one option*)
-let options_window () =
+(*let options_window () =
   let option_window = GWindow.window ~title:"Options" ~resizable:false
       ~border_width:5 () in
   let myclose _ = option_window#destroy() in
@@ -167,7 +162,7 @@ let options_window () =
   let update_expansion () = expansion_enabled:= (checkbox#active) in
   ignore(confirm#connect#clicked(update_expansion));
   ignore(confirm#connect#clicked(myclose));
-  option_window#show ()
+  option_window#show ()*)
 
 
 (*About screen - includes image, about text*)
@@ -180,7 +175,7 @@ let about_screen () =
     about#set_icon (Some icon);
     let myclose _ = about_visible:=None;about#destroy () in
     ignore(about#connect#destroy(myclose));
-    let vbox = GPack.vbox ~spacing:5 ~packing:about#add() in
+    let vbox = GBin.scrolled_window  ~packing:about#add() in
     let logo = GdkPixbuf.from_file "res/cards.png" in
     let logo_widget = GMisc.image ~pixbuf:logo ~packing:vbox#add () in
     logo_widget#set_pixbuf logo;
@@ -202,25 +197,20 @@ Some code borrowed from the open-source lablgtk2 libraries.\n
 
 let score_dialog () =
   let icon = GdkPixbuf.from_file "res/icon.png" in
-  let score = GWindow.window ~title:"Game Stats" ~resizable:false
+  let score = GWindow.window ~title:"Winning Cards" ~resizable:false
       ~border_width:5 ~height:600 ~width: 270 () in
   score#set_icon(Some icon);
   score_visible:= Some score;
   let myclose _ =score_visible:=None;score#destroy() in
   ignore(score#connect#destroy(myclose));
   let mainbox = GPack.vbox ~spacing:5 ~packing:score#add () in
-  let title = GMisc.label ~packing:mainbox#add () in
-  let scores = GBin.frame ~packing:mainbox#add () in
-  let scores_list = GMisc.label ~packing:scores#add () in
+  get_winners();
   let winnerstext = GText.view ~buffer:gamelog
       ~justification:`FILL ~packing:mainbox#add () in
-  title#set_label("Game Stats");
-  scores#set_label(Some "Scores");
   winnerstext#set_editable(false);
 
   (*Sets values of scores and items - use to integrate scoring and winning cards*)
-  gamelog#set_text ("Dummy - fill in later\nLorem ipsum dolor sit amet");
-  scores_list#set_text(get_scores ());
+  (*scores_list#set_text(get_scores ());*)
 
   score#show ()
 
@@ -243,12 +233,13 @@ let main_window () =
   let logo = GdkPixbuf.from_file "res/logo.png" in
   let logo_widget = GMisc.image ~pixbuf:logo ~packing:hbox_top#add () in
   logo_widget#set_pixbuf logo;
-  let opt_menu = GMenu.menu () in
+  (*let opt_menu = GMenu.menu () in
   let opt_button = GMenu.menu_item ~label:("More settings")
       ~packing:opt_menu#append () in
   ignore(opt_button#connect#activate(options_window));
-  let menu_opts = GMenu.menu_item ~label:"Options" ~packing:menubar#append () in
-  menu_opts#set_submenu (opt_menu);
+  let menu_opts = GMenu.menu_item ~label:"Options" 
+      ~packing:menubar#append () in
+  menu_opts#set_submenu (opt_menu);*)
   let about_menu = GMenu.menu () in
   let about_button = GMenu.menu_item ~label:("About")
       ~packing:about_menu#append () in
@@ -268,7 +259,8 @@ let main_window () =
       ~label:"Current Black Card" ~width:540 ~height:95 () in
   let scoreframe = GBin.frame ~packing:(bcbox#pack ~padding:5)
       ~label: "Score:" ~width:70 ~height:70 () in
-  let show_score = GButton.button ~packing:(hbox_top#pack ~padding:5) ~label:("Show scores") () in
+  let show_score = GButton.button ~packing:(hbox_top#pack ~padding:5) 
+      ~label:("Show scores") () in
   let score_dialog_opt () =
     match !score_visible with
     |None -> score_dialog ()
@@ -345,24 +337,9 @@ let main_window () =
   (*Code for initialization, can be modified to take data from the server
    *when this is fully implemented.*)
 
-
-  (*let curr_time = ref 30 in
-  let curr_score = ref 0 in
-  timer#set_label((string_of_int(!curr_time)));
-  score#set_label((string_of_int(!curr_score)));*)
-
-
   (*Universal Callbacks: Methods for updating score, updating timer -
    *bound to every button currently, primarily for debug.  Can be modified*)
-  (*let update_score() = score#set_label((string_of_int(!curr_score))) in
-    let update_timer() = timer#set_label((string_of_int(!curr_time))) in*)
-  score_list:= ("User", 3)::("Player", 5)::[];
 
-  (*Debug Callbacks: Used for testing GUI in offline*)
-  (*let increment_score() = curr_score:=(!curr_score +1) in*)
-  (*let increment_timer() = curr_time:=(!curr_time +1) in*)
-
-  (*Czar mode callback: Shows Czar Cards*)
 
   let update_gui_func () =
     upon (client_get_user_state ()) (fun curr_state ->
@@ -371,6 +348,8 @@ let main_window () =
           judging_mode:=false;
           curr_user_state:= Some st;
           player_hand:= Some st.hand;
+          winner_log:=Some st.winners;
+          get_winners();
           let h = Some st.hand in
           card1#set_label(get_hand_num 1 h);
           card2#set_label(get_hand_num 2 h);
@@ -386,7 +365,9 @@ let main_window () =
           bcard#set_label(st.b_card);
           score#set_label(get_current_score())
         | Judging st ->
-          submissions:= Some st.played; 
+          submissions:= Some st.played;
+          winner_log:=Some st.winners;
+          get_winners(); 
           card1#set_label(get_submissions 1);
           card2#set_label(get_submissions 2);
           card3#set_label(get_submissions 3);
@@ -401,6 +382,8 @@ let main_window () =
           current_mode#set_label("You are the Czar!") 
         | JWaiting st ->
           judging_mode:=true;
+          winner_log:= Some st.winners;
+          get_winners();
           card1#set_label("Waiting for players");
           card2#set_label("Waiting for players");
           card3#set_label("Waiting for players");
@@ -414,7 +397,8 @@ let main_window () =
           bcard#set_label("Waiting for players");
           current_mode#set_label("You are the Czar!")
         | PWaiting st ->
-          judging_mode:=false; 
+          judging_mode:=false;
+          winner_log:= Some st.winners; 
           card1#set_label("Waiting for czar");
           card2#set_label("Waiting for czar");
           card3#set_label("Waiting for czar");
@@ -445,44 +429,54 @@ let main_window () =
    *additional callbacks to transmit which card was selected to the server.*)
 
   let callback1 () = bcard#set_label("Waiting for other players");
-    if !judging_mode = true then (upon (client_judge (submit_judge_num 1)) (fun () -> update_gui ())) else
-      upon (client_play_white (submit_hand_num 1)) (fun () ->
+    if !judging_mode = true 
+    then (upon (client_judge (submit_judge_num 1)) (fun () -> update_gui ())) 
+    else upon (client_play_white (submit_hand_num 1)) (fun () ->
           update_gui()) in
   let callback2 () = bcard#set_label("Waiting for other players");
-    if !judging_mode = true then (upon (client_judge (submit_judge_num 2)) (fun () -> update_gui ())) else
-      upon (client_play_white (submit_hand_num 2)) (fun () ->
+    if !judging_mode = true 
+    then (upon (client_judge (submit_judge_num 2)) (fun () -> update_gui ())) 
+    else upon (client_play_white (submit_hand_num 2)) (fun () ->
           update_gui()) in
   let callback3 () = bcard#set_label("Waiting for other players");
-    if !judging_mode = true then (upon (client_judge (submit_judge_num 3)) (fun () -> update_gui ())) else
-      upon (client_play_white (submit_hand_num 3)) (fun () ->
+    if !judging_mode = true 
+    then (upon (client_judge (submit_judge_num 3)) (fun () -> update_gui ())) 
+    else upon (client_play_white (submit_hand_num 3)) (fun () ->
           update_gui()) in
   let callback4 () = bcard#set_label("Waiting for other players");
-    if !judging_mode = true then (upon (client_judge (submit_judge_num 4)) (fun () -> update_gui ())) else
-      upon (client_play_white (submit_hand_num 4)) (fun () ->
+    if !judging_mode = true 
+    then (upon (client_judge (submit_judge_num 4)) (fun () -> update_gui ())) 
+    else upon (client_play_white (submit_hand_num 4)) (fun () ->
           update_gui()) in
   let callback5 () = bcard#set_label("Waiting for other players");
-    if !judging_mode = true then (upon (client_judge (submit_judge_num 5)) (fun () -> update_gui ())) else
-      upon (client_play_white (submit_hand_num 5)) (fun () ->
+    if !judging_mode = true 
+    then (upon (client_judge (submit_judge_num 5)) (fun () -> update_gui ())) 
+    else upon (client_play_white (submit_hand_num 5)) (fun () ->
           update_gui())in
   let callback6 () = bcard#set_label("Waiting for other players");
-    if !judging_mode = true then (upon (client_judge (submit_judge_num 6)) (fun () -> update_gui ())) else
-      upon (client_play_white (submit_hand_num 6)) (fun () ->
+    if !judging_mode = true 
+    then (upon (client_judge (submit_judge_num 6)) (fun () -> update_gui ())) 
+    else upon (client_play_white (submit_hand_num 6)) (fun () ->
           update_gui()) in
   let callback7 () = bcard#set_label("Waiting for other players");
-    if !judging_mode = true then (upon (client_judge (submit_judge_num 7)) (fun () -> update_gui ())) else
-      upon (client_play_white (submit_hand_num 7)) (fun () ->
+    if !judging_mode = true 
+    then (upon (client_judge (submit_judge_num 7)) (fun () -> update_gui ())) 
+    else upon (client_play_white (submit_hand_num 7)) (fun () ->
           update_gui()) in
   let callback8 () = bcard#set_label("Waiting for other players");
-    if !judging_mode = true then (upon (client_judge (submit_judge_num 8)) (fun () -> update_gui ())) else
-      upon (client_play_white (submit_hand_num 8)) (fun () ->
+    if !judging_mode = true 
+    then (upon (client_judge (submit_judge_num 8)) (fun () -> update_gui ())) 
+    else upon (client_play_white (submit_hand_num 8)) (fun () ->
           update_gui()) in
   let callback9 () = bcard#set_label("Waiting for other players");
-    if !judging_mode = true then (upon (client_judge (submit_judge_num 9)) (fun () -> update_gui ())) else
-      upon (client_play_white (submit_hand_num 9)) (fun () ->
+    if !judging_mode = true 
+    then (upon (client_judge (submit_judge_num 9)) (fun () -> update_gui ())) 
+    else upon (client_play_white (submit_hand_num 9)) (fun () ->
           update_gui()) in
   let callback10 () = bcard#set_label("Waiting for other players");
-    if !judging_mode = true then (upon (client_judge (submit_judge_num 10)) (fun () -> update_gui ())) else
-      upon (client_play_white (submit_hand_num 10)) (fun () ->
+    if !judging_mode = true 
+    then (upon (client_judge (submit_judge_num 10)) (fun () -> update_gui ())) 
+    else upon (client_play_white (submit_hand_num 10)) (fun () ->
           update_gui()) in
 
   ignore(window#connect#destroy ~callback:main_destroy);
@@ -529,7 +523,8 @@ let initial_window () =
   logo_widget#set_pixbuf logo;
   let indicator = GMisc.label ~packing:(vbox#add) () in
   indicator#set_label("Connect to server before starting game.");
-  let boxbuffer = GBin.frame ~packing:(vbox#pack ~padding:5) ~label:"Server address" () in
+  let boxbuffer = GBin.frame ~packing:(vbox#pack ~padding:5) 
+      ~label:"Server address" () in
   let server = GText.buffer () in
   let server_box = GText.view ~packing:(boxbuffer#add) () in
   server#set_text("http://localhost:8080");
@@ -542,9 +537,15 @@ let initial_window () =
     upon (Client.trigger_start()) (fun () -> (main_window();main_destroy())) in
   let init_connect () = 
     let server_input = server#get_text () in
-    upon (connect_server server_input "string") (fun () ->
-        ignore(start_button#connect#clicked ~callback:init_start);
-        indicator#set_label("You are now connected!")) in
+    let connect_attempt = try Some (connect_server server_input "string") with
+      | _ -> None in
+    match connect_attempt with
+    | Some d ->
+      upon d (fun () ->
+          ignore(start_button#connect#clicked ~callback:init_start);
+          indicator#set_label("You are now connected!")) 
+    | None -> indicator#set_label("Error, could not connect. Try again!") in
+
   let connect_first () = 
     indicator#set_label("Connect to server first!") in
 
