@@ -57,6 +57,7 @@ end
 (*Open system files*)
 open Client
 open State
+open RecurringCall
 open Async.Std
 
 let flush () = after(Core.Std.sec 0.)
@@ -363,7 +364,7 @@ let main_window () =
 
   (*Czar mode callback: Shows Czar Cards*)
 
-  let rec update_gui_func () =
+  let update_gui_func () =
     upon (client_get_user_state ()) (fun curr_state ->
         match curr_state with
         | Playing st->
@@ -411,10 +412,7 @@ let main_window () =
           card9#set_label("Waiting for players");
           card10#set_label("Waiting for players");
           bcard#set_label("Waiting for players");
-          current_mode#set_label("You are the Czar!");
-          let _ = after (Core.Std.sec 2.0) >>= 
-            (fun () -> update_gui_func(); return ()) in
-          ()
+          current_mode#set_label("You are the Czar!")
         | PWaiting st ->
           judging_mode:=false; 
           card1#set_label("Waiting for czar");
@@ -428,21 +426,17 @@ let main_window () =
           card9#set_label("Waiting for czar");
           card10#set_label("Waiting for czar");
           bcard#set_label("Waiting for czar");
-          current_mode#set_label("Pick the best card!"));
-          let _ = after (Core.Std.sec 2.0) >>= 
-            (fun () -> update_gui_func(); return ()) in
-          ()
+          current_mode#set_label("Pick the best card!"))
   in
-  let update_gui () = update_gui_func () in
-  update_gui ();
-  let rec update_timer () = 
-    let _  = after (Core.Std.sec 0.2) >>= 
-      (fun () -> timer#set_label(string_of_int (Client.get_time ())); 
-        update_timer ();
-        return ()) in
-    () 
+  let gui_update_call = RecurringCall.create_call 1.0 update_gui_func in
+  RecurringCall.start_call gui_update_call;
+  let timer_update_call = RecurringCall.create_call 0.2  
+      (fun () -> timer#set_label(string_of_int (Client.get_time ()))) 
   in
-  update_timer();
+  RecurringCall.start_call timer_update_call;
+
+  let update_gui () = RecurringCall.start_call gui_update_call in
+
   (*Callbacks: Here is where the callbacks are assigned for each
    *of the 10 buttons in the main interface of the GUI.  When connecting
    *to the server, each of the 10 buttons' callbacks can be used to call
