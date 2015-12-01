@@ -28,7 +28,8 @@ val user_remove: state -> uID -> state
 cards in the state*)
 val user_play_white: state -> uID -> white_card -> state
 
-(*judge_select determines the winner of a round*)
+(*judge_select determines the winner of a round, 
+  uID must match uID of judge in the state*)
 val user_judge: state -> uID -> white_card -> state
 
 (*reset_all removes all players from the state*)

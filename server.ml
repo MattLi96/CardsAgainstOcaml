@@ -78,10 +78,8 @@ let respond_post f_state body req =
       );
       Server.respond `OK
     | "judge" ->
-      let c_uID = int_of_string (get_param (Header.to_list l_headers) "client") in
       (Log.Global.info "JUDGE: %i" (get_univ_s (!s_state)).judge);
-      (Log.Global.info "CLIENT REQ UID: %i" c_uID);
-      if (c_uID = (get_univ_s (!s_state)).judge) then
+      if (uID = (get_univ_s (!s_state)).judge) then
         let new_state = user_judge (!s_state) uID body in
         s_state := new_state;
         (if judge_state_finished !s_state then
