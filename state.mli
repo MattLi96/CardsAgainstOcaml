@@ -82,7 +82,8 @@
   val get_black_deck: s_state -> deck
 
   (*----helper methods------------------------------------------------*)
-  (*IMPORTANT: All these throw errors due to malformed strings. Use inside a try with*)
+  (*IMPORTANT: All these throw errors due to malformed strings.
+  Use inside a try with*)
   val string_winners: (black_card * white_card * uID) list -> string
   val winners_of_string: string -> (black_card * white_card * uID) list
 

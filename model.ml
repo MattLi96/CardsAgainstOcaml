@@ -74,7 +74,7 @@ let select_black (u_s_state:univ_s_state) : univ_s_state =
     winners = u_s_state.winners;
     b_deck = BDeck new_d;
     w_deck = u_s_state.w_deck;
-    card_to_player = List.map (fun (uid, _) -> (uid, None)) 
+    card_to_player = List.map (fun (uid, _) -> (uid, None))
         u_s_state.card_to_player;
     hands = u_s_state.hands
   }
@@ -97,7 +97,7 @@ let user_add_helper univ_s name =
   let new_card_to_player = (new_uID, None) ::
                            univ_s.card_to_player in
   let new_hands = (new_uID, [])::univ_s.hands in
-  let final_state = {univ_s with 
+  let final_state = {univ_s with
                     scores = new_scores;
                     card_to_player = new_card_to_player;
                     hands = new_hands
@@ -115,7 +115,7 @@ let user_add state name =
 (*remove_user takes in the uID of a player and removes said player from the
   list of players in the state*)
 (* val user_remove: state -> uID -> state *)
-let user_remove state uID = failwith "Unsupported"
+(* let user_remove state uID = failwith "Unsupported" *)
 
 let modify_card_to_player l uID white =
   List.map (fun (id, op) -> if id = uID then (id, Some white) else (id, op)) l
@@ -125,7 +125,7 @@ let remove_card_from_hand hands uID white =
       if (u=uID) then
         (u, List.filter (fun x -> x <> white) l)
       else
-        (u, l)) 
+        (u, l))
   in
   List.map (sel_fun) hands
 
@@ -133,15 +133,15 @@ let remove_card_from_hand hands uID white =
   cards in the state*)
 (* val user_play_white: state -> uID -> card -> state *)
 let user_play_white (state:state) (uID:uID) (white:white_card):state =
-  match state with 
+  match state with
   | Playing x ->
-    if List.exists (fun (id, op) -> id = uID && op <> None) x.card_to_player 
+    if List.exists (fun (id, op) -> id = uID && op <> None) x.card_to_player
     then state
     else if List.exists (fun (id, _) -> id = uID) x.card_to_player then
       let new_hands = (remove_card_from_hand x.hands uID white) in
       let new_played = (uID, white)::x.played in
       let new_card_to_player = modify_card_to_player x.card_to_player uID white in
-      let new_state = {x with 
+      let new_state = {x with
                         played = new_played;
                         card_to_player = new_card_to_player;
                         hands = new_hands
@@ -163,19 +163,19 @@ let user_judge (state:state) (uID:uID) (white:white_card) : state =
   match state with
   | Playing x -> state
   | Judging x ->
-    if (white = "") || (x.judge <> uID) then state 
-    else 
+    if (white = "") || (x.judge <> uID) then state
+    else
       let win = List.filter (fun (_, card) -> card = white) x.played in
-      Judging 
-        (List.fold_left 
+      Judging
+        (List.fold_left
            (fun x2 (wID, _) ->
               let old_black_card = x2.b_card in
               let new_scores = give_point x2.scores wID in
-              let new_state = {x2 with 
+              let new_state = {x2 with
                                winners = (old_black_card, white, wID)::x2.winners} in
               let new_state2 = {new_state with scores = new_scores} in
               new_state2
-           ) 
+           )
            x win
         )
 
@@ -184,7 +184,7 @@ let user_judge (state:state) (uID:uID) (white:white_card) : state =
 let game_reset state uID =
   match state with
   | Judging x | Playing x ->
-    let new_state = {(get_univ_s (init_s_state ())) with 
+    let new_state = {(get_univ_s (init_s_state ())) with
                      b_deck = x.b_deck;
                      w_deck = x.w_deck
                     } in
