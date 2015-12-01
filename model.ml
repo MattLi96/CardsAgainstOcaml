@@ -138,8 +138,7 @@ let user_play_white (state:state) (uID:uID) (white:white_card):state =
     if List.exists (fun (id, op) -> id = uID && op <> None) x.card_to_player 
     then state
     else if List.exists (fun (id, _) -> id = uID) x.card_to_player then
-      let old_hands = x.hands in
-      let new_hands = (remove_card_from_hand old_hands uID white) in
+      let new_hands = (remove_card_from_hand x.hands uID white) in
       let new_played = (uID, white)::x.played in
       let new_card_to_player = modify_card_to_player x.card_to_player uID white in
       let new_state = {x with 
