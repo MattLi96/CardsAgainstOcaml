@@ -31,7 +31,8 @@ val judge: uID -> white_card -> unit Deferred.t
 val get_user_state: uID -> state Deferred.t
 
 (*check_heartbeat returns false if the heartbeat ever fails*)
-val check_heartbeat: uID -> bool
+(* No longer needed because of the addition of heartbeat.mli*)
+(* val check_heartbeat: uID -> bool *)
 
 val trigger_start: unit -> unit Deferred.t
 
