@@ -89,12 +89,6 @@ let init_s_state () =
              w_deck = WDeck (fill_deck "white.json");
             }
 
-(*GET FUNCTIONS: functions that return information about the state*)
-
-(*get a list of active users*)
-(* val get_active_user: unit -> uId list *)
-let get_active_user () = failwith "todo"
-
 (*SET FUNCTIONS: functions that modify the state*)
 (*univ_s is a univ_s_state. Rest are the same*)
 let user_add_helper univ_s name =
@@ -102,10 +96,12 @@ let user_add_helper univ_s name =
   let new_scores = (new_uID, 0) :: univ_s.scores in
   let new_card_to_player = (new_uID, None) ::
                            univ_s.card_to_player in
-  let new_hands = (new_uID, []) :: univ_s.hands in
-  let new_state1 = {univ_s with scores = new_scores} in
-  let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
-  let final_state = {new_state2 with hands = new_hands} in
+  let new_hands = (new_uID, [])::univ_s.hands in
+  let final_state = {univ_s with 
+                    scores = new_scores;
+                    card_to_player = new_card_to_player;
+                    hands = new_hands
+                   } in
   (new_uID, final_state)
 
 (*add_user takes in a username and adds it to the list of players in the state*)
@@ -119,15 +115,10 @@ let user_add state name =
 (*remove_user takes in the uID of a player and removes said player from the
   list of players in the state*)
 (* val user_remove: state -> uID -> state *)
-let user_remove state uID = failwith "todo"
+let user_remove state uID = failwith "Unsupported"
 
-let rec modify_card_to_player l uID white =
-  match l with
-  | [] -> []
-  | h::t -> if ((fst h) = uID) then
-      (fst h, Some white)::(modify_card_to_player t uID white)
-    else
-      h::(modify_card_to_player t uID white)
+let modify_card_to_player l uID white =
+  List.map (fun (id, op) -> if id = uID then (id, Some white) else (id, op)) l
 
 let remove_card_from_hand hands uID white =
   let sel_fun = (fun (u, l) ->
@@ -151,10 +142,12 @@ let user_play_white (state:state) (uID:uID) (white:white_card):state =
       let new_hands = (remove_card_from_hand old_hands uID white) in
       let new_played = (uID, white)::x.played in
       let new_card_to_player = modify_card_to_player x.card_to_player uID white in
-      let new_state1 = {x with played = new_played} in
-      let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
-      let new_state3 = {new_state2 with hands = new_hands} in
-      Playing new_state3
+      let new_state = {x with 
+                        played = new_played;
+                        card_to_player = new_card_to_player;
+                        hands = new_hands
+                       } in
+      Playing new_state
     else
       state
   | Judging x -> state
@@ -192,10 +185,11 @@ let user_judge (state:state) (uID:uID) (white:white_card) : state =
 let game_reset state uID =
   match state with
   | Judging x | Playing x ->
-    let new_state = {(get_univ_s (init_s_state ())) with b_card = x.b_card} in
-    let new_state2 = {new_state with b_deck = x.b_deck} in
-    let new_state3 = {new_state2 with w_deck = x.w_deck} in
-    Playing new_state3
+    let new_state = {(get_univ_s (init_s_state ())) with 
+                     b_deck = x.b_deck;
+                     w_deck = x.w_deck
+                    } in
+    Playing new_state
 
 (*Shuffle helpers*)
 (*borrowed shuffle_list from google*)

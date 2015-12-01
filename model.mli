@@ -10,11 +10,6 @@ type uID = int
 (*INIT FUNCTIONS: functions that return information about the state*)
 val init_s_state: unit -> state
 
-(*GET FUNCTIONS: functions that return information about the state*)
-
-(*get a list of active users*)
-val get_active_user: unit -> uID list
-
 (*SET FUNCTIONS: functions that modify the state*)
 
 (*add_user takes in a username and adds it to the list of players in the state*)
