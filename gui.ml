@@ -96,13 +96,13 @@ let rec find_idx n l =
 
 let get_current_score () =
   match !curr_user_state with
-  | None -> "N/A"
+  | None -> "0"
   | Some s -> 
-    let rec find_score n l =
-      match l with
-      | [] -> (-1,-1)
-      | hd::tl -> if n = 1 then hd else find_score (n-1) tl in
-    string_of_int (fst(find_score (Client.current_id ()) s.scores))
+    let find_score n l = 
+      let filtered = List.filter (fun (id,score) -> n = id) l in
+      List.fold_left (fun s (_, score) -> s + score) 0 filtered
+    in
+    string_of_int (find_score (Client.current_id ()) s.scores)
 
 
 let rec get_submissions x =
@@ -379,6 +379,7 @@ let main_window () =
           card9#set_label(get_submissions 9);
           card10#set_label(get_submissions 10);
           bcard#set_label (st.b_card);
+          score#set_label(get_current_score());
           current_mode#set_label("You are the Czar!") 
         | JWaiting st ->
           judging_mode:=true;
@@ -395,7 +396,8 @@ let main_window () =
           card9#set_label("Waiting for players");
           card10#set_label("Waiting for players");
           bcard#set_label("Waiting for players");
-          current_mode#set_label("You are the Czar!")
+          current_mode#set_label("You are the Czar!");
+          score#set_label(get_current_score())
         | PWaiting st ->
           judging_mode:=false;
           winner_log:= Some st.winners; 
@@ -410,7 +412,8 @@ let main_window () =
           card9#set_label("Waiting for czar");
           card10#set_label("Waiting for czar");
           bcard#set_label("Waiting for czar");
-          current_mode#set_label("Pick the best card!"))
+          current_mode#set_label("Pick the best card!"));
+          score#set_label(get_current_score())
   in
   let gui_update_call = RecurringCall.create_call 1.0 update_gui_func in
   RecurringCall.start_call gui_update_call;
