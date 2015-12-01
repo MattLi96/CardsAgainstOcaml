@@ -95,7 +95,7 @@ let client_pause () =
   let temp_header_with_type = Header.add temp_header "type" "pause" in
   let post_req = (Client.post (Uri.of_string !connect_url)
     ~headers:temp_header_with_type
-    ~body:(Body.of_string "")) in
+    (* ~body:(Body.of_string "") *)) in
   post_req >>= (fun (resp,body) ->
   let code = resp |> Response.status |> Code.code_of_status in
   print_string "Response Code: "; print_int code; print_endline "";
@@ -107,7 +107,7 @@ let client_resume () =
   let temp_header_with_type = Header.add temp_header "type" "resume" in
   let post_req = (Client.post (Uri.of_string !connect_url)
     ~headers:temp_header_with_type
-    ~body:(Body.of_string "")) in
+    (* ~body:(Body.of_string "") *)) in
   post_req >>= (fun (resp,body) ->
   let code = resp |> Response.status |> Code.code_of_status in
   print_string "Response Code: "; print_int code; print_endline "";
@@ -119,7 +119,7 @@ let client_beat () =
   let temp_header_with_type = Header.add temp_header "type" "beat" in
   let post_req = (Client.post (Uri.of_string !connect_url)
     ~headers:temp_header_with_type
-    ~body:(Body.of_string "")) in
+    (* ~body:(Body.of_string "") *)) in
   post_req >>= (fun (resp,body) ->
   (* let code = resp |> Response.status |> Code.code_of_status in
   print_string "Response Code: "; print_int code; print_endline "";
