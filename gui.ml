@@ -99,8 +99,8 @@ let get_current_score () =
   | None -> "0"
   | Some s -> 
     let find_score n l = 
-      let filtered = List.filter (fun (id,score) -> n = id) l in
-      List.fold_left (fun s (_, score) -> s + score) 0 filtered
+      List.fold_left 
+        (fun score (id, s) -> if n = id then s + score else score) 0 l
     in
     string_of_int (find_score (Client.current_id ()) s.scores)
 

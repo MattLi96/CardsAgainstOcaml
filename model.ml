@@ -123,7 +123,7 @@ let modify_card_to_player l uID white =
 let remove_card_from_hand hands uID white =
   let sel_fun = (fun (u, l) ->
       if (u=uID) then
-        (u, List.filter (fun x -> x<>white) l)
+        (u, List.filter (fun x -> x <> white) l)
       else
         (u, l)) 
   in
