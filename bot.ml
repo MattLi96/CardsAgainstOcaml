@@ -58,6 +58,9 @@ let rec start_from_json json:unit =
 
 let _ =
   (match Array.to_list Sys.argv with
+  | a::b::c::t ->
+    ignore(connect_server c "BOT" >>=
+    (fun _ -> return (start_from_json (Yojson.Basic.from_file b))))
   | a::b::t ->
     ignore(connect_server "http://localhost:8080/" "BOT" >>=
     (fun _ -> return (start_from_json (Yojson.Basic.from_file b))))
