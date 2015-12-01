@@ -132,17 +132,10 @@ let rec modify_card_to_player l uID white =
 let remove_card_from_hand hands uID white =
   let sel_fun = (fun (u, l) ->
       if (u=uID) then
-        let rec remove hand white =
-          (match hand with
-           | [] -> []
-           | h::t ->
-             (if (h <> white) then
-                h::(remove t white)
-              else
-                (remove t white)))
-        in (u, remove l white)
+        (u, List.filter (fun x -> x<>white) l)
       else
-        (u, l)) in
+        (u, l)) 
+  in
   List.map (sel_fun) hands
 
 (*user_play_white adds the card played by a player into the list of played
