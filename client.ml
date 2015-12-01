@@ -92,44 +92,29 @@ let judge uID white =
 let client_judge (white:white_card) =
   judge !c_uID white
 
-(*pausing and resuming the game*)
-let client_pause () =
+let type_post str log =
   let temp_header = Header.add (Header.init()) "uID" (string_of_int !c_uID) in
   let temp_header_with_type = Header.add temp_header "type" "pause" in
   let post_req = (Client.post (Uri.of_string !connect_url)
-    ~headers:temp_header_with_type
-    (* ~body:(Body.of_string "") *)) in
+    ~headers:temp_header_with_type) in
   post_req >>= (fun (resp,body) ->
-  let code = resp |> Response.status |> Code.code_of_status in
+  if log then
+  (let code = resp |> Response.status |> Code.code_of_status in
   print_string "Response Code: "; print_int code; print_endline "";
-  print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string);
+  print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string);)
+  else ();
   return ())
+
+(*pausing and resuming the game*)
+let client_pause () =
+  type_post "pause" true
 
 let client_resume () =
-  let temp_header = Header.add (Header.init()) "uID" (string_of_int !c_uID) in
-  let temp_header_with_type = Header.add temp_header "type" "resume" in
-  let post_req = (Client.post (Uri.of_string !connect_url)
-    ~headers:temp_header_with_type
-    (* ~body:(Body.of_string "") *)) in
-  post_req >>= (fun (resp,body) ->
-  let code = resp |> Response.status |> Code.code_of_status in
-  print_string "Response Code: "; print_int code; print_endline "";
-  print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string);
-  return ())
+  type_post "resume" true
 
+(*heatbeat method*)
 let client_beat () =
-  let temp_header = Header.add (Header.init()) "uID" (string_of_int !c_uID) in
-  let temp_header_with_type = Header.add temp_header "type" "beat" in
-  let post_req = (Client.post (Uri.of_string !connect_url)
-    ~headers:temp_header_with_type
-    (* ~body:(Body.of_string "") *)) in
-  post_req >>= (fun (resp,body) ->
-  (* let code = resp |> Response.status |> Code.code_of_status in
-  print_string "Response Code: "; print_int code; print_endline "";
-  print_string "Headers: "; print_endline (resp |> Response.headers |> Header.to_string); *)
-  time := (get_param (resp |> Response.headers |> Header.to_list) "time") |> int_of_string;
-  return ())
-
+  type_post "beat" false
 
 (*start_heatbeat creates an ivar that represents the heartbeat*)
 (* val start_heartbeat: uID -> 'a Async.Std.Ivar.t *)
