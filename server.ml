@@ -6,8 +6,6 @@ open Model
 open Timer
 open Heartbeat
 
-(* compile with: $ corebuild receive_post.native -pkg cohttp.async *)
-
 (*Additional state for helping run the server*)
 type a_state = {
   (*Fill when phase is over, either due to time or everyone played*)
@@ -30,8 +28,7 @@ type full_state = a_state * State.s_state ref
 let rec gameloop f_state =
   match f_state with
   | (a_state, s_state) ->
-    (*TODO: make sure this is legit, could be issue involving phase_over*)
-    a_state.timer <- create_timer 40; (*TODO: change 40 later*)
+    a_state.timer <- create_timer 40;
     bind_timer a_state.timer (Ivar.fill_if_empty a_state.phase_over);
     start_timer a_state.timer;
 
@@ -65,7 +62,8 @@ let respond_post f_state body req =
     let l_headers = (Cohttp.Request.headers req) in
     let uID = get_UID (Header.to_list (l_headers)) in
     let typ = get_type (Header.to_list l_headers) in
-    (*     Log.Global.info "POST Body: %s" body;
+    (*     Uncomment below for log statements
+           Log.Global.info "POST Body: %s" body;
            Log.Global.info "uID found is %i" uID;
            Log.Global.info "type found is %s" typ; *)
     match typ with
@@ -98,7 +96,7 @@ let respond_post f_state body req =
       Server.respond `OK ~headers: h
     | _ -> failwith "wierd type of post"
 
-(*TODO pass in other parameters in the header of the response*)
+(*Other parameters in the header of the response*)
 let respond_get f_state body req =
   match f_state with
   | (a_state, s_state) ->
@@ -159,7 +157,8 @@ let start_server port () =
                 timer = create_timer 0}
               , ref (init_s_state ())) in
   eprintf "Listening for HTTP on port %d\n" port;
-  eprintf "Try (this will crash the server): curl -X POST -d 'foo bar' http://localhost:%d\n" port;
+  eprintf "Try (this will crash the server):
+           curl -X POST -d 'foo bar' http://localhost:%d\n" port;
   Cohttp_async.Server.create ~on_handler_error:`Raise
     (Tcp.on_port port) (fun ~body _ req ->
         match req |> Cohttp.Request.meth with

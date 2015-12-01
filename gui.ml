@@ -180,7 +180,7 @@ let about_screen () =
     about#set_icon (Some icon);
     let myclose _ = about_visible:=None;about#destroy () in
     ignore(about#connect#destroy(myclose));
-    let vbox = GBin.scrolled_window  ~packing:about#add() in
+    let vbox = GPack.vbox  ~packing:about#add() in
     let logo = GdkPixbuf.from_file "res/cards.png" in
     let logo_widget = GMisc.image ~pixbuf:logo ~packing:vbox#add () in
     logo_widget#set_pixbuf logo;
@@ -202,13 +202,13 @@ Some code borrowed from the open-source lablgtk2 libraries.\n
 
 let score_dialog () =
   let icon = GdkPixbuf.from_file "res/icon.png" in
-  let score = GWindow.window ~title:"Winning Cards" ~resizable:false
+  let score = GWindow.window ~title:"Winning Cards" ~resizable:true
       ~border_width:5 ~height:600 ~width: 270 () in
   score#set_icon(Some icon);
   score_visible:= Some score;
   let myclose _ =score_visible:=None;score#destroy() in
   ignore(score#connect#destroy(myclose));
-  let mainbox = GPack.vbox ~spacing:5 ~packing:score#add () in
+  let mainbox = GBin.scrolled_window ~packing:score#add () in
   get_winners();
   let winnerstext = GText.view ~buffer:gamelog
       ~justification:`FILL ~packing:mainbox#add () in
@@ -374,16 +374,16 @@ let main_window () =
           submissions:= Some st.played;
           winner_log:=Some st.winners;
           get_winners(); 
-          card1#set_label(FormatOps.break_line (get_submissions 1) 25);
-          card2#set_label(FormatOps.break_line (get_submissions 2) 25);
-          card3#set_label(FormatOps.break_line (get_submissions 3) 25);
-          card4#set_label(FormatOps.break_line (get_submissions 4) 25);
-          card5#set_label(FormatOps.break_line (get_submissions 5) 25);
-          card6#set_label(FormatOps.break_line (get_submissions 6) 25);
-          card7#set_label(FormatOps.break_line (get_submissions 7) 25);
-          card8#set_label(FormatOps.break_line (get_submissions 8) 25);
-          card9#set_label(FormatOps.break_line (get_submissions 9) 25);
-          card10#set_label(FormatOps.break_line (get_submissions 10) 25);
+          card1#set_label(FormatOps.break_line (get_submissions 1) 22);
+          card2#set_label(FormatOps.break_line (get_submissions 2) 22);
+          card3#set_label(FormatOps.break_line (get_submissions 3) 22);
+          card4#set_label(FormatOps.break_line (get_submissions 4) 22);
+          card5#set_label(FormatOps.break_line (get_submissions 5) 22);
+          card6#set_label(FormatOps.break_line (get_submissions 6) 22);
+          card7#set_label(FormatOps.break_line (get_submissions 7) 22);
+          card8#set_label(FormatOps.break_line (get_submissions 8) 22);
+          card9#set_label(FormatOps.break_line (get_submissions 9) 22);
+          card10#set_label(FormatOps.break_line (get_submissions 10) 22);
           bcard#set_label (st.b_card);
           score#set_label(get_current_score());
           current_mode#set_label("You are the Czar!") 
