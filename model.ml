@@ -129,11 +129,6 @@ let rec modify_card_to_player l uID white =
     else
       h::(modify_card_to_player t uID white)
 
-let rec uID_in_list l uID =
-  match l with
-  | [] -> false
-  | h::t -> if ((fst h) = uID) then true else (uID_in_list t uID)
-
 let remove_card_from_hand hands uID white =
   let sel_fun = (fun (u, l) ->
       if (u=uID) then
