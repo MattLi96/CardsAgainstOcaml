@@ -117,8 +117,13 @@ let rec get_hand_num x l =
   | Some hand ->
     FormatOps.break_line (find_idx x (hand)) 22
 
+let rec get_submit_num x l =
+  match l with
+  | None -> "Waiting on server"
+  | Some hand -> (find_idx x (hand))
+
 let submit_hand_num n = 
-  get_hand_num n !player_hand
+  get_submit_num n !player_hand
 
 let submit_judge_num n =
   get_submissions n
