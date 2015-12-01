@@ -374,16 +374,16 @@ let main_window () =
           submissions:= Some st.played;
           winner_log:=Some st.winners;
           get_winners(); 
-          card1#set_label(get_submissions 1);
-          card2#set_label(get_submissions 2);
-          card3#set_label(get_submissions 3);
-          card4#set_label(get_submissions 4);
-          card5#set_label(get_submissions 5);
-          card6#set_label(get_submissions 6);
-          card7#set_label(get_submissions 7);
-          card8#set_label(get_submissions 8);
-          card9#set_label(get_submissions 9);
-          card10#set_label(get_submissions 10);
+          card1#set_label(FormatOps.break_line (get_submissions 1) 25);
+          card2#set_label(FormatOps.break_line (get_submissions 2) 25);
+          card3#set_label(FormatOps.break_line (get_submissions 3) 25);
+          card4#set_label(FormatOps.break_line (get_submissions 4) 25);
+          card5#set_label(FormatOps.break_line (get_submissions 5) 25);
+          card6#set_label(FormatOps.break_line (get_submissions 6) 25);
+          card7#set_label(FormatOps.break_line (get_submissions 7) 25);
+          card8#set_label(FormatOps.break_line (get_submissions 8) 25);
+          card9#set_label(FormatOps.break_line (get_submissions 9) 25);
+          card10#set_label(FormatOps.break_line (get_submissions 10) 25);
           bcard#set_label (st.b_card);
           score#set_label(get_current_score());
           current_mode#set_label("You are the Czar!") 
