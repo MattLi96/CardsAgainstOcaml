@@ -39,7 +39,7 @@ let do_game json (cstate:c_state): unit Deferred.t =
   try
   (let card_score = score_of_black json (cstate |> get_univ_c).b_card in
   match cstate with
-  | Playing st -> if should_play !c_uID st then
+  | Playing st -> if should_play (get_c_uID ()) st then
       let bc = best_card card_score st.hand in
       play_card bc >>= (fun _ -> return ())
     else return ()
