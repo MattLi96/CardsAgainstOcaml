@@ -365,6 +365,7 @@ let main_window () =
           bcard#set_label(st.b_card);
           score#set_label(get_current_score())
         | Judging st ->
+          curr_user_state:= Some st;
           submissions:= Some st.played;
           winner_log:=Some st.winners;
           get_winners(); 
@@ -383,6 +384,7 @@ let main_window () =
           current_mode#set_label("You are the Czar!") 
         | JWaiting st ->
           judging_mode:=true;
+          curr_user_state:= Some st;
           winner_log:= Some st.winners;
           get_winners();
           card1#set_label("Waiting for players");
@@ -400,6 +402,7 @@ let main_window () =
           score#set_label(get_current_score())
         | PWaiting st ->
           judging_mode:=false;
+          curr_user_state:= Some st;
           winner_log:= Some st.winners; 
           card1#set_label("Waiting for czar");
           card2#set_label("Waiting for czar");
