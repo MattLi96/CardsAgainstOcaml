@@ -6,6 +6,8 @@ type state = c_state
 
 val get_time: unit -> int
 
+val get_c_uID: unit -> int
+
 (*connect_server allows the client to connect to a server*)
 val connect_server: string -> string -> unit Deferred.t
 

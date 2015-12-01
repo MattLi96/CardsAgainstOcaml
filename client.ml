@@ -27,6 +27,9 @@ let connect_url = ref "http://localhost:8080/"
 let get_time () =
   !time
 
+let get_c_uID () =
+  !c_uID
+
 (*Helper Functions*)
 let rec get_UID l =
   (match l with

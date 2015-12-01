@@ -37,7 +37,7 @@
  {
  "id": 464,
  "numAnswers": 1,
- "text": "What's the next Happy Meal&copy; toy?",
+ "text": "What's the next Happy Meal toy?",
  "expansion": "Base",
  "cardType": "Q"
  },
@@ -114,7 +114,7 @@
  {
  "id": 476,
  "numAnswers": 1,
- "text": "This is the way the world ends <br> This is the way the world ends <br> Not with a bang but with _.",
+ "text": "This is the way the world ends. Not with a bang but with _.",
  "expansion": "Base",
  "cardType": "Q"
  },
