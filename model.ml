@@ -129,16 +129,6 @@ let rec modify_card_to_player l uID white =
     else
       h::(modify_card_to_player t uID white)
 
-let has_played state uID =
-  let rec loop list =
-    (match list with
-     | [] -> false
-     | h::t -> if ((fst h) = uID) then
-         (if (snd h <> None) then true else false)
-       else
-         loop t) in
-  loop (get_univ_s state).card_to_player
-
 let rec uID_in_list l uID =
   match l with
   | [] -> false
@@ -164,21 +154,22 @@ let remove_card_from_hand hands uID white =
   cards in the state*)
 (* val user_play_white: state -> uID -> card -> state *)
 let user_play_white (state:state) (uID:uID) (white:white_card):state =
-  if (has_played state uID) then
-    state
-  else
-  if (uID_in_list (get_univ_s state).card_to_player uID) then
-    let old_hands = (get_univ_s state).hands in
-    let new_hands = (remove_card_from_hand old_hands uID white) in
-    let new_played = (uID, white) :: ((get_univ_s state).played) in
-    let new_card_to_player = modify_card_to_player
-        (get_univ_s state).card_to_player uID white in
-    let new_state1 = {(get_univ_s state) with played = new_played} in
-    let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
-    let new_state3 = {new_state2 with hands = new_hands} in
-    Playing new_state3
-  else
-    state
+  match state with 
+  | Playing x ->
+    if List.exists (fun (id, op) -> id = uID && op <> None) x.card_to_player 
+    then state
+    else if List.exists (fun (id, _) -> id = uID) x.card_to_player then
+      let old_hands = x.hands in
+      let new_hands = (remove_card_from_hand old_hands uID white) in
+      let new_played = (uID, white)::x.played in
+      let new_card_to_player = modify_card_to_player x.card_to_player uID white in
+      let new_state1 = {x with played = new_played} in
+      let new_state2 = {new_state1 with card_to_player = new_card_to_player} in
+      let new_state3 = {new_state2 with hands = new_hands} in
+      Playing new_state3
+    else
+      state
+  | Judging x -> state
 
 (* type scores = (uID * int) list *)
 let give_point scores uID =
@@ -188,17 +179,25 @@ let give_point scores uID =
 
 (*judge_select determines the winner of a round*)
 (* val user_judge: state -> uID -> card -> state *)
-let user_judge (state:state) (uID:uID) (white:white_card):state =
-  if (white = "") then state else
-    ((if (uID_in_list (get_univ_s state).card_to_player uID) then
-        let old_black_card = (get_univ_s state).b_card in
-        let new_scores = give_point (get_univ_s state).scores uID in
-        let new_state = {(get_univ_s state) with winners =
-                                                   (old_black_card, white, uID) :: (get_univ_s state).winners} in
-        let new_state2 = {new_state with scores = new_scores} in
-        Judging new_state2
-      else
-        state))
+let user_judge (state:state) (uID:uID) (white:white_card) : state =
+  match state with
+  | Playing x -> state
+  | Judging x ->
+    if (white = "") || (x.judge <> uID) then state 
+    else 
+      let win = List.filter (fun (_, card) -> card = white) x.played in
+      Judging 
+        (List.fold_left 
+           (fun x2 (wID, _) ->
+              let old_black_card = x2.b_card in
+              let new_scores = give_point x2.scores wID in
+              let new_state = {x2 with 
+                               winners = (old_black_card, white, wID)::x2.winners} in
+              let new_state2 = {new_state with scores = new_scores} in
+              new_state2
+           ) 
+           x win
+        )
 
 (*reset_all removes all players from the state*)
 (* val game_reset: state -> uID -> state *)

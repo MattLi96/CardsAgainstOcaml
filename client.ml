@@ -75,8 +75,7 @@ let client_play_white (white:white_card) =
 (* val judge: uID -> white_card -> unit *)
 let judge uID white =
   let temp_header = Header.add (Header.init()) "uID" (string_of_int uID) in
-  let temp_header_2 = Header.add temp_header "client" (string_of_int !c_uID) in
-  let temp_header_with_type = Header.add temp_header_2 "type" "judge" in
+  let temp_header_with_type = Header.add temp_header "type" "judge" in
   let temp_body = Body.of_string white in
   let post_req = (Client.post (Uri.of_string !connect_url)
     ~headers:temp_header_with_type
