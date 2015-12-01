@@ -471,7 +471,7 @@
  {
  "id": 68,
  "numAnswers": 0,
- "text": "A Super Soaker&trade; full of cat pee.",
+ "text": "A Super Soaker full of cat pee.",
  "expansion": "Base",
  "cardType": "A"
  },
@@ -660,7 +660,7 @@
  {
  "id": 95,
  "numAnswers": 0,
- "text": "Adderall&trade;.",
+ "text": "Adderall.",
  "expansion": "Base",
  "cardType": "A"
  },
@@ -807,7 +807,7 @@
  {
  "id": 116,
  "numAnswers": 0,
- "text": "<i>Bees?</i>",
+ "text": "Bees?",
  "expansion": "Base",
  "cardType": "A"
  },
@@ -947,7 +947,7 @@
  {
  "id": 136,
  "numAnswers": 0,
- "text": "A Bop It&trade;.",
+ "text": "A Bop It.",
  "expansion": "Base",
  "cardType": "A"
  },
@@ -1367,7 +1367,7 @@
  {
  "id": 196,
  "numAnswers": 0,
- "text": "The Tempur-Pedic&copy; Swedish Sleep System&trade;.",
+ "text": "The Tempur-Pedic&copy; Swedish Sleep System.",
  "expansion": "Base",
  "cardType": "A"
  },
@@ -1899,7 +1899,7 @@
  {
  "id": 272,
  "numAnswers": 0,
- "text": "Euphoria&trade; by Calvin Klein.",
+ "text": "Euphoria by Calvin Klein.",
  "expansion": "Base",
  "cardType": "A"
  },
@@ -1913,7 +1913,7 @@
  {
  "id": 274,
  "numAnswers": 0,
- "text": "Lunchables&trade;.",
+ "text": "Lunchables.",
  "expansion": "Base",
  "cardType": "A"
  },
@@ -2326,7 +2326,7 @@
  {
  "id": 333,
  "numAnswers": 0,
- "text": "Five-Dollar Footlongs&trade;.",
+ "text": "Five-Dollar Footlongs.",
  "expansion": "Base",
  "cardType": "A"
  },
@@ -2851,7 +2851,7 @@
  {
  "id": 408,
  "numAnswers": 0,
- "text": "Domino's&trade; Oreo&trade; Dessert Pizza.",
+ "text": "Domino's Oreo Dessert Pizza.",
  "expansion": "Base",
  "cardType": "A"
  },
@@ -3117,7 +3117,7 @@
  {
  "id": 446,
  "numAnswers": 0,
- "text": "The Donald Trump Seal of Approval&trade;.",
+ "text": "The Donald Trump Seal of Approval.",
  "expansion": "Base",
  "cardType": "A"
  },
