@@ -84,7 +84,7 @@ let played_white_cards current_state: white_card list =
 
 (*----server state methods------------------------------------------------*)
 
-let init_s_state () = 
+let init_s_state () =
   Playing {
     judge = 0;
     played = [];
@@ -94,7 +94,8 @@ let init_s_state () =
     b_deck = BDeck [];
     w_deck = WDeck [];
 
-    (*List of (card, player_ pairs matching cards played to users who played them*)
+    (*List of (card, player_ pairs matching cards played
+    to users who played them*)
     card_to_player = [];
     hands = []
   }
@@ -126,9 +127,15 @@ let get_user_state (state:s_state) (u:uID):c_state =
   if (state |> get_univ_s).judge = 0 then PWaiting univ_c else
     match state with
     | Playing _ ->
-      if (u = (get_univ_s state).judge) then JWaiting univ_c else Playing univ_c
+      if (u = (get_univ_s state).judge) then
+        JWaiting univ_c
+      else
+        Playing univ_c
     | Judging _ ->
-      if (u = (get_univ_s state).judge) then Judging univ_c else PWaiting univ_c
+      if (u = (get_univ_s state).judge) then
+        Judging univ_c
+      else
+      PWaiting univ_c
 
 
 (*val get_black_deck: s_state -> deck *)
@@ -161,12 +168,14 @@ let winners_of_string input =
      | x ->
        let first_break = String.index x '|' in
        let win = String.sub x 0 first_break in
-       let rest = String.sub x (first_break+1) (String.length x -1 - first_break) in
+       let rest = String.sub x (first_break+1)
+                  (String.length x -1 - first_break) in
        let cutoff_b = String.index x '*' in
        let black = String.sub win 0 cutoff_b in
        let cutoff_w = String.index_from x (cutoff_b+1) '*' in
        let white = String.sub win (cutoff_b+1) (cutoff_w-1-cutoff_b) in
-       let uID = int_of_string(String.sub win (cutoff_w+1) (String.length win - 1 - cutoff_w)) in
+       let uID = int_of_string(String.sub win (cutoff_w+1)
+                                (String.length win - 1 - cutoff_w)) in
        (black, white, uID) :: loop (rest)
     )
   in loop input
@@ -187,7 +196,8 @@ let hand_of_string input =
      | x ->
        let first_break = String.index x '|' in
        let card = String.sub x 0 first_break in
-       let rest = String.sub x (first_break+1) (String.length x -1 - first_break) in
+       let rest = String.sub x (first_break+1)
+                  (String.length x -1 - first_break) in
        card::(loop rest)
     )
   in loop input
@@ -197,7 +207,8 @@ let string_scores input =
   let rec loop input =
     (match input with
      | [] -> ""
-     | h::t -> (string_of_int (fst h)) ^ "." ^ (string_of_int (snd h)) ^ "|" ^ loop t)
+     | h::t -> (string_of_int (fst h)) ^ "." ^
+                (string_of_int (snd h)) ^ "|" ^ loop t)
   in
   loop input
 
@@ -209,10 +220,12 @@ let scores_of_string input =
      | x ->
        let first_break = String.index x '|' in
        let player = String.sub x 0 first_break in
-       let rest = String.sub x (first_break+1) (String.length x -1 - first_break) in
+       let rest = String.sub x (first_break+1)
+                              (String.length x -1 - first_break) in
        let mid_break = String.index player '.' in
        let uID = int_of_string (String.sub player 0 mid_break) in
-       let score = int_of_string (String.sub player (mid_break+1) (String.length player - 1 - mid_break)) in
+       let score = int_of_string (String.sub player (mid_break+1)
+                                  (String.length player - 1 - mid_break)) in
        (uID, score) :: loop (rest)
     )
   in
@@ -235,10 +248,12 @@ let played_of_string input =
      | x ->
        let first_break = String.index x '|' in
        let player = String.sub x 0 first_break in
-       let rest = String.sub x (first_break+1) (String.length x -1 - first_break) in
+       let rest = String.sub x (first_break+1)
+                  (String.length x -1 - first_break) in
        let mid_break = String.index player '.' in
        let uID = int_of_string (String.sub player 0 mid_break) in
-       let wh = (String.sub player (mid_break+1) (String.length player - 1 - mid_break)) in
+       let wh = (String.sub player (mid_break+1)
+                (String.length player - 1 - mid_break)) in
        (uID, wh) :: loop (rest)
     )
   in
