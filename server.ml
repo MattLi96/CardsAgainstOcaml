@@ -120,8 +120,8 @@ let respond_get f_state body req =
     Log.Global.info "scores: %s" (State.string_scores (ans.scores));
     Log.Global.info "winners: %s" (State.string_winners (ans.winners));
     Log.Global.info "hand: %s" (State.string_hand (ans.hand));
-
-    Log.Global.info "judge: %i" ((get_univ_s !s_state).judge);
+    (*this has the new line, should be the last info printed*)
+    Log.Global.info "judge: %i\n" ((get_univ_s !s_state).judge);
 
     let temp_header = Header.add (Header.init()) "b_card"  (s_black) in
     let h2 = Header.add (temp_header) "played" s_played in
