@@ -1,5 +1,8 @@
 # CardsAgainstOcaml
-Cards Against Humanity: In OCaml. Need I say anymore?
+
+![CAO](https://github.com/MattLi96/CardsAgainstOcaml/blob/master/res/logo.png)
+
+Cards Against Humanity: **In OCaml.** Need I say anymore?
 
 ## Members:
 * [Austin Liu (arl96)](https://github.com/aliu139)
@@ -24,8 +27,8 @@ First navigate into the folder CardsAgainstOcaml.
 
 In terminal run:
 
-* cs3110 compile server.ml
-* cs3110 run server.ml
+* `cs3110 compile server.ml`
+* `cs3110 run server.ml`
 
 This should start up the server. If properly started, you should see a message
 telling you what port the server was started on (default to 8080). If 8080 is
@@ -35,8 +38,8 @@ in use already, then this will not work.
 
 In a new terminal (other than the one running server), run:
 
-* cs3110 compile gui.ml
-* cs3110 run gui.ml
+* `cs3110 compile gui.ml`
+* `cs3110 run gui.ml`
 
 This should launch the GUI. From the GUI, type in the ip address of the server
 you want to connect to. Press the "Click to connect to server!" button.
@@ -47,8 +50,8 @@ then feel free to start the game when all players are ready.
 
 To start up a bot, from the same machine that is running the server, run:
 
-* cs3110 compile bot.ml
-* cs3110 run bot.ml --[name of json trainer file]
+* `cs3110 compile bot.ml`
+* `cs3110 run bot.ml --[name of json trainer file]`
 
 ## Self-Modification
 ### Using Different Decks
