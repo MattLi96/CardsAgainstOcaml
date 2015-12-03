@@ -12,16 +12,24 @@ let score_of_black json black_card =
   List.map (fun (a,b) -> (a,(b |> Yojson.Basic.Util.to_int)))
     (b_assoc |> Yojson.Basic.Util.to_assoc)
 
+let shuffle_list l =
+  let rand_mapped = List.map (fun e -> (Random.bits (), e)) l in
+  let sorted = List.sort compare rand_mapped in
+  List.map snd sorted
+
 (*Precondition: card_score is a assoc list of (white_card,int), w_list
-  is a list of white card*)
+  is a list of white card, the list cannot be empty*)
 let best_card card_score w_list =
-  let rec search_max cd scr lst =
+  let rec search_max cdl scr lst =
     match lst with
-    | [] -> cd
+    | [] -> cdl
     | h::t -> let new_scr = List.assoc h card_score in
-      if new_scr > scr then search_max h new_scr t
-      else search_max cd scr t in
-  search_max "" min_int w_list
+      if new_scr > scr then search_max [h] new_scr t
+      else if new_scr = scr then search_max (h::cdl) scr t
+      else search_max cdl scr t in
+  let best_lst = search_max [""] min_int w_list in
+  Random.self_init ();
+  List.hd (shuffle_list best_lst)
 
 let should_play uID (st:univ_c_state) = not (List.mem_assoc uID st.played)
 
