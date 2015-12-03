@@ -1,2 +1,6 @@
 (*Server*)
-(*Server is gonna be the  main method of this game*)
+(*Server contains the  main method of this game
+
+  This is empty on purpose so that nothing about the server is exposed
+
+*)
