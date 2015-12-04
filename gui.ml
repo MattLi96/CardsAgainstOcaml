@@ -370,6 +370,7 @@ let main_window () =
           bcard#set_label(st.b_card);
           score#set_label(get_current_score())
         | Judging st ->
+          judging_mode:=true;
           curr_user_state:= Some st;
           submissions:= Some st.played;
           winner_log:=Some st.winners;
@@ -520,7 +521,8 @@ let main_window () =
 
 
 
-let initial_window () = 
+let initial_window () =
+  let is_connected = ref false in 
   ignore(locale ());
   let icon = GdkPixbuf.from_file "res/icon.png" in
   let splash = GWindow.window 
@@ -548,14 +550,19 @@ let initial_window () =
     upon (Client.trigger_start()) (fun () -> (main_window();main_destroy())) in
   let init_connect () = 
     let server_input = server#get_text () in
-    let connect_attempt = try Some (connect_server server_input "string") with
+    let connect_attempt = 
+      if !is_connected then None else
+      try Some (connect_server server_input "string") with
       | _ -> None in
     match connect_attempt with
-    | Some d ->
+    | Some d -> is_connected:=true;
       upon d (fun () ->
           ignore(start_button#connect#clicked ~callback:init_start);
           indicator#set_label("You are now connected!")) 
-    | None -> indicator#set_label("Error, could not connect. Try again!") in
+    | None -> 
+      if !is_connected
+      then indicator#set_label("You are already connected.  Click to start!")
+      else indicator#set_label("Error, could not connect. Try again!") in
 
   let connect_first () = 
     indicator#set_label("Connect to server first!") in
