@@ -72,6 +72,7 @@ let play_white (uID:uID) (white:white_card) =
   return ())
 
 let client_play_white (white:white_card) =
+  if (white = "") then () else
   play_white !c_uID white
 
 (*judge allows a user to select the winner of a round if he is the judge*)
@@ -90,6 +91,7 @@ let judge uID white =
   return ())
 
 let client_judge (white:white_card) =
+  if (white = "") then () else
   judge !c_uID white
 
 let type_post str =
