@@ -230,15 +230,27 @@ let rec game_next_phase state active_users =
     then Judging x
     else game_next_phase (Judging x) active_users
   | Judging x ->
-    (*Implement player removal and judge cycling here*)
-    let new_judge = cycle_judge x.card_to_player x.judge in
+    (*Cycle to next judge*)
+    let new_judge_state = {x with 
+                           judge = (cycle_judge x.card_to_player x.judge)} in
+    (*Remove inactive users*)
+    let inactive_users = 
+      List.fold_left (fun l (uID, _) -> 
+          if List.mem uID active_users
+          then l else uID::l) 
+        [] new_judge_state.card_to_player in
+    let cleaned_state = List.fold_left (fun s rID -> user_remove s rID) 
+      (Judging new_judge_state) inactive_users in
 
-    let new_hands_state = give_cards {x with judge = new_judge} in
-    let new_black_state = select_black new_hands_state in
-    Playing {new_black_state with
-             card_to_player = List.map (fun (uid, _) -> (uid, None))
-                 new_black_state.card_to_player;
-            }
+    (*Rest of state setup*)
+    match cleaned_state with
+    | Playing y | Judging y ->
+      let new_hands_state = give_cards y in
+      let new_black_state = select_black new_hands_state in
+      Playing {new_black_state with
+               card_to_player = List.map (fun (uid, _) -> (uid, None))
+                   new_black_state.card_to_player;
+              }
 
 (*game_start begins the game for all players, takes a list of active users*)
 (* val game_start: state -> state *)
