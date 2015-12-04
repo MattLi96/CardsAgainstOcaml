@@ -139,20 +139,23 @@ let start_heartbeat () =
   (*connect_server allows the user to connect to a server at a given url
   with the username of their choice*)
 let connect_server url name =
-  connect_url := url;
-  let temp_header = Header.add (Header.init()) "name" (name) in
-  let post_req = (Client.put (Uri.of_string !connect_url)
-                  ~headers:temp_header) in
-  post_req >>= (fun (resp, body) ->
-    let code = resp |> Response.status |> Code.code_of_status in
-    let ans = (if (code = 200) then
-      (print_endline ("Connection successful");
-      start_heartbeat ();
-      (c_uID := get_UID (resp |> Response.headers |> Header.to_list));
-      ())
-    else
-      (print_string "Response Code: "; print_int code; print_endline ""; ())) in
-  return ans)
+  if (!c_uID <> 0) then
+    return ()
+  else
+    (connect_url := url;
+    let temp_header = Header.add (Header.init()) "name" (name) in
+    let post_req = (Client.put (Uri.of_string !connect_url)
+                    ~headers:temp_header) in
+    post_req >>= (fun (resp, body) ->
+      let code = resp |> Response.status |> Code.code_of_status in
+      let ans = (if (code = 200) then
+        (print_endline ("Connection successful");
+        start_heartbeat ();
+        (c_uID := get_UID (resp |> Response.headers |> Header.to_list));
+        ())
+      else
+        (print_string "Response Code: "; print_int code; print_endline ""; ())) in
+    return ans))
 
 (*get_user_state returns the state of the user*)
 (* val get_user_state: uID -> state *)
