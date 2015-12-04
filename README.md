@@ -28,9 +28,15 @@ If you just want to get the basic game running quickly without understanding why
 * `cs3110 compile server.ml`
 * `cs3110 compile gui.ml`
 * `cs3110 run server.ml` 
-* (In a new terminal) `cs3110 run gui.ml`
+* (In a new terminal) `cs3110 run gui.ml` (Do this one time for each player)
 
 When there are multiple people connected to the server, start the game. 
+
+Also, make sure that you have all the dependencies needed such as (but are not limited to)
+
+* CoHTTP 0.19.2
+* CoHTTP Async 0.19.2
+* YoJSON
 
 ### Server
 
@@ -62,6 +68,13 @@ To start up a bot, from the same machine that is running the server, run:
 
 * `cs3110 compile bot.ml`
 * `cs3110 run bot.ml --[name of json trainer file]`
+
+You can also run `botgui.ml` in order to start a bot:
+
+* `cs3110 compile botgui.ml`
+* `cs3110 run botgui.ml`
+
+Enter the parameters necessary.
 
 ## How to Play
 If you are a player, then simply click on the white card that you feel would best complete or answer the black card. If you are the judge, wait for players to submit their responses; then click the answer you feel best responds to the black card (or is the sickest). Scores are noted in the top right, and if you would like to see old winners, click the button and a log of old winners will be shown.
