@@ -49,7 +49,7 @@ let give_cards (u_s_state:univ_s_state):univ_s_state =
 let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge: uID) =
   let rec loop l id =
     (match l with
-     | [] -> card_to_player
+     | [] | h::[] -> card_to_player
      | h::t -> if (fst h = id || id = 0) then t else loop t id) in
   match loop card_to_player current_judge with
   | [] -> 0 (*No valid judges avalible*)
