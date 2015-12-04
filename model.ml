@@ -48,13 +48,12 @@ let give_cards (u_s_state:univ_s_state):univ_s_state =
 
 let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge: uID) =
   (Printf.printf "current_judge: %i" current_judge);
-  let new_list = card_to_player @ card_to_player in
   let rec loop l id =
     (match l with
-     | [] -> new_list
+     | [] -> card_to_player
      | h::t -> if (fst h = id || id = 0) then t else loop t id) in
-  match loop new_list current_judge with
-  | [] -> 1 (*default to first user*)
+  match loop card_to_player current_judge with
+  | [] -> 0 (*No valid judges avalible*)
   | h::t -> fst h
 
 let select_black (u_s_state:univ_s_state) : univ_s_state =
