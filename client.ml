@@ -92,7 +92,7 @@ let judge uID white =
 
 let client_judge (white:white_card) =
   if (white = "") then return () else
-  judge !c_uID white
+  ((print_string "CLIENT_JUDGE_CALLED"); judge !c_uID white)
 
 let type_post str =
   let temp_header = Header.add (Header.init()) "uID" (string_of_int !c_uID) in
