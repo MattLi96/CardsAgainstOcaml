@@ -119,7 +119,7 @@ let user_remove state uID =
     let new_j = cycle_judge ustate.card_to_player ustate.judge in
     if new_j = uID then state |> get_univ_s
     else {new_ustate_draft with judge = new_j}
-  else
+  else new_ustate_draft in
   match state with
   | Playing _ -> Playing new_ustate
   | Judging _ -> Judging new_ustate
@@ -240,13 +240,13 @@ let rec game_next_phase state active_users =
     if (List.exists (fun p -> (snd p) <> None) x.card_to_player)
     then Judging x
     else game_next_phase (Judging x) active_users
-  | Judging x -> 
+  | Judging x ->
     (*Implement player removal and judge cycling here*)
     let new_judge = cycle_judge x.card_to_player x.judge in
 
     let new_hands_state = give_cards {x with judge = new_judge} in
     let new_black_state = select_black new_hands_state in
-    Playing {new_black_state with 
+    Playing {new_black_state with
              card_to_player = List.map (fun (uid, _) -> (uid, None))
                  new_black_state.card_to_player;
             }
