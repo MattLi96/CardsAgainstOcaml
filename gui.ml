@@ -240,12 +240,12 @@ let main_window () =
   let logo_widget = GMisc.image ~pixbuf:logo ~packing:hbox_top#add () in
   logo_widget#set_pixbuf logo;
   (*let opt_menu = GMenu.menu () in
-  let opt_button = GMenu.menu_item ~label:("More settings")
+    let opt_button = GMenu.menu_item ~label:("More settings")
       ~packing:opt_menu#append () in
-  ignore(opt_button#connect#activate(options_window));
-  let menu_opts = GMenu.menu_item ~label:"Options" 
+    ignore(opt_button#connect#activate(options_window));
+    let menu_opts = GMenu.menu_item ~label:"Options" 
       ~packing:menubar#append () in
-  menu_opts#set_submenu (opt_menu);*)
+    menu_opts#set_submenu (opt_menu);*)
   let about_menu = GMenu.menu () in
   let about_button = GMenu.menu_item ~label:("About")
       ~packing:about_menu#append () in
@@ -423,7 +423,7 @@ let main_window () =
           card10#set_label("Waiting for czar");
           bcard#set_label("Waiting for czar");
           current_mode#set_label("Pick the best card!"));
-          score#set_label(get_current_score())
+    score#set_label(get_current_score())
   in
   let gui_update_call = RecurringCall.create_call 1.0 update_gui_func in
   RecurringCall.start_call gui_update_call;
@@ -445,52 +445,52 @@ let main_window () =
     if !judging_mode = true 
     then (upon (client_judge (submit_judge_num 1)) (fun () -> update_gui ())) 
     else upon (client_play_white (submit_hand_num 1)) (fun () ->
-          update_gui()) in
+        update_gui()) in
   let callback2 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true 
     then (upon (client_judge (submit_judge_num 2)) (fun () -> update_gui ())) 
     else upon (client_play_white (submit_hand_num 2)) (fun () ->
-          update_gui()) in
+        update_gui()) in
   let callback3 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true 
     then (upon (client_judge (submit_judge_num 3)) (fun () -> update_gui ())) 
     else upon (client_play_white (submit_hand_num 3)) (fun () ->
-          update_gui()) in
+        update_gui()) in
   let callback4 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true 
     then (upon (client_judge (submit_judge_num 4)) (fun () -> update_gui ())) 
     else upon (client_play_white (submit_hand_num 4)) (fun () ->
-          update_gui()) in
+        update_gui()) in
   let callback5 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true 
     then (upon (client_judge (submit_judge_num 5)) (fun () -> update_gui ())) 
     else upon (client_play_white (submit_hand_num 5)) (fun () ->
-          update_gui())in
+        update_gui())in
   let callback6 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true 
     then (upon (client_judge (submit_judge_num 6)) (fun () -> update_gui ())) 
     else upon (client_play_white (submit_hand_num 6)) (fun () ->
-          update_gui()) in
+        update_gui()) in
   let callback7 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true 
     then (upon (client_judge (submit_judge_num 7)) (fun () -> update_gui ())) 
     else upon (client_play_white (submit_hand_num 7)) (fun () ->
-          update_gui()) in
+        update_gui()) in
   let callback8 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true 
     then (upon (client_judge (submit_judge_num 8)) (fun () -> update_gui ())) 
     else upon (client_play_white (submit_hand_num 8)) (fun () ->
-          update_gui()) in
+        update_gui()) in
   let callback9 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true 
     then (upon (client_judge (submit_judge_num 9)) (fun () -> update_gui ())) 
     else upon (client_play_white (submit_hand_num 9)) (fun () ->
-          update_gui()) in
+        update_gui()) in
   let callback10 () = bcard#set_label("Waiting for other players");
     if !judging_mode = true 
     then (upon (client_judge (submit_judge_num 10)) (fun () -> update_gui ())) 
     else upon (client_play_white (submit_hand_num 10)) (fun () ->
-          update_gui()) in
+        update_gui()) in
 
   ignore(window#connect#destroy ~callback:main_destroy);
   ignore(card1#connect#clicked ~callback:callback1);
@@ -523,13 +523,15 @@ let main_window () =
 
 
 let initial_window () =
-  let is_connected = ref false in 
+  let is_connected = ref false in
+  let is_started = ref false in 
   ignore(locale ());
   let icon = GdkPixbuf.from_file "res/icon.png" in
   let splash = GWindow.window 
       ~resizable:false ~border_width:10 ~title:"Cards Against OCaml" () in
   splash#set_icon(Some icon);
-  let main_destroy _ = splash#destroy() in
+  let main_destroy () = splash#destroy(); 
+    if !is_started then () else ignore(exit 0) in
   (*ignore(splash#connect#destroy(main_destroy));*)
   let vbox = GPack.vbox ~packing:(splash#add) () in
   let logo = GdkPixbuf.from_file "res/cards.png" in
@@ -548,13 +550,14 @@ let initial_window () =
   let start_button = GButton.button ~label:("Click to start!") 
       ~packing:vbox#add () in
   let init_start () = 
+    is_started:=true;
     upon (Client.trigger_start()) (fun () -> (main_window();main_destroy())) in
   let init_connect () = 
     let server_input = server#get_text () in
     let connect_attempt = 
       if !is_connected then None else
-      try Some (connect_server server_input "string") with
-      | _ -> None in
+        try Some (connect_server server_input "string") with
+        | _ -> None in
     match connect_attempt with
     | Some d -> is_connected:=true;
       upon d (fun () ->
@@ -570,7 +573,7 @@ let initial_window () =
 
   ignore(connect_button#connect#clicked ~callback:init_connect);
   ignore(start_button#connect#clicked ~callback:connect_first);
-  (*ignore(splash#connect#destroy(confirm_exit));*)
+  ignore(splash#connect#destroy(main_destroy));
   splash#show(); ()
 
 let main () =

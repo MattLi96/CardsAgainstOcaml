@@ -150,7 +150,7 @@ let score_dialog () =
   get_winners();
   let winnerstext = GText.view ~buffer:gamelog
       ~justification:`FILL ~packing:sbox#add
-     ~cursor_visible:false ~wrap_mode:`WORD  () in
+      ~cursor_visible:false ~wrap_mode:`WORD  () in
   winnerstext#set_editable(false);
   let update_gui_func () =
     upon (client_get_user_state ()) (fun curr_state ->
@@ -191,12 +191,14 @@ let score_dialog () =
 
 let initial_window () =
   let is_connected = ref false in
+  let is_started = ref false in
   ignore(locale ());
   let icon = GdkPixbuf.from_file "res/icon.png" in
   let splash = GWindow.window
       ~resizable:false ~border_width:10 ~title:"Cards Against OCaml" () in
   splash#set_icon(Some icon);
-  let main_destroy _ = splash#destroy() in
+  let main_destroy () = splash#destroy(); 
+    if !is_started then () else ignore(exit 0) in
   (*ignore(splash#connect#destroy(main_destroy));*)
   let vbox = GPack.vbox ~packing:(splash#add) () in
   let logo = GdkPixbuf.from_file "res/cards.png" in
@@ -224,6 +226,7 @@ let initial_window () =
     indicator#set_label("Connect to server first!") in
 
   let init_start () =
+    is_started:=true;
     upon (Client.trigger_start()) (fun () ->
         score_dialog();main_destroy()) in
   let init_connect () =
@@ -244,7 +247,7 @@ let initial_window () =
 
   ignore(connect_button#connect#clicked ~callback:(fun () -> init_connect()));
   ignore(start_button#connect#clicked ~callback:connect_first);
-  (*ignore(splash#connect#destroy(confirm_exit));*)
+  ignore(splash#connect#destroy(main_destroy));
   splash#show(); ()
 
 let main_method () = initial_window ();
