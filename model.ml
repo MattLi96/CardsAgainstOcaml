@@ -49,7 +49,7 @@ let give_cards (u_s_state:univ_s_state):univ_s_state =
 let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge: uID) =
   let rec loop l id =
     (match l with
-     | [] | h::[] -> card_to_player
+     | [] | _::[] -> card_to_player
      | h::t -> if (fst h = id || id = 0) then t else loop t id) in
   match loop card_to_player current_judge with
   | [] -> 0 (*No valid judges avalible*)
@@ -221,17 +221,6 @@ let shuffle state =
     Playing {x with b_deck = shuffle_help x.b_deck;
                     w_deck = shuffle_help x.w_deck}
 
-(*game_start begins the game for all players in the list of players*)
-(* val game_start: state -> state *)
-let game_start state =
-  Random.self_init ();
-  let s = shuffle state in
-  match s with
-  | Judging x | Playing x ->
-    let sel_blck = select_black x in
-    let card_distro = give_cards sel_blck in
-    Playing card_distro
-
 (*goes to the next game phase*)
 (* val game_next_phase: state -> uID list -> state *)
 let rec game_next_phase state active_users =
@@ -250,6 +239,15 @@ let rec game_next_phase state active_users =
              card_to_player = List.map (fun (uid, _) -> (uid, None))
                  new_black_state.card_to_player;
             }
+
+(*game_start begins the game for all players, takes a list of active users*)
+(* val game_start: state -> state *)
+let game_start state active_users =
+  Random.self_init ();
+  let s = shuffle state in
+  match s with
+  | Judging x | Playing x ->
+    game_next_phase (Judging x) active_users
 
 let play_state_finished state =
   match state with

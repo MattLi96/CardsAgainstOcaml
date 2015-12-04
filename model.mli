@@ -31,8 +31,8 @@ val user_judge: state -> uID -> white_card -> state
 (*reset_all removes all players from the state*)
 val game_reset: state -> uID -> state
 
-(*game_start begins the game for all players in the list of players*)
-val game_start: state -> state
+(*game_start begins the game for all players, takes a list of active players*)
+val game_start: state -> uID list -> state
 
 (*shuffle takes a state, shuffles the deck, and returns the deck*)
 val shuffle: state -> state

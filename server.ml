@@ -135,7 +135,7 @@ let respond_put (f_state:full_state) body req =
     if (body = "start") then (
       if (not a_state.started) then
         (a_state.started <- true;
-         s_state := game_start !s_state;
+         s_state := game_start !s_state (get_active_users a_state.hb);
          let _ = gameloop f_state in
          (Log.Global.info "Start %s" "triggered";
           Server.respond `OK))
