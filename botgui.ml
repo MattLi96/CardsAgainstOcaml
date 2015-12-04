@@ -118,7 +118,7 @@ let get_winners () =
     match l with
     | [] -> !score_string
     | (bc, wc, _)::tl ->
-      (FormatOps.break_line bc 50)^"\n-->"^(FormatOps.break_line wc 50)^"\n\n"^
+      bc^"\n-->"^wc^"\n\n"^
       (generate_string tl) in
   match !winner_log with
   | None -> gamelog#set_text "No winners yet!"
@@ -142,13 +142,15 @@ let score_dialog () =
   let score = GWindow.window ~title:"Winning Cards" ~resizable:true
       ~border_width:5 ~height:600 ~width: 270 () in
   score#set_icon(Some icon);
-  let myclose _ =score#destroy() in
+  let myclose _ =score#destroy(); ignore(exit 0) in
   ignore(score#connect#destroy(myclose));
-  let mainbox = GBin.scrolled_window ~packing:score#add () in
-  get_winners();
+  let mainbox = GPack.vbox ~packing:score#add () in
   let score_num = GMisc.label ~packing:mainbox#add () in
+  let sbox = GBin.scrolled_window ~packing:mainbox#add ~height:500 ~width: 270() in
+  get_winners();
   let winnerstext = GText.view ~buffer:gamelog
-      ~justification:`FILL ~packing:mainbox#add () in
+      ~justification:`FILL ~packing:sbox#add
+     ~cursor_visible:false ~wrap_mode:`WORD  () in
   winnerstext#set_editable(false);
   let update_gui_func () =
     upon (client_get_user_state ()) (fun curr_state ->
@@ -188,6 +190,7 @@ let score_dialog () =
   score#show ()
 
 let initial_window () =
+  let is_connected = ref false in
   ignore(locale ());
   let icon = GdkPixbuf.from_file "res/icon.png" in
   let splash = GWindow.window
@@ -225,11 +228,19 @@ let initial_window () =
         score_dialog();main_destroy()) in
   let init_connect () =
     let server_input = server#get_text () in
-    upon (connect_server server_input "string") (fun () ->
+    let connect_attempt = 
+      if !is_connected then None else
+        try Some (connect_server server_input "string") with
+        | _ -> None in 
+    match connect_attempt with
+    | Some d -> is_connected:=true; upon d (fun () ->
         trainer_json:=Some (Yojson.Basic.from_file (trainer#get_text()
-                                       )));
-        indicator#set_label("You are now connected!");
-    ignore(start_button#connect#clicked ~callback:init_start);() in
+                                                   )));
+      indicator#set_label("You are now connected!");
+      ignore(start_button#connect#clicked ~callback:init_start)
+    | None -> if !is_connected
+      then indicator#set_label("You are already connected.  Click to start!")
+      else indicator#set_label("Error, could not connect.  Try again!") in
 
   ignore(connect_button#connect#clicked ~callback:(fun () -> init_connect()));
   ignore(start_button#connect#clicked ~callback:connect_first);
@@ -244,9 +255,9 @@ let main_method () = initial_window ();
 
 let _ =
   (*(match Array.to_list Sys.argv with
-   | a::b::t ->
+    | a::b::t ->
      ignore(connect_server "http://localhost:8080/" "BOT" >>=
             (fun _ -> return (start_from_json (Yojson.Basic.from_file b))))
-   | _ -> failwith "insufficient argument");
+    | _ -> failwith "insufficient argument");
     ignore(Scheduler.go ())*)
   main_method ()
