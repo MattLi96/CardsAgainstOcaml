@@ -9,7 +9,7 @@ open Async.Std
 (*Postcondition: return a associative list that maps white card to score*)
 let score_of_black json black_card =
   let b_assoc = Yojson.Basic.Util.member black_card json in
-  List.map (fun (a,b) -> (a,(b |> Yojson.Basic.Util.to_int)))
+  List.map (fun (a,b) -> (a,(b |> Yojson.Basic.Util.to_number)))
     (b_assoc |> Yojson.Basic.Util.to_assoc)
 
 let shuffle_list l =
@@ -27,11 +27,12 @@ let best_card card_score w_list =
       if new_scr > scr then search_max [h] new_scr t
       else if new_scr = scr then search_max (h::cdl) scr t
       else search_max cdl scr t in
-  let best_lst = search_max [""] min_int w_list in
+  let best_lst = search_max [""] min_float w_list in
   Random.self_init ();
   List.hd (shuffle_list best_lst)
 
-let should_play uID (st:univ_c_state) = not (List.mem_assoc uID st.played)
+let should_play uID (st:univ_c_state) =  print_endline " should play";
+  not (List.mem_assoc uID st.played)
 
 let play_card w_card = client_play_white w_card >>=
   (fun _ -> print_endline ("White card played " ^ w_card); return ())
@@ -55,7 +56,7 @@ let do_game json (cstate:c_state): unit Deferred.t =
     judge_card bc >>= (fun () -> return ())
   | PWaiting st | JWaiting st -> return ())
   with
-  | _ -> return ()
+  | _ -> print_endline "not working"; return ()
 
 (*start the game form the json read in*)
 let rec start_from_json json:unit =
