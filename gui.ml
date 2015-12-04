@@ -370,6 +370,7 @@ let main_window () =
           bcard#set_label(st.b_card);
           score#set_label(get_current_score())
         | Judging st ->
+          judging_mode:=true;
           curr_user_state:= Some st;
           submissions:= Some st.played;
           winner_log:=Some st.winners;
