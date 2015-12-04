@@ -23,6 +23,15 @@ is the game you don’t want your mother to know you play.
 
 First navigate into the folder CardsAgainstOcaml.
 
+### Quickstart
+If you just want to get the basic game running quickly without understanding why:
+* `cs3110 compile server.ml`
+* `cs3110 compile gui.ml`
+* `cs3110 run server.ml` 
+* (In a new terminal) `cs3110 run gui.ml`
+
+When there are multiple people connected to the server, start the game. 
+
 ### Server
 
 In terminal run:
@@ -32,7 +41,8 @@ In terminal run:
 
 This should start up the server. If properly started, you should see a message
 telling you what port the server was started on (default to 8080). If 8080 is
-in use already, then this will not work.
+in use already, then this will not work. The server MUST be started before 
+anyone can connnect or join the game. 
 
 ### Client/GUI
 
@@ -42,7 +52,7 @@ In a new terminal (other than the one running server), run:
 * `cs3110 run gui.ml`
 
 This should launch the GUI. From the GUI, type in the ip address of the server
-you want to connect to. Press the "Click to connect to server!" button.
+you want to connect to (this defaults to localhost). Press the "Click to connect to server!" button.
 If you get the message "You are now connected",
 then feel free to start the game when all players are ready.
 
@@ -52,6 +62,9 @@ To start up a bot, from the same machine that is running the server, run:
 
 * `cs3110 compile bot.ml`
 * `cs3110 run bot.ml --[name of json trainer file]`
+
+## How to Play
+If you are a player, then simply click on the white card that you feel would best complete or answer the black card. If you are the judge, wait for players to submit their responses; then click the answer you feel best responds to the black card (or is the sickest). Scores are noted in the top right, and if you would like to see old winners, click the button and a log of old winners will be shown.
 
 ## Self-Modification
 ### Using Different Decks
