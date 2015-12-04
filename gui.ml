@@ -139,7 +139,7 @@ let get_winners () =
     match l with
     | [] -> !score_string
     | (bc, wc, _)::tl ->
-      (FormatOps.break_line bc 50)^"\n-->"^(FormatOps.break_line wc 50)^"\n\n"^
+      bc^"\n-->"^wc^"\n\n"^
       (generate_string tl) in
   match !winner_log with
   | None -> gamelog#set_text "No winners yet!"
@@ -211,7 +211,8 @@ let score_dialog () =
   let mainbox = GBin.scrolled_window ~packing:score#add () in
   get_winners();
   let winnerstext = GText.view ~buffer:gamelog
-      ~justification:`FILL ~packing:mainbox#add () in
+      ~justification:`FILL ~packing:mainbox#add  ~cursor_visible:false 
+      ~wrap_mode:`WORD () in
   winnerstext#set_editable(false);
 
   (*Sets values of scores and items - use to integrate scoring and winning cards*)
