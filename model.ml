@@ -114,8 +114,25 @@ let user_add state name =
 
 (*remove_user takes in the uID of a player and removes said player from the
   list of players in the state*)
+(*PRECONDITION: the single last player cannot be removed*)
 (* val user_remove: state -> uID -> state *)
-(* let user_remove state uID = failwith "Unsupported" *)
+let user_remove state uID =
+  let ustate = get_univ_s state in
+  let new_ustate_draft =
+  {ustate with hands = List.remove_assoc uID ustate.hands;
+              scores = List.remove_assoc uID ustate.scores;
+              played = List.remove_assoc uID ustate.played;
+      card_to_player = List.remove_assoc uID ustate.card_to_player
+  } in
+  let new_ustate = if ustate.judge = uID then (*The judge is removed*)
+    let new_j = cycle_judge ustate.card_to_player ustate.judge in
+    if new_j = uID then state |> get_univ_s
+    else {new_ustate_draft with judge = new_j}
+  else
+  match state with
+  | Playing _ -> Playing new_ustate
+  | Judging _ -> Judging new_ustate
+
 
 let modify_card_to_player l uID white =
   List.map (fun (id, op) -> if id = uID then (id, Some white) else (id, op)) l

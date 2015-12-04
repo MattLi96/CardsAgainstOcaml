@@ -18,7 +18,7 @@ val user_add: state -> string -> (uID * state)
 (*remove_user takes in the uID of a player and removes said player from the
 list of players in the state*)
 (*Unsupported Functionality*)
-(* val user_remove: state -> uID -> state *)
+val user_remove: state -> uID -> state
 
 (*user_play_white adds the card played by a player into the list of played
 cards in the state*)
