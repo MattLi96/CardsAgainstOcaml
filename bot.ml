@@ -27,12 +27,11 @@ let best_card card_score w_list =
       if new_scr > scr then search_max [h] new_scr t
       else if new_scr = scr then search_max (h::cdl) scr t
       else search_max cdl scr t in
-  let best_lst = search_max [""] min_float w_list in
+  let best_lst = search_max [""] (-1000.0) w_list in
   Random.self_init ();
   List.hd (shuffle_list best_lst)
 
-let should_play uID (st:univ_c_state) =  print_endline " should play";
-  not (List.mem_assoc uID st.played)
+let should_play uID (st:univ_c_state) = not (List.mem_assoc uID st.played)
 
 let play_card w_card = client_play_white w_card >>=
   (fun _ -> print_endline ("White card played " ^ w_card); return ())
