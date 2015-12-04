@@ -47,7 +47,6 @@ let give_cards (u_s_state:univ_s_state):univ_s_state =
   {new_state with w_deck = WDeck !deck}
 
 let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge: uID) =
-  (Printf.printf "current_judge: %i" current_judge);
   let rec loop l id =
     (match l with
      | [] -> card_to_player
@@ -65,17 +64,10 @@ let select_black (u_s_state:univ_s_state) : univ_s_state =
     match old_b_deck with
     | [] -> ("", [])
     | h::t -> (h, t @ [h])) in
-  {
-    judge  = cycle_judge u_s_state.card_to_player u_s_state.judge;
-    played = [];
-    b_card = new_b;
-    scores = u_s_state.scores;
-    winners = u_s_state.winners;
-    b_deck = BDeck new_d;
-    w_deck = u_s_state.w_deck;
-    card_to_player = List.map (fun (uid, _) -> (uid, None))
-        u_s_state.card_to_player;
-    hands = u_s_state.hands
+  {u_s_state with
+   played = [];
+   b_card = new_b;
+   b_deck = BDeck new_d;
   }
 
 (*INIT FUNCTIONS*)
@@ -224,14 +216,23 @@ let game_start state =
     Playing card_distro
 
 (*goes to the next game phase*)
-(* val game_next_phase: state -> state *)
-let rec game_next_phase state =
+(* val game_next_phase: state -> uID list -> state *)
+let rec game_next_phase state active_users =
   match state with
   | Playing x ->
     if (List.exists (fun p -> (snd p) <> None) x.card_to_player)
     then Judging x
-    else game_next_phase (Judging x)
-  | Judging x -> Playing (give_cards (select_black x))
+    else game_next_phase (Judging x) active_users
+  | Judging x -> 
+    (*Implement player removal and judge cycling here*)
+    let new_judge = cycle_judge x.card_to_player x.judge in
+
+    let new_hands_state = give_cards {x with judge = new_judge} in
+    let new_black_state = select_black new_hands_state in
+    Playing {new_black_state with 
+             card_to_player = List.map (fun (uid, _) -> (uid, None))
+                 new_black_state.card_to_player;
+            }
 
 let play_state_finished state =
   match state with

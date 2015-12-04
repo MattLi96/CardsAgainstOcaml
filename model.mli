@@ -37,8 +37,8 @@ val game_start: state -> state
 (*shuffle takes a state, shuffles the deck, and returns the deck*)
 val shuffle: state -> state
 
-(*goes to the next game phase*)
-val game_next_phase: state -> state
+(*goes to the next game phase, takes current phase and list of active users*)
+val game_next_phase: state -> uID list -> state
 
 (*These functions tell when a state is finished and we can move to next phase*)
 val play_state_finished: state -> bool

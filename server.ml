@@ -34,7 +34,7 @@ let rec gameloop f_state =
 
     let _ = (Ivar.read a_state.phase_over) >>= (fun _ ->
         a_state.phase_over <- Ivar.create ();
-        s_state := game_next_phase (!s_state);
+        s_state := game_next_phase (!s_state) (get_active_users a_state.hb);
         gameloop f_state) in
     return ()
 
