@@ -186,7 +186,7 @@ let about_screen () =
     logo_widget#set_pixbuf logo;
     let aboutlabel = GMisc.label ~line_wrap:true ~packing:vbox#add
         ~justify:`CENTER() in
-    aboutlabel#set_text("0.9.5r12215\n\nCharley Chen\nMatthew Li\nAustin Liu
+    aboutlabel#set_text("1.0.0r120315\n\nCharley Chen\nMatthew Li\nAustin Liu
 Jared Wong\n
 Some code borrowed from the open-source lablgtk2 libraries.\n
  2015. All rights reserved.");
