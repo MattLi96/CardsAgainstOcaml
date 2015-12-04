@@ -51,7 +51,7 @@ let cycle_judge (card_to_player: (uID * white_card option) list) (current_judge:
   let new_list = card_to_player @ card_to_player in
   let rec loop l id =
     (match l with
-     | [] -> []
+     | [] -> new_list
      | h::t -> if (fst h = id || id = 0) then t else loop t id) in
   match loop new_list current_judge with
   | [] -> 1 (*default to first user*)
