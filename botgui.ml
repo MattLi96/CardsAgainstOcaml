@@ -24,7 +24,7 @@ let (trainer_json: Yojson.Basic.json option ref) = ref None
 (*Postcondition: return a associative list that maps white card to score*)
 let score_of_black json black_card =
   let b_assoc = Yojson.Basic.Util.member black_card json in
-  List.map (fun (a,b) -> (a,(b |> Yojson.Basic.Util.to_int)))
+  List.map (fun (a,b) -> (a,(b |> Yojson.Basic.Util.to_number)))
     (b_assoc |> Yojson.Basic.Util.to_assoc)
 
 (*Precondition: card_score is a assoc list of (white_card,int), w_list
@@ -36,7 +36,7 @@ let best_card card_score w_list =
     | h::t -> let new_scr = List.assoc h card_score in
       if new_scr > scr then search_max h new_scr t
       else search_max cd scr t in
-  search_max "" min_int w_list
+  search_max "" min_float w_list
 
 let should_play uID (st:univ_c_state) = not (List.mem_assoc uID st.played)
 
@@ -66,7 +66,7 @@ let do_game json (cstate:c_state): unit Deferred.t =
 
 (*start the game form the json read in*)
 let start_from_json () :unit =
-  upon (client_get_user_state ()) (fun x -> 
+  upon (client_get_user_state ()) (fun x ->
       match !trainer_json with
       | None -> ()
       | Some b -> ignore (do_game b x); ())
@@ -114,16 +114,16 @@ let get_winners () =
       (generate_string tl) in
   match !winner_log with
   | None -> gamelog#set_text "No winners yet!"
-  | Some s -> 
+  | Some s ->
     let log = generate_string s in
     gamelog#set_text log
 
 let get_current_score () =
   match !curr_user_state with
   | None -> "0"
-  | Some s -> 
-    let find_score n l = 
-      List.fold_left 
+  | Some s ->
+    let find_score n l =
+      List.fold_left
         (fun score (id, s) -> if n = id then s + score else score) 0 l
     in
     string_of_int (find_score (Client.current_id ()) s.scores)
@@ -143,9 +143,9 @@ let score_dialog () =
       ~justification:`FILL ~packing:mainbox#add () in
   winnerstext#set_editable(false);
   let update_gui_func () =
-    upon (client_get_user_state ()) (fun curr_state -> 
+    upon (client_get_user_state ()) (fun curr_state ->
         match curr_state with
-        | Playing st -> 
+        | Playing st ->
           curr_user_state:= Some st;
           player_hand:= Some st.hand;
           winner_log:=Some st.winners;
@@ -162,7 +162,7 @@ let score_dialog () =
           winner_log:= Some st.winners;
           get_winners();
           score_num#set_label(get_current_score())
-        | PWaiting st -> 
+        | PWaiting st ->
           curr_user_state:= Some st;
           winner_log:= Some st.winners;
           get_winners();
@@ -179,10 +179,10 @@ let score_dialog () =
 
   score#show ()
 
-let initial_window () = 
+let initial_window () =
   ignore(locale ());
   let icon = GdkPixbuf.from_file "res/icon.png" in
-  let splash = GWindow.window 
+  let splash = GWindow.window
       ~resizable:false ~border_width:10 ~title:"Cards Against OCaml" () in
   splash#set_icon(Some icon);
   let main_destroy _ = splash#destroy() in
@@ -193,7 +193,7 @@ let initial_window () =
   logo_widget#set_pixbuf logo;
   let indicator = GMisc.label ~packing:(vbox#add) () in
   indicator#set_label("Connect to server before starting game.");
-  let boxbuffer = GBin.frame ~packing:(vbox#pack ~padding:5) 
+  let boxbuffer = GBin.frame ~packing:(vbox#pack ~padding:5)
       ~label:"Server address" () in
   let server = GText.buffer () in
   let server_box = GText.view ~packing:(boxbuffer#add) () in
@@ -205,24 +205,24 @@ let initial_window () =
   trainer#set_text("trained_bot.json");
   let trainer_box = GText.view ~packing:(trainerbuffer#add) () in
   trainer_box#set_buffer(trainer);
-  let connect_button = GButton.button ~label:("Click to connect bot to server!") 
+  let connect_button = GButton.button ~label:("Click to connect bot to server!")
       ~packing:vbox#add () in
-  let start_button = GButton.button ~label:("Click to start!") 
+  let start_button = GButton.button ~label:("Click to start!")
       ~packing:vbox#add () in
-  let connect_first () = 
+  let connect_first () =
     indicator#set_label("Connect to server first!") in
 
-  let init_start () = 
-    upon (Client.trigger_start()) (fun () -> 
+  let init_start () =
+    upon (Client.trigger_start()) (fun () ->
         score_dialog();main_destroy()) in
-  let init_connect () = 
+  let init_connect () =
     let server_input = server#get_text () in
     upon (connect_server server_input "string") (fun () ->
         trainer_json:=Some (Yojson.Basic.from_file (trainer#get_text()
                                        )));
         indicator#set_label("You are now connected!");
-    ignore(start_button#connect#clicked ~callback:init_start);() in 
-  
+    ignore(start_button#connect#clicked ~callback:init_start);() in
+
   ignore(connect_button#connect#clicked ~callback:(fun () -> init_connect()));
   ignore(start_button#connect#clicked ~callback:connect_first);
   (*ignore(splash#connect#destroy(confirm_exit));*)
