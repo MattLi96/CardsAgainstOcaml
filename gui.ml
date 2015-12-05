@@ -186,7 +186,7 @@ let about_screen () =
     logo_widget#set_pixbuf logo;
     let aboutlabel = GMisc.label ~line_wrap:true ~packing:vbox#add
         ~justify:`CENTER() in
-    aboutlabel#set_text("1.0.0r120315\n\nCharley Chen\nMatthew Li\nAustin Liu
+    aboutlabel#set_text("1.0.1r12045\n\nCharley Chen\nMatthew Li\nAustin Liu
 Jared Wong\n
 Some code borrowed from the open-source lablgtk2 libraries.\n
  2015. All rights reserved.");
@@ -562,7 +562,8 @@ let initial_window () =
     | Some d -> is_connected:=true;
       upon d (fun () ->
           ignore(start_button#connect#clicked ~callback:init_start);
-          indicator#set_label("You are now connected!")) 
+          indicator#set_label("You are now connected!"));
+      server_box#set_editable(false) 
     | None -> 
       if !is_connected
       then indicator#set_label("You are already connected.  Click to start!")

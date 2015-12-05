@@ -236,11 +236,19 @@ let initial_window () =
         try Some (connect_server server_input "string") with
         | _ -> None in 
     match connect_attempt with
-    | Some d -> is_connected:=true; upon d (fun () ->
-        trainer_json:=Some (Yojson.Basic.from_file (trainer#get_text()
-                                                   )));
-      indicator#set_label("You are now connected!");
-      ignore(start_button#connect#clicked ~callback:init_start)
+    | Some d -> upon d (fun () ->
+        let try_json = 
+          try Some (Yojson.Basic.from_file(trainer#get_text())) with
+          | _ -> None in
+        match try_json with
+        | None -> indicator#set_label("Error: Invalid Trainer Template")
+        | Some f ->
+          is_connected:=true;
+          trainer_json:= Some f;
+          indicator#set_label("You are now connected!");
+          server_box#set_editable(false);
+          trainer_box#set_editable(false);
+      ignore(start_button#connect#clicked ~callback:init_start))
     | None -> if !is_connected
       then indicator#set_label("You are already connected.  Click to start!")
       else indicator#set_label("Error, could not connect.  Try again!") in
