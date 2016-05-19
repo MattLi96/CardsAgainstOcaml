@@ -24,6 +24,42 @@ is the game you don’t want your mother to know you play.
 First navigate into the folder CardsAgainstOcaml.
 
 ### Quickstart
+
+######Update 5/19/16: Directions for compilation on Ubuntu
+----External Dependencies----
+(Optional, only if you do not have these tools)
+* sudo apt-get install gtk+2.0
+
+----Installing OCaml via OPAM----
+(If you already have OCaml installed via OPAM, you can skip this step)
+* sudo apt-get install ocaml
+* sudo apt-get install opam
+* opam init
+* opam install ocaml
+
+----Installing dependencies----
+(Only install the ones you don't already have)
+* sudo apt-get install liblablgtk2-ocaml-dev
+* opam depext conf-m4.1
+* opam install cohttp async
+* opam install yojson
+* opam install lablgtk2
+
+Clone the repo!
+
+----Automatic, quick compile----
+(Once in the directory)
+* chmod +x quickbuild.sh
+* ./quickbuild.sh
+
+----Running the program!----
+ocamlrun server.byte - First step, to start the server in the background
+ocamlrun gui.byte - Run as many of these as you like, and connect them to the server
+ocamlrun botgui.byte - Run as many of these as you like, and connect them to the server
+
+
+
+####Original Directions for compilation on the CS 3110 Course VM
 If you just want to get the basic game running quickly without understanding why:
 * `cs3110 compile server.ml`
 * `cs3110 compile gui.ml`

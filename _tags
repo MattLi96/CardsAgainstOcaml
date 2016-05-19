@@ -1,0 +1,1 @@
+true: package(lablgtk2, async, cohttp, yojson, cohttp.async, str), thread
