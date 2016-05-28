@@ -18,3 +18,12 @@ h1{
 .light{
 	background: white;
 }
+
+.btn-gold {
+    color: #232323 !important;
+    background: #f2c40f !important;
+    border-color: #917609 !important;
+    -moz-box-shadow: inset 0 -4px 0 0 #917609;
+    -webkit-box-shadow: inset 0 -4px 0 0 #917609;
+    box-shadow: inset 0 -4px 0 0 #917609;
+}
